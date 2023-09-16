@@ -53,7 +53,7 @@ const Ecommerce = () => {
           </Card>
         </div>
         <div className="xl:col-span-6 col-span-12">
-          <Card title="Customer" headerslot={<SelectMonth />}>
+          <Card title="Latest Customer" headerslot={<SelectMonth />}>
             <Customer />
           </Card>
         </div>

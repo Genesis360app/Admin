@@ -1,7 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
-
 import useDarkMode from "@/hooks/useDarkMode";
 
 const ProfitChart = ({
@@ -14,7 +13,6 @@ const ProfitChart = ({
       data: [15, 30, 15, 30, 20, 35],
     },
   ];
-
   const options = {
     chart: {
       toolbar: {
@@ -81,17 +79,52 @@ const ProfitChart = ({
     },
     colors: [color],
   };
+
+  const [allUsers, setAllUsers] = useState([]);
+  const [prevAllUsers, setPrevAllUsers] = useState(0);
+
+  useEffect(() => {
+    var token = localStorage.getItem("token");
+    fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/User/Dashboard`, {
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    })
+    .then(response => response.json())
+    .then((res) => {
+      if (res.code === 200) {
+        const newAllUsers = res.all_users;
+        setAllUsers(newAllUsers);
+
+        // Calculate percentage change
+        const percentageChange = ((newAllUsers - prevAllUsers) / prevAllUsers) * 100;
+
+        // Update previous all users and store it in local storage
+        setPrevAllUsers(newAllUsers);
+        localStorage.setItem("allUsers", newAllUsers.toString());
+
+        // Update percentageChange state
+        setPercentageChange(percentageChange);
+      } else if (res.code === 401) {
+        // Handle unauthorized user
+      }
+    });
+  }, [prevAllUsers]);
+
+  // Declare percentageChange state
+  const [percentageChange, setPercentageChange] = useState(0);
+
   return (
     <div className={className}>
       <div className="text-sm text-slate-600 dark:text-slate-300 mb-[6px]">
-        Profit
+        Customers
       </div>
       <div className="text-lg text-slate-900 dark:text-white font-medium mb-[6px]">
-        654k
+        {allUsers}
       </div>
       <div className="font-normal text-xs text-slate-600 dark:text-slate-300">
-        <span className="text-primary-500">+02% </span>
-        From last Week
+        <span className="text-primary-500">+{percentageChange.toFixed(2)}% </span>
+        From last Period
       </div>
       <div className="mt-4">
         <Chart type="line" height="44" options={options} series={series} />

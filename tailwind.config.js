@@ -126,8 +126,46 @@ module.exports = {
           800: "#1E293B",
           900: "#0F172A",
         },
+        processing: {
+          50:  "#fff7e8",
+          100: "#ffeed1",
+          200: "#fee6b9",
+          300: "#fedea2",
+          400: "#fed68b",
+          500: "#fecd74",
+          600: "#fec55d",
+          700: "#fdbd45",
+          800: "#fdb42e",
+          900: "#fdac17",
+        },
+        pending: {
+          50:  "#f7e8ff",
+          100: "#eed1ff",
+          200: "#e6b9fe",
+          300: "#dea2fe",
+          400: "#d68bfe",
+          500: "#cd74fe",
+          600: "#c55dfe",
+          700: "#bd45fd",
+          800: "#b42efd",
+          900: "#ac17fd",
+        },
       },
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
       fontFamily: {
         inter: ["Inter", "sans-serif"],
       },

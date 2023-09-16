@@ -1,4 +1,4 @@
-import React from "react";
+import React,{useEffect,useState,useRef} from "react";
 import Card from "@/components/ui/Card";
 import Icon from "@/components/ui/Icon";
 import dynamic from "next/dynamic";
@@ -206,34 +206,83 @@ const shapeLine3 = {
   },
 };
 
-const statistics = [
-  {
-    name: shapeLine1,
-    title: "Totel revenue",
-    count: "3,564",
-    bg: "bg-[#E5F9FF] dark:bg-slate-900	",
-    text: "text-info-500",
-    icon: "heroicons:shopping-cart",
-  },
-  {
-    name: shapeLine2,
-    title: "Products sold",
-    count: "564",
-    bg: "bg-[#FFEDE6] dark:bg-slate-900	",
-    text: "text-warning-500",
-    icon: "heroicons:cube",
-  },
-  {
-    name: shapeLine3,
-    title: "Growth",
-    count: "+5.0%",
-    bg: "bg-[#EAE6FF] dark:bg-slate-900	",
-    text: "text-[#5743BE]",
-    icon: "heroicons:arrow-trending-up-solid",
-  },
-];
+
+
+
+
+
+
 
 const GroupChart2 = () => {
+  const [all_packages, setAll_packages] = useState([]);
+  const [all_orders, setAll_orders] = useState([]);
+  const [all_sub, setAll_sub] = useState([]);
+  const [all_users, setAll_users] = useState([]);
+
+  useEffect(() => {
+    var token = localStorage.getItem("token");
+    fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/User/Dashboard`, {
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    })
+    .then(response => response.json())
+    .then((res) => {
+      // console.log(res);
+      if (res.code === 200) {
+        setAll_packages(res.all_packages);
+        setAll_orders(res.all_orders);
+        setAll_sub(res.all_sub);
+        setAll_users(res.all_users);
+      } else if (res.code === 401) {
+        // Handle unauthorized user
+      }
+    });
+  }, []);
+
+  // Calculate counts
+  const totalOrdersCount = all_orders;
+  const productsSoldCount = all_users;
+  const growthCount = all_packages;
+  const growthSubCount = all_sub;
+
+  const statistics = [
+    {
+      name: shapeLine1,
+      title: "Total Orders",
+      count: totalOrdersCount,
+      bg: "bg-[#E5F9FF] dark:bg-slate-900",
+      text: "text-info-500",
+      icon: "heroicons:shopping-cart",
+    },
+    // {
+    //   name: shapeLine2,
+    //   title: "Total Customer",
+    //   count: productsSoldCount,
+    //   bg: "bg-[#FFEDE6] dark:bg-slate-900",
+    //   text: "text-warning-500",
+    //   icon: "heroicons:cube",
+    // },
+    {
+      name: shapeLine3,
+      title: "Total Packages",
+      count: growthCount,
+      bg: "bg-[#EAE6FF] dark:bg-slate-900",
+      text: "text-[#5743BE]",
+      icon: "heroicons:arrow-trending-up-solid",
+    },
+    {
+      name: shapeLine2,
+      title: "Total Subscription",
+      count: growthSubCount,
+      bg: "bg-[#FFEDE6] dark:bg-slate-900",
+      text: "text-warning-500",
+      icon: "heroicons:cube",
+    },
+  ];
+
+
+
   return (
     <>
       {" "}

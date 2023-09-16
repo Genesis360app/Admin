@@ -85,6 +85,9 @@ export const appProjectSlice = createSlice({
     toggleEditModal: (state, action) => {
       state.editModal = action.payload;
     },
+    toggleViewOrdersModal: (state, action) => {
+      state.editModal = action.payload;
+    },
     pushProject: (state, action) => {
       state.projects.unshift(action.payload);
 
@@ -136,6 +139,28 @@ export const appProjectSlice = createSlice({
         category: action.payload.category,
       });
     },
+    vieworders: (state, action) => {
+      // update project and  store it into editItem when click edit button
+
+      state.editItem = action.payload;
+      // toggle edit modal
+      state.editModal = !state.editModal;
+      // find index
+      let index = state.projects.findIndex(
+        (item) => item.id === action.payload.id
+      );
+      // update project
+      state.projects.splice(index, 1, {
+        id: action.payload.id,
+        name: action.payload.name,
+        des: action.payload.des,
+        startDate: action.payload.startDate,
+        endDate: action.payload.endDate,
+        assignee: action.payload.assignee,
+        progress: action.payload.progress,
+        category: action.payload.category,
+      });
+    },
   },
 });
 
@@ -145,6 +170,8 @@ export const {
   toggleAddModal,
   removeProject,
   toggleEditModal,
+  toggleViewOrdersModal,
   updateProject,
+  vieworders,
 } = appProjectSlice.actions;
 export default appProjectSlice.reducer;

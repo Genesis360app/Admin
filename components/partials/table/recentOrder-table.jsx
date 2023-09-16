@@ -1,5 +1,9 @@
-import React, { useState, useMemo } from "react";
-import { recentOrder } from "@/constant/table-data";
+import React,{useEffect,useState,useRef, useMemo} from "react";
+import { format } from "date-fns";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+// import { recentOrder } from "@/constant/table-data";
 
 import Icon from "@/components/ui/Icon";
 
@@ -10,77 +14,201 @@ import {
   useGlobalFilter,
   usePagination,
 } from "react-table";
+import { useRouter } from "next/navigation";
 
-const COLUMNS = [
-  {
-    Header: "user",
-    accessor: "user",
-    Cell: (row) => {
-      return (
+const RecentOrderTable = () => {
+  const [orderItems, setOrderItems] = useState([]);
+  const router = useRouter();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        var token = localStorage.getItem("token");
+  
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/Products/getOrders.php`, {
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        });
+  
+        if (!response.ok) {
+          // Handle error if the response is not OK
+          toast.warning("Network response was not ok", {
+            position: "top-right",
+            autoClose: 1500,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+          });
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+  
+        const res = await response.json();
+  
+        console.log(res);
+  
+        if (res.code === 200) {
+          setOrderItems(res.cart);
+        } else if (res.code === 401) {
+          setTimeout(() => {
+            router.push("/login");
+          }, 1500);
+        }
+      } catch (error) {
+     
+        // Handle errors here
+        toast.error(error, {
+          position: "top-right",
+          autoClose: 1500,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+      }
+    };
+  
+    fetchData(); // Call the asynchronous function
+  }, []);
+  
+
+const naira = new Intl.NumberFormat('en-NG', {
+  style : 'currency', 
+  currency: 'NGN',
+ maximumFractionDigits:0,
+ minimumFractionDigits:0
+
+});
+
+const last25Items = orderItems.slice(-25);
+
+// Sort the last 25 items by the 'id' property in ascending order
+last25Items.sort((a, b) => {
+  const idA = a.cart_info?.id || 0; // Use a default value if 'a.cart_info.id' is null
+  const idB = b.cart_info?.id || 0; // Use a default value if 'b.cart_info.id' is null
+
+  return idB - idA; // Sort in ascending order by 'id'
+});
+
+const allOrder = last25Items.map((item, i) => ({
+  id: item.cart_info?.id || i, // Use a default value if 'item.product' or 'item.product.id' is null
+  image: item.product?.image,
+  product_name: item.product?.product_name,
+  price: item.product?.price || "0",
+  qty: item.cart_info?.qty || "0",
+  channel: item.product?.channel || "BNPL",
+  status: item.order_tracking?.current_status.name,
+  date: item.cart_info?.created_at,
+}));
+
+
+
+  const COLUMNS = [
+    {
+      Header: "id",
+      accessor: "id",
+      Cell: (row) => {
+        return <span>#{row?.cell?.value}</span>;
+      },
+    },
+    {
+      Header: "image",
+      accessor: "image",
+      Cell: (row) => {
+        return (
         <div>
-          <div className="flex items-center">
-            <div className="flex-none">
-              <div className="w-8 h-8 rounded-[100%] ltr:mr-2 rtl:ml-2">
-                <img
-                  src={row?.cell?.value.image}
+            <div className="flex items-center">
+              <div className="flex-none">
+                <div className="w-8 h-8 rounded-[100%] ltr:mr-2 rtl:ml-2">
+                  <img
+                    src={row?.cell?.value || "https://www.pngkey.com/png/full/233-2332677_image-500580-placeholder-transparent.png"}
+                  width={70}
+                  height={70}
                   alt=""
-                  className="w-full h-full rounded-[100%] object-cover"
-                />
+                    className="w-full h-full rounded-[5%] object-cover"
+                  />
+                </div>
               </div>
-            </div>
-            <div className="flex-1 text-start">
-              <h4 className="text-sm font-medium text-slate-600">
-                {row?.cell?.value.name}
-              </h4>
+              
             </div>
           </div>
-        </div>
-      );
+        );
+      },
     },
-  },
 
-  {
-    Header: "invoice",
-    accessor: "invoice",
-    Cell: (row) => {
-      return <span>{row?.cell?.value}</span>;
+    {
+      Header: "product name",
+      accessor: "product_name",
+      Cell: (row) => {
+        return <h4 className="text-sm font-medium text-slate-600">{row?.cell?.value}</h4>;
+      },
     },
-  },
-  {
-    Header: "price",
-    accessor: "price",
-    Cell: (row) => {
-      return <span>{row?.cell?.value}</span>;
+
+    {
+      Header: "price",
+      accessor: "price",
+      Cell: (row) => {
+        return <span>{naira.format(parseFloat(row?.cell?.value))}</span>;
+      },
     },
-  },
-  {
-    Header: "status",
-    accessor: "status",
-    Cell: (row) => {
-      return (
-        <span className="block w-full">
-          <span
+    {
+      Header: "channel",
+      accessor: "channel",
+      Cell: (row) => {
+        return <span>{row?.cell?.value}</span>;
+      },
+    },
+    {
+      Header: "qty",
+      accessor: "qty",
+      Cell: (row) => {
+        return <span>{row?.cell?.value}</span>;
+      },
+    },
+  
+    {
+      Header: "status",
+      accessor: "status",
+      Cell: (row) => {
+        return (
+          <span className="block w-full">
+            <span
             className={` inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 ${
-              row?.cell?.value === "paid"
+              row?.cell?.value === "delivered"
                 ? "text-success-500 bg-success-500"
                 : ""
             } 
             ${
-              row?.cell?.value === "due"
+              row?.cell?.value === "closed"
                 ? "text-warning-500 bg-warning-500"
                 : ""
             }
             ${
-              row?.cell?.value === "cancled"
+              row?.cell?.value === "paid"
+                ? "text-info-500 bg-info-500"
+                : ""
+            }
+            ${
+              row?.cell?.value === "processing"
+                ? "text-processing-400 bg-processing-400"
+                : ""
+            }
+            ${
+              row?.cell?.value === "closed"
                 ? "text-danger-500 bg-danger-500"
                 : ""
             }
                 ${
                   row?.cell?.value === "pending"
-                    ? "text-danger-500 bg-danger-500"
+                    ? "text-pending-500 bg-pending-500"
                     : ""
                 } ${
-              row?.cell?.value === "shipped"
+              row?.cell?.value === "in-transit"
                 ? "text-primary-500 bg-primary-500"
                 : ""
             }
@@ -89,15 +217,32 @@ const COLUMNS = [
           >
             {row?.cell?.value}
           </span>
-        </span>
-      );
+          </span>
+        );
+      },
     },
-  },
-];
 
-const RecentOrderTable = () => {
+    {
+      Header: "date",
+      accessor: "date",
+      Cell: (row) => {
+        const rawDate = row?.cell?.value;
+        const date = new Date(rawDate);
+        
+        if (!isNaN(date.getTime())) {
+          const formattedDate = date.toLocaleDateString(); // Format the date as needed
+          return <span>{formattedDate}</span>;
+        } else {
+          return <span>Invalid Date</span>;
+        }
+      },
+    },
+  ];
+ 
   const columns = useMemo(() => COLUMNS, []);
-  const data = useMemo(() => recentOrder, []);
+  const data = useMemo(() => allOrder, []);
+
+  
 
   const tableInstance = useTable(
     {
@@ -133,9 +278,12 @@ const RecentOrderTable = () => {
   } = tableInstance;
 
   const { pageIndex, pageSize } = state;
+  
+
 
   return (
     <>
+    <ToastContainer/>
       <div>
         <div className="overflow-x-auto -mx-6">
           <div className="inline-block min-w-full align-middle">
@@ -144,16 +292,14 @@ const RecentOrderTable = () => {
                 className="min-w-full divide-y divide-slate-100 table-fixed dark:divide-slate-700"
                 {...getTableProps}
               >
-                <thead className="bg-slate-200 dark:bg-slate-700">
-                  {headerGroups.map((headerGroup) => {
-                    const { key, ...restHeaderGroupProps } =
-                      headerGroup.getHeaderGroupProps();
-                    <tr key={key} {...restHeaderGroupProps}>
-                      {headerGroup.headers.map((column) => {
-                        const { key, ...restColumn } = column.getHeaderProps();
+               <thead className="bg-slate-200 dark:bg-slate-700">
+                  {headerGroups.map((headerGroup) => (
+                    <tr {...headerGroup.getHeaderGroupProps()}>
+                      {headerGroup.headers.map((column) => (
                         <th
-                          key={key}
-                          {...restColumn}
+                          {...column.getHeaderProps(
+                            column.getSortByToggleProps()
+                          )}
                           scope="col"
                           className=" table-th "
                         >
@@ -165,10 +311,10 @@ const RecentOrderTable = () => {
                                 : " 🔼"
                               : ""}
                           </span>
-                        </th>;
-                      })}
-                    </tr>;
-                  })}
+                        </th>
+                      ))}
+                    </tr>
+                  ))}
                 </thead>
                 <tbody
                   className="bg-white divide-y divide-slate-100 dark:bg-slate-800 dark:divide-slate-700"
@@ -241,6 +387,7 @@ const RecentOrderTable = () => {
             </li>
           </ul>
         </div>
+       
       </div>
     </>
   );

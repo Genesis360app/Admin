@@ -46,7 +46,7 @@ const LoginForm = () => {
       });
 
       if (!response.ok) {
-        toast.success("Network response was not ok", {
+        toast.warning("Network response was not ok", {
           position: "top-right",
           autoClose: 1500,
           hideProgressBar: false,
