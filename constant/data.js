@@ -46,6 +46,13 @@ export const menuItems = [
   },
 
   {
+    title: "Products",
+    isHide: true,
+    icon: "heroicons-outline:calendar",
+    link: "products",
+  },
+
+  {
     title: "Chat",
     isHide: true,
     icon: "heroicons-outline:chat",
@@ -65,6 +72,7 @@ export const menuItems = [
     icon: "heroicons-outline:view-boards",
     link: "kanban",
   },
+  
   {
     title: "Calender",
     isHide: true,

@@ -1,4 +1,4 @@
-import React from "react";
+import React,{useEffect,useState,useRef} from "react";
 import { colors } from "@/constant/data";
 import dynamic from "next/dynamic";
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
@@ -212,33 +212,72 @@ const columnCharthome4 = {
     },
   },
 };
-const statistics = [
-  {
-    name: columnCharthome3,
-    title: "Current balance ",
-    count: "$34,564",
-    bg: "bg-[#E5F9FF] dark:bg-slate-900	",
-    text: "text-info-500",
-    icon: "heroicons:shopping-cart",
-  },
-  {
-    name: columnCharthome4,
-    title: "Credit",
-    count: "$3,564",
-    bg: "bg-[#E5F9FF] dark:bg-slate-900	",
-    text: "text-warning-500",
-    icon: "heroicons:cube",
-  },
-  {
-    name: columnCharthome2,
-    title: "Debit",
-    count: "$3,564",
-    bg: "bg-[#E5F9FF] dark:bg-slate-900	",
-    text: "text-[#5743BE]",
-    icon: "heroicons:arrow-trending-up-solid",
-  },
-];
+
 const GroupChart5 = () => {
+  const [history, setHistory] = useState([]);
+  const [wallet, setWallet] = useState(null);
+  const [spendings, setSpendings] = useState(null);
+  const [spending_limit, setSpending_limit] = useState(null);
+
+  useEffect(() => {
+    var token = localStorage.getItem("token");
+    var userid = localStorage.getItem("userid");
+    fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/User/getUser.php?userid=${userid}`, {
+      headers: {
+          "Authorization": `Bearer ${token}`
+      }
+      })
+      .then(response => response.json())
+      .then((res) => {
+      // console.log(res);
+      if(res.code == 200){
+         
+          setWallet(res.user.wallet);
+          setSpendings(res.user.spendings);
+          setSpending_limit(res.user.spending_limit);
+        }
+      });
+  }, []);
+
+  const wallet_balance = wallet;
+  const acc_spending = spendings;
+  const acc_limit = spending_limit;
+
+  const naira = new Intl.NumberFormat('en-NG', {
+    style : 'currency', 
+    currency: 'NGN',
+   maximumFractionDigits:0,
+   minimumFractionDigits:0
+  
+  });
+  const statistics = [
+    {
+      name: columnCharthome3,
+      title: "Current balance ",
+      count: wallet_balance,
+      bg: "bg-[#E5F9FF] dark:bg-slate-900	",
+      text: "text-info-500",
+      icon: "heroicons:shopping-cart",
+    },
+    {
+      name: columnCharthome4,
+      title: "Spending",
+      count: acc_spending,
+      bg: "bg-[#E5F9FF] dark:bg-slate-900	",
+      text: "text-warning-500",
+      icon: "heroicons:cube",
+    },
+    {
+      name: columnCharthome2,
+      title: "Spending Limit",
+      count: acc_limit,
+      bg: "bg-[#E5F9FF] dark:bg-slate-900	",
+      text: "text-[#5743BE]",
+      icon: "heroicons:arrow-trending-up-solid",
+    },
+  ];
+
+  
   return (
     <>
       {statistics.map((item, i) => (
@@ -247,7 +286,7 @@ const GroupChart5 = () => {
             {item.title}
           </div>
           <div className="text-slate-900 dark:text-white text-lg font-medium">
-            {item.count}
+            {item.count !== null ? naira.format(parseFloat(item.count)) : 'N/A'}
           </div>
           <div className="ml-auto max-w-[124px]">
             <Chart

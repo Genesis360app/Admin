@@ -35,7 +35,7 @@ const ImageBlock2 = () => {
           });
 
           setTimeout(() => {
-            router.push("/login");
+            router.push("/");
           }, 1500);
           // Handle unauthorized error...
         }

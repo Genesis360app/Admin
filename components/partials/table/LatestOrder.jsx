@@ -16,20 +16,29 @@ import { useRouter } from "next/navigation";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useSelector, useDispatch } from "react-redux";
-import { vieworders } from "@/components/partials/app/projects/store";
+// import { vieworders } from "@/components/partials/app/projects/store";
 import ViewOrders from "@/components/partials/app/projects/ViewOrders";
 
-//   const ExampleTwo: React.FC<OrderRowProps> = ({ item,title = "Advanced Table Two" }) => {
 const ExampleTwo = ({ item,title = "Advanced Table Two" }) => {
-
-
 
   const [orderItems, setOrderItems] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const router = useRouter();
   const [selectedOrder, setSelectedOrder] = useState(null); // State to store the selected order data
   const dispatch = useDispatch();
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
  
+  const setSelectedItemId = (orderId) => {
+    setSelectedOrder(orderId);
+};
+
+
+ // Define the onClose function to handle modal closure
+ const handleCloseEditModal = () => {
+  setIsEditModalOpen(false);
+};
+
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -114,7 +123,13 @@ const recentOrder = orderItems.map((item, i) => ({
   channel: item.product?.channel || "BNPL",
   status: item.order_tracking?.current_status.name,
   date: item.cart_info?.created_at,
+  action: item.cart_info?.id,
 }));
+
+const handleLinkClick = (orderId) => {
+  router.push(`/order/${orderId}`);
+};
+
 
 const COLUMNS = [
   {
@@ -149,6 +164,7 @@ const COLUMNS = [
       );
     },
   },
+
 
   {
     Header: "product name",
@@ -248,22 +264,35 @@ const COLUMNS = [
     },
   },
 
+
   {
     Header: "action",
     accessor: "action",
     Cell: (row) => {
       return (
+        <>
+       
         <div className="flex space-x-3 rtl:space-x-reverse">
+
           <Tooltip content="View" placement="top" arrow animation="shift-away">
-            <button className="action-btn" type="button"   onClick={(item) => dispatch(vieworders(item))}>
+            <button className="action-btn" type="button"  
+            onClick={() => {
+              // const itemId = row.original.id;
+                setSelectedItemId(row?.cell?.value); // Store the itemId in the state
+                setIsEditModalOpen(true); // Set isEditModalOpen to true here
+              }}
+                >
               <Icon icon="heroicons:eye" />
             </button>
+           
           </Tooltip>
           <Tooltip content="Edit" placement="top" arrow animation="shift-away">
-            <button className="action-btn" type="button"  >
+            <button className="action-btn" type="button" onClick={() => handleLinkClick(row?.cell?.value)}>
               <Icon icon="heroicons:pencil-square" />
             </button>
           </Tooltip>
+          
+  
           {/* <Tooltip
             content="Delete"
             placement="top"
@@ -276,10 +305,14 @@ const COLUMNS = [
             </button>
           </Tooltip> */}
         </div>
+  
+        </>
       );
     },
   },
 ];
+
+
 
 const IndeterminateCheckbox = React.forwardRef(
   ({ indeterminate, ...rest }, ref) => {
@@ -521,9 +554,16 @@ const columns = useMemo(() => COLUMNS, []);
               </button>
             </li>
           </ul>
+
         </div>
         {/*end*/}
-        <ViewOrders />
+        
+        
+
+
+{isEditModalOpen && selectedOrder && (
+  <ViewOrders initialEditItem={selectedOrder} onClose={handleCloseEditModal} />
+)}
       </Card>    
     </>
   );

@@ -1,9 +1,10 @@
-import React, { useState, useMemo } from "react";
-import { advancedTable } from "@/constant/table-data";
+import React,{useEffect,useState,useMemo} from "react";
 import Card from "@/components/ui/Card";
 import Icon from "@/components/ui/Icon";
 import Dropdown from "@/components/ui/Dropdown";
 import { Menu } from "@headlessui/react";
+import Modal from "@/components/ui/Modal";
+import Button from "@/components/ui/Button";
 import {
   useTable,
   useRowSelect,
@@ -12,249 +13,368 @@ import {
   usePagination,
 } from "react-table";
 import GlobalFilter from "@/components/partials/table/GlobalFilter";
-
-const COLUMNS = [
-  {
-    Header: "customer",
-    accessor: "customer",
-    Cell: (row) => {
-      return (
-        <div>
-          <span className="inline-flex items-center">
-            <span className="w-7 h-7 rounded-full ltr:mr-3 rtl:ml-3 flex-none bg-slate-600">
-              <img
-                src={row?.cell?.value.image}
-                alt=""
-                className="object-cover w-full h-full rounded-full"
-              />
-            </span>
-            <span className="text-sm text-slate-600 dark:text-slate-300 capitalize font-medium">
-              {row?.cell?.value.name}
-            </span>
-          </span>
-        </div>
-      );
-    },
-  },
-  {
-    Header: "date",
-    accessor: "date",
-    Cell: (row) => {
-      return (
-        <span className="text-slate-500 dark:text-slate-400">
-          {row?.cell?.value}
-          <span className="inline-block ml-1">
-            {Math.floor(Math.random() * 12) + 1}:
-            {Math.floor(Math.random() * 60) + 1}
-          </span>
-        </span>
-      );
-    },
-  },
-  {
-    Header: "HISTORY",
-    accessor: "quantity",
-    Cell: (row) => {
-      return (
-        <span className="text-slate-500 dark:text-slate-400">
-          <span className="block text-slate-600 dark:text-slate-300">
-            Transfer
-          </span>
-          <span className="block text-slate-500 text-xs">
-            Trans ID: 8HG654Pk32
-          </span>
-        </span>
-      );
-    },
-  },
-
-  {
-    Header: "amount",
-    accessor: "status",
-    Cell: (row) => {
-      return (
-        <span className="block w-full">
-          <span
-            className={`${
-              row?.cell?.value === "paid" ? "text-success-500 " : ""
-            } 
-            ${row?.cell?.value === "due" ? "text-warning-500 " : ""}
-            ${row?.cell?.value === "cancled" ? "text-danger-500" : ""}
-            
-             `}
-          >
-            {row?.cell?.value === "due" && <span>+$ 1,200.00</span>}
-            {row?.cell?.value === "paid" && <span>+$ 200.00</span>}
-            {row?.cell?.value === "cancled" && <span>+$ 1400.00</span>}
-          </span>
-        </span>
-      );
-    },
-  },
-  {
-    Header: "action",
-    accessor: "action",
-    Cell: (row) => {
-      return (
-        <div className=" text-center">
-          <Dropdown
-            classMenuItems="right-0 w-[140px] top-[110%] "
-            label={
-              <span className="text-xl text-center block w-full">
-                <Icon icon="heroicons-outline:dots-vertical" />
-              </span>
-            }
-          >
-            <div className="divide-y divide-slate-100 dark:divide-slate-800">
-              {actions.map((item, i) => (
-                <Menu.Item key={i}>
-                  <div
-                    className={`
-                
-                  ${
-                    item.name === "delete"
-                      ? "bg-danger-500 text-danger-500 bg-opacity-30   hover:bg-opacity-100 hover:text-white"
-                      : "hover:bg-slate-900 hover:text-white dark:hover:bg-slate-600 dark:hover:bg-opacity-50"
-                  }
-                   w-full border-b border-b-gray-500 border-opacity-10 px-4 py-2 text-sm  last:mb-0 cursor-pointer 
-                   first:rounded-t last:rounded-b flex  space-x-2 items-center rtl:space-x-reverse `}
-                  >
-                    <span className="text-base">
-                      <Icon icon={item.icon} />
-                    </span>
-                    <span>{item.name}</span>
-                  </div>
-                </Menu.Item>
-              ))}
-            </div>
-          </Dropdown>
-        </div>
-      );
-    },
-  },
-];
-
-const actions = [
-  {
-    name: "view",
-    icon: "heroicons-outline:eye",
-  },
-  {
-    name: "edit",
-    icon: "heroicons:pencil-square",
-  },
-  {
-    name: "delete",
-    icon: "heroicons-outline:trash",
-  },
-];
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import Tooltip from "@/components/ui/Tooltip";
 
 const TransactionsTable = () => {
-  const columns = useMemo(() => COLUMNS, []);
-  const data = useMemo(() => advancedTable, []);
+  const [history, setHistory] = useState([]);
+  const [activeModal, setActiveModal] = useState(false);
+  const [selectedHistory, setSelectedHistory] = useState(null); // To store the selected history details
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5); // Added pageSize state
+  const itemsPerPage = pageSize; // Use pageSize for itemsPerPage
+  const maxPageButtons = 5; // Number of page buttons to display
+  const [globalFilter, setGlobalFilter] = useState(""); // Global filter
 
-  const tableInstance = useTable(
-    {
-      columns,
-      data,
-      initialState: {
-        pageSize: 4,
-      },
-    },
 
-    useGlobalFilter,
-    useSortBy,
-    usePagination,
-    useRowSelect
+  // Function to format date value
+function formattedDate(rawDate) {
+  const date = new Date(rawDate);
+
+  if (!isNaN(date.getTime())) {
+    const options = {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      // second: '2-digit',
+      hour12: true, // Use 24-hour format
+    };
+
+    const formattedDate = date.toLocaleString(undefined, options);
+    return <span>{formattedDate}</span>;
+  } else {
+    return <span>Invalid Date</span>;
+  }
+}
+
+
+// Function to filter data based on globalFilter value
+// Function to filter data based on globalFilter value
+const filteredData = useMemo(() => {
+return (history || []).filter((item) => {
+  const transaction_ref = (item?.transaction_ref|| "").toString(); // Access product_name safely and convert to lowercase
+  const txn_Id = (item?.id || "").toString(); // Access package_id safely and convert to string
+  const date = (formattedDate(item?.created_at)|| "").toString(); // Access package_id safely and convert to string
+
+  // Check if globalFilter is defined and not null before using trim
+  const filterText = globalFilter ? globalFilter.trim() : "";
+
+  // Customize this logic to filter based on your specific requirements
+  return (
+    transaction_ref.includes(filterText.toLowerCase()) ||
+    txn_Id.includes(filterText)||
+    date.includes(filterText)
   );
-  const {
-    getTableProps,
-    getTableBodyProps,
-    headerGroups,
-    footerGroups,
-    page,
-    nextPage,
-    previousPage,
-    canNextPage,
-    canPreviousPage,
-    pageOptions,
-    state,
-    gotoPage,
-    pageCount,
-    setPageSize,
-    setGlobalFilter,
-    prepareRow,
-  } = tableInstance;
+});
+}, [history, globalFilter]);
 
-  const { globalFilter, pageIndex, pageSize } = state;
+
+
+
+
+const naira = new Intl.NumberFormat("en-NG", {
+  style: "currency",
+  currency: "NGN",
+  maximumFractionDigits: 0,
+  minimumFractionDigits: 0,
+});
+
+const handleNextPage = () => {
+  if (currentPage < Math.ceil(filteredData.length / itemsPerPage)) {
+    setCurrentPage((prevPage) => prevPage + 1);
+  }
+};
+
+const handlePrevPage = () => {
+  if (currentPage > 1) {
+    setCurrentPage((prevPage) => prevPage - 1);
+  }
+};
+
+// Calculate the index range for the current page
+const startIndex = (currentPage - 1) * itemsPerPage;
+const endIndex = Math.min(startIndex + itemsPerPage, filteredData.length);
+
+// Get the paginated history data for the current page
+const paginatedHistory = filteredData.slice(startIndex, endIndex);
+
+// Calculate the total number of pages
+const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+
+const getPageNumbers = () => {
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const middlePage = Math.ceil(maxPageButtons / 2);
+
+  let startPage = currentPage - middlePage + 1;
+  let endPage = currentPage + middlePage - 1;
+
+  if (totalPages <= maxPageButtons) {
+    startPage = 1;
+    endPage = totalPages;
+  } else if (currentPage <= middlePage) {
+    startPage = 1;
+    endPage = maxPageButtons;
+  } else if (currentPage >= totalPages - middlePage) {
+    startPage = totalPages - maxPageButtons + 1;
+    endPage = totalPages;
+  }
+
+  const pageNumbers = [];
+  for (let i = startPage; i <= endPage; i++) {
+    pageNumbers.push(i);
+  }
+
+  return pageNumbers;
+};
+
+
+
+  useEffect(() => {
+    var userid = localStorage.getItem("userid");
+    var token = localStorage.getItem("token");
+    fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/Wallet/History.php?user_id=${userid}`, {
+    headers: {
+        "Authorization": `Bearer ${token}`
+    }
+    })
+    .then(response => response.json())
+    .then((res) => {
+    console.log(res);
+    if(res.code == 200){
+        setHistory(res.history);   
+      }else if(res.code == 401){
+        toast.info(`An error occurred, please login again`, {
+          position: "top-right",
+          autoClose: 1500,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+        
+      }
+    })
+
+
+  },
+
+  [])
+
+
+
   return (
     <>
+    <ToastContainer/>
+
+    
+    
+    <Modal
+        activeModal={activeModal}
+        onClose={() => setActiveModal(false)}
+        title="Transaction Details"
+        footer={
+          <Button
+            text="Close"
+            btnClass="btn-primary"
+            onClick={() => setActiveModal(false)}
+          />
+        }
+      >
+          <div>
+                <div className="flex justify-between mt-[40px]">
+                  <div>
+                    <h2 className="text-[20px] leading-[25px] font-bold">Transaction ID</h2>
+                    <p className="text-[20px] leading-[20px] font-medium mt-[5px] ">
+                      # {selectedHistory?.id}
+                    </p>
+                  </div>
+                  <div>
+  <h2 className="text-[20px] leading-[25px] font-bold text-right">Transaction Date</h2>
+<p className="text-[20px] leading-[20px] text-right font-medium mt-[5px]">
+  {(() => {
+    const rawDate = selectedHistory?.created_at;
+    const date = new Date(rawDate);
+    return !isNaN(date.getTime()) ? (
+      <>
+        {new Intl.DateTimeFormat('en', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        }).format(date)}
+      </>
+    ) : (
+      <span>Invalid Date</span>
+    );
+  })()}
+</p>
+</div>
+
+
+
+                </div>
+
+                <div className="flex justify-between mt-[30px]">
+                  <div>
+                    <h2 className="text-[20px] leading-[25px] font-bold">Transaction Ref</h2>
+                    <p className="text-[20px] leading-[20px] font-medium mt-[5px] ">
+                      {selectedHistory?.transaction_ref}
+                    </p>
+                  </div>
+                  <div>
+                    <h2 className="text-[20px] leading-[25px] font-bold text-right">Amount</h2>
+                    <p className="text-[20px] leading-[20px] text-right font-medium mt-[5px]">
+                       {naira.format(selectedHistory?.amount)}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex justify-between mt-[30px]">
+                  <div>
+                    <h2 className="text-[20px] leading-[25px] font-bold">Description</h2>
+                    <p className="text-[20px] leading-[20px] font-medium mt-[5px] ">
+                      {selectedHistory?.remark}
+                    </p>
+                  </div>
+                  <div>
+                    <h2 className="text-[20px] leading-[25px] font-bold text-right">Transaction Type</h2>
+                    <p className="text-[20px] leading-[20px] text-right font-medium mt-[5px]">
+                      {selectedHistory?.txn_type}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex justify-between mt-[30px] items-center">
+                  <div>
+                    <h2 className="text-[20px] leading-[25px] font-bold">Transaction Status</h2>
+                    <p className="text-[20px] leading-[20px] font-medium mt-[5px] ">
+                      {selectedHistory?.status}
+                    </p>
+                  </div>
+                  <div>
+                    <h2 className="text-[20px] leading-[25px] font-bold text-right">User ID</h2>
+                    <p className="text-[20px] leading-[20px] text-right font-medium mt-[5px]">
+                      {selectedHistory?.userid}
+                    </p>
+                  </div>
+                </div>
+              </div>
+      </Modal>
+      
+
       <Card noborder>
         <div className="md:flex justify-between items-center mb-6">
-          <h4 className="card-title">All transactions</h4>
+          <h4 className="card-title">My latest transactions</h4>
           <div>
             <GlobalFilter filter={globalFilter} setFilter={setGlobalFilter} />
           </div>
         </div>
+
+        
         <div className="overflow-x-auto -mx-6">
           <div className="inline-block min-w-full align-middle">
             <div className="overflow-hidden ">
-              <table
-                className="min-w-full divide-y divide-slate-100 table-fixed dark:divide-slate-700"
-                {...getTableProps}
-              >
-                <thead className=" border-t border-slate-100 dark:border-slate-800">
-                  {headerGroups.map((headerGroup) => {
-                    const { key, ...restHeaderGroupProps } =
-                      headerGroup.getHeaderGroupProps();
-                    <tr key={key} {...restHeaderGroupProps}>
-                      {headerGroup.headers.map((column) => {
-                        const { key, ...restColumn } = column.getHeaderProps();
-                        <th
-                          key={key}
-                          {...restColumn}
-                          scope="col"
-                          className=" table-th "
-                        >
-                          {column.render("Header")}
-                          <span>
-                            {column.isSorted
-                              ? column.isSortedDesc
-                                ? " 🔽"
-                                : " 🔼"
-                              : ""}
-                          </span>
-                        </th>;
-                      })}
-                    </tr>;
-                  })}
+              <table className="min-w-full divide-y divide-slate-100 table-fixed dark:divide-slate-700">
+               <thead className=" border-t border-slate-100 dark:border-slate-800">
+               <tr className="text-left text-[15px] font-semibold border-[#DFE5FF] border-y-2">
+                    <th scope="col" className="table-th">
+                      ID
+                    </th>
+                    <th scope="col" className="table-th">
+                    Amount
+                    </th>
+                    <th scope="col" className="table-th">
+                    Txn Type
+                    </th>
+                    <th scope="col" className="table-th">
+                    Remark
+                    </th>
+                    <th scope="col" className="table-th">
+                    Reference Id
+                    </th>
+                    <th scope="col" className="table-th">
+                    Status
+                    </th>
+                    <th scope="col" className="table-th">
+                      Date
+                    </th>
+                    <th scope="col" className="table-th">
+                      Action
+                    </th>
+                  </tr>
                 </thead>
+                {paginatedHistory.map((item) => (
+                  <React.Fragment key={item.id}>
                 <tbody
-                  className="bg-white divide-y divide-slate-100 dark:bg-slate-800 dark:divide-slate-700"
-                  {...getTableBodyProps}
+                  className="bg-white divide-y divide-slate-100 dark:bg-slate-800 dark:divide-slate-700" >
+
+                      <tr >
+                        <td className="table-td py-2"> <span>{item.id}</span></td>
+                        <td className="table-td py-2"> {item.amount}</td>
+                        <td className="table-td py-2"> {item.txn_type} </td>
+
+                        <td className="table-td py-2"> 
+                        <span className="text-slate-500 dark:text-slate-400">
+                <span className="block text-slate-600 dark:text-slate-300">
+                {item.remark}
+                </span>
+              </span>
+              </td>
+                        <td className="table-td py-2">  
+                         <span className="text-slate-500 dark:text-slate-400">
+                <span className="block text-xs text-slate-500">
+                  Trans ID: {item.transaction_ref}
+                </span>
+              </span> 
+              </td>
+                        <td className="table-td py-2"> <span className="block w-full">
+                <span
+                  className={`${
+                    item.status === "Completed" ? "text-success-500 " : ""} 
+                  ${item.status === "Pending" ? "text-warning-500 " : ""}
+                  ${item.status=== "Canceled" ? "text-danger-500" : ""}
+                  
+                   `}
                 >
-                  {page.map((row) => {
-                    prepareRow(row);
-                    const { key, ...restRowProps } = row.getRowProps();
-                    return (
-                      <tr key={key} {...restRowProps}>
-                        {row.cells.map((cell) => {
-                          const { key, ...restCellProps } = cell.getCellProps();
-                          return (
-                            <td
-                              key={key}
-                              {...restCellProps}
-                              className="table-td py-2"
-                            >
-                              {cell.render("Cell")}
-                            </td>
-                          );
-                        })}
+                  {item.status}
+                
+                </span>
+              </span>
+              </td>
+                        <td className="table-td py-2">  {formattedDate(item.created_at)}</td>
+                        <td className="table-td py-2"> 
+                        <div className="flex space-x-3 rtl:space-x-reverse">
+                <Tooltip content="View" placement="top" arrow animation="shift-away">
+                  <button
+                    className="action-btn"
+                    type="button"
+                    onClick={() => {
+                      setSelectedHistory(item);
+                       setActiveModal(true);
+                    }}
+                  >
+                    <Icon icon="heroicons:eye" />
+                  </button>
+                </Tooltip>
+                {/* {row.cell.value} */}
+    
+            </div>
+                        </td>
+                       
                       </tr>
-                    );
-                  })}
+                   
                 </tbody>
+                </React.Fragment>
+                ))}
               </table>
+              
             </div>
           </div>
         </div>

@@ -23,6 +23,7 @@ const Textinput = ({
   description,
   hasicon,
   onChange,
+  hidden,
   options,
   onFocus,
   defaultValue,
@@ -66,6 +67,7 @@ const Textinput = ({
             className={`form-control py-2 ${className}`}
             placeholder={placeholder}
             defaultValue={defaultValue}
+            hidden
           />
         )}
         {!name && !isMask && (
@@ -76,6 +78,7 @@ const Textinput = ({
             defaultValue={defaultValue}
             onChange={onChange}
             {...rest}
+            hidden
           />
         )}
         {name && isMask && (

@@ -1,3 +1,5 @@
+"use client";
+
 import React,{useEffect,useState,useRef, useMemo} from "react";
 import { format } from "date-fns";
 import { ToastContainer, toast } from 'react-toastify';
@@ -16,64 +18,30 @@ import {
 } from "react-table";
 import { useRouter } from "next/navigation";
 
+
 const RecentOrderTable = () => {
   const [orderItems, setOrderItems] = useState([]);
   const router = useRouter();
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        var token = localStorage.getItem("token");
-  
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/Products/getOrders.php`, {
-          headers: {
-            "Authorization": `Bearer ${token}`
-          }
-        });
-  
-        if (!response.ok) {
-          // Handle error if the response is not OK
-          toast.warning("Network response was not ok", {
-            position: "top-right",
-            autoClose: 1500,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "light",
-          });
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-  
-        const res = await response.json();
-  
-        console.log(res);
-  
-        if (res.code === 200) {
-          setOrderItems(res.cart);
-        } else if (res.code === 401) {
-          setTimeout(() => {
-            router.push("/login");
-          }, 1500);
-        }
-      } catch (error) {
-     
-        // Handle errors here
-        toast.error(error, {
-          position: "top-right",
-          autoClose: 1500,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
+    var token = localStorage.getItem("token");
+    fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/Products/getOrders.php`, {
+      headers: {
+        "Authorization": `Bearer ${token}`
       }
-    };
-  
-    fetchData(); // Call the asynchronous function
+    })
+    .then(response => response.json())
+    .then((res) => {
+      // console.log(res);
+      if (res.code === 200) {
+        setOrderItems(res.cart);
+      } else if (res.code === 401) {
+        // Handle unauthorized user
+        setTimeout(() => {
+          router.push("/");
+        }, 1500);
+      }
+    });
   }, []);
   
 
@@ -230,11 +198,13 @@ const allOrder = last25Items.map((item, i) => ({
         const date = new Date(rawDate);
         
         if (!isNaN(date.getTime())) {
-          const formattedDate = date.toLocaleDateString(); // Format the date as needed
+          const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+          const formattedDate = date.toLocaleString(undefined, options); // Format the date with time
           return <span>{formattedDate}</span>;
         } else {
           return <span>Invalid Date</span>;
         }
+        
       },
     },
   ];
@@ -391,6 +361,7 @@ const allOrder = last25Items.map((item, i) => ({
       </div>
     </>
   );
+
 };
 
 export default RecentOrderTable;

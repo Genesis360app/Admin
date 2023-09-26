@@ -208,11 +208,6 @@ const shapeLine3 = {
 
 
 
-
-
-
-
-
 const GroupChart2 = () => {
   const [all_packages, setAll_packages] = useState([]);
   const [all_orders, setAll_orders] = useState([]);

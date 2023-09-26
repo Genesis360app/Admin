@@ -83,7 +83,7 @@ const columnCharthome3 = {
   },
 };
 
-const HomeBredCurbs = ({ title }) => {
+const ProductBredCurbs = ({ title }) => {
   const [activeModal, setActiveModal] = useState(false);
   const [paybusinessModal, setPaybusinessModal] = useState(false);
   const [wallet, setWallet] = useState(null);
@@ -426,7 +426,7 @@ const HomeBredCurbs = ({ title }) => {
 
   return (
 
-    <div className="flex justify-between flex-wrap items-center mb-6 ">
+    <div className="flex flex-wrap items-center justify-between mb-6 ">
     <Modal
            activeModal={activeModal}
         onClose={() => setActiveModal(false)}
@@ -465,9 +465,9 @@ const HomeBredCurbs = ({ title }) => {
           </div>
           <br/>
             <div className="text-base text-slate-600 dark:text-slate-300">
-            <div className="bg-slate-100 dark:bg-slate-900 rounded-md p-4">
+            <div className="p-4 rounded-md bg-slate-100 dark:bg-slate-900">
                 <span
-                  className="text-xs text-slate-500 dark:text-slate-400 block mb-1 cursor-pointer font-normal"
+                  className="block mb-1 text-xs font-normal cursor-pointer text-slate-500 dark:text-slate-400"
                   htmlFor="Account_Number"
                 >
                   Account Number
@@ -482,15 +482,15 @@ const HomeBredCurbs = ({ title }) => {
                   id="Account_Number"
                   min="1000000000" // Minimum value (10 digits)
                 max="9999999999" // Maximum value (10 digits)
-                  className="bg-transparent border-none focus:ring-0 focus:border-none p-0 text-slate-900 dark:text-white text-sm placeholder:text-slate-400 placeholder:font-medium  h-auto font-medium"
+                  className="h-auto p-0 text-sm font-medium bg-transparent border-none focus:ring-0 focus:border-none text-slate-900 dark:text-white placeholder:text-slate-400 placeholder:font-medium"
                 />
               </div>
             </div>
           <br/>
             <div className="text-base text-slate-600 dark:text-slate-300">
-            <div className="bg-slate-100 dark:bg-slate-900 rounded-md p-4">
+            <div className="p-4 rounded-md bg-slate-100 dark:bg-slate-900">
                 <span
-                  className="text-xs text-slate-500 dark:text-slate-400 block mb-1 cursor-pointer font-normal"
+                  className="block mb-1 text-xs font-normal cursor-pointer text-slate-500 dark:text-slate-400"
                   htmlFor="Amount"
                 >
                   Amount
@@ -502,15 +502,15 @@ const HomeBredCurbs = ({ title }) => {
                       }}
                  value={amount}
                   id="Amount"
-                  className="bg-transparent border-none focus:ring-0 focus:border-none p-0 text-slate-900 dark:text-white text-sm placeholder:text-slate-400 placeholder:font-medium  h-auto font-medium"
+                  className="h-auto p-0 text-sm font-medium bg-transparent border-none focus:ring-0 focus:border-none text-slate-900 dark:text-white placeholder:text-slate-400 placeholder:font-medium"
                 />
               </div>
             </div>
           <br/>
             <div className="text-base text-slate-600 dark:text-slate-300">
-            <div className="bg-slate-100 dark:bg-slate-900 rounded-md p-4">
+            <div className="p-4 rounded-md bg-slate-100 dark:bg-slate-900">
   <span
-    className="text-xs text-slate-500 dark:text-slate-400 block mb-1 cursor-pointer font-normal"
+    className="block mb-1 text-xs font-normal cursor-pointer text-slate-500 dark:text-slate-400"
     htmlFor="Select_Bank"
   >
     Select Bank
@@ -523,7 +523,7 @@ const HomeBredCurbs = ({ title }) => {
     }}
     value={selectedBank}
     options={bankOptions}
-    className="bg-transparent border-none focus:ring-0 focus:border-none p-0 text-slate-900 dark:text-white text-sm placeholder:text-slate-400 placeholder:font-medium  h-auto font-medium"
+    className="h-auto p-0 text-sm font-medium bg-transparent border-none focus:ring-0 focus:border-none text-slate-900 dark:text-white placeholder:text-slate-400 placeholder:font-medium"
     styles={{
       // Add custom styles for the Select component here
       // You can override the default styles of the Select component
@@ -533,7 +533,7 @@ const HomeBredCurbs = ({ title }) => {
 <br/>
 
               {showWithdrawButton ? (
-                  <Button type="button" className="btn btn-dark w-full ml-auto" 
+                  <Button type="button" className="w-full ml-auto btn btn-dark" 
                   onClick={handleValidateAccount}
                   // onClick={() => console.log("datannn")}
                   disabled={!selectedBank || !account_number || !amount || isLoading}>
@@ -545,7 +545,7 @@ const HomeBredCurbs = ({ title }) => {
 
                   {account_name ? (
                <>
-              <div className="bg-slate-100 dark:bg-slate-900 rounded-md p-4">
+              <div className="p-4 rounded-md bg-slate-100 dark:bg-slate-900">
                 <Textinput
                 
                   type="text"
@@ -553,7 +553,7 @@ const HomeBredCurbs = ({ title }) => {
                   name="account_name"
                   value={account_name} 
                   disabled
-                  className="bg-transparent border-none focus:ring-0 focus:border-none p-0 text-slate-900 dark:text-white text-sm placeholder:text-slate-400 h-auto placeholder:font-medium font-medium"
+                  className="h-auto p-0 text-sm font-medium bg-transparent border-none focus:ring-0 focus:border-none text-slate-900 dark:text-white placeholder:text-slate-400 placeholder:font-medium"
                 />
               </div>
              
@@ -628,9 +628,9 @@ const HomeBredCurbs = ({ title }) => {
           </div>
           <br/>
 
-          <div className="bg-slate-100 dark:bg-slate-900 rounded-md p-4">
+          <div className="p-4 rounded-md bg-slate-100 dark:bg-slate-900">
                 <span
-                  className="text-xs text-slate-500 dark:text-slate-400 block mb-1 cursor-pointer font-normal"
+                  className="block mb-1 text-xs font-normal cursor-pointer text-slate-500 dark:text-slate-400"
                   htmlFor="cdp"
                 >
                   Amount
@@ -640,13 +640,13 @@ const HomeBredCurbs = ({ title }) => {
                 onChange={handleSendAmountChange}
                   id="cdp"
                  value={sendamount}
-                  className="bg-transparent border-none focus:ring-0 focus:border-none p-0 text-slate-900 dark:text-white text-sm placeholder:text-slate-400 placeholder:font-medium  h-auto font-medium"
+                  className="h-auto p-0 text-sm font-medium bg-transparent border-none focus:ring-0 focus:border-none text-slate-900 dark:text-white placeholder:text-slate-400 placeholder:font-medium"
                 />
               </div>
               <br/>
-              <div className="bg-slate-100 dark:bg-slate-900 rounded-md p-4">
+              <div className="p-4 rounded-md bg-slate-100 dark:bg-slate-900">
                 <label
-                  className="text-xs text-slate-500 dark:text-slate-400 block cursor-pointer mb-1"
+                  className="block mb-1 text-xs cursor-pointer text-slate-500 dark:text-slate-400"
                   htmlFor="cd"
                 >
                   Recipient username
@@ -659,13 +659,13 @@ const HomeBredCurbs = ({ title }) => {
                   id="email"
                   onChange={handlerecieverChange}
                   value={recieveremail}
-                  className="bg-transparent border-none focus:ring-0 focus:border-none p-0 text-slate-900 dark:text-white text-sm placeholder:text-slate-400 h-auto placeholder:font-medium font-medium"
+                  className="h-auto p-0 text-sm font-medium bg-transparent border-none focus:ring-0 focus:border-none text-slate-900 dark:text-white placeholder:text-slate-400 placeholder:font-medium"
                 />
               </div>
               <br/>
-              <div className="bg-slate-100 dark:bg-slate-900 rounded-md p-4">
+              <div className="p-4 rounded-md bg-slate-100 dark:bg-slate-900">
                 <label
-                  className="text-xs text-slate-500 dark:text-slate-400 block cursor-pointer mb-1"
+                  className="block mb-1 text-xs cursor-pointer text-slate-500 dark:text-slate-400"
                   htmlFor="sender_email"
                 >
                   {/*  sender_email */}
@@ -678,16 +678,16 @@ const HomeBredCurbs = ({ title }) => {
                   // placeholder="Enter user ID"
                   disabled
                   value={email}
-                  className="bg-transparent border-none focus:ring-0 focus:border-none p-0 text-slate-900 dark:text-white text-sm placeholder:text-slate-400 h-auto placeholder:font-medium font-medium"
+                  className="h-auto p-0 text-sm font-medium bg-transparent border-none focus:ring-0 focus:border-none text-slate-900 dark:text-white placeholder:text-slate-400 placeholder:font-medium"
                 />
               </div>
               <br/>
               <div className="flex justify-between">
                 <div>
-                  <span className="text-xs text-slate-500 dark:text-slate-400 block mb-1">
+                  <span className="block mb-1 text-xs text-slate-500 dark:text-slate-400">
                     Total amount
                   </span>
-                  <span className="text-lg font-medium text-slate-900 dark:text-white block">
+                  <span className="block text-lg font-medium text-slate-900 dark:text-white">
                   {wallet !== null ? naira.format(parseFloat(wallet)) : 'N/A'}
                   </span>
                 </div>
@@ -714,17 +714,17 @@ const HomeBredCurbs = ({ title }) => {
 
           </Modal>
 
-      <h4 className="font-medium lg:text-2xl text-xl capitalize text-slate-900 inline-block ltr:pr-4 rtl:pl-4">
+      <h4 className="inline-block text-xl font-medium capitalize lg:text-2xl text-slate-900 ltr:pr-4 rtl:pl-4">
         {title}
       </h4>
-      <div className="flex sm:space-x-4 space-x-2 sm:justify-end items-center rtl:space-x-reverse">
-        <div className="date-btn inline-flex btn btn-md whitespace-nowrap space-x-2 rtl:space-x-reverse cursor-pointer bg-white dark:bg-slate-800 dark:text-slate-300 btn-md h-min text-sm font-normal text-slate-900" onClick={() => setActiveModal(true)}>
+      <div className="flex items-center space-x-2 sm:space-x-4 sm:justify-end rtl:space-x-reverse">
+        <div className="inline-flex space-x-2 text-sm font-normal bg-white cursor-pointer date-btn btn btn-md whitespace-nowrap rtl:space-x-reverse dark:bg-slate-800 dark:text-slate-300 h-min text-slate-900" onClick={() => setActiveModal(true)}>
           <span className="text-lg">
             <Icon icon="tdesign:money" />
           </span>
           <span>Withdraw Fund</span>
         </div>
-        <div className="date-btn inline-flex btn btn-md whitespace-nowrap space-x-2 rtl:space-x-reverse cursor-pointer bg-white dark:bg-slate-800 dark:text-slate-300 btn-md h-min text-sm font-normal text-slate-900" onClick={() => setPaybusinessModal(true)}>
+        <div className="inline-flex space-x-2 text-sm font-normal bg-white cursor-pointer date-btn btn btn-md whitespace-nowrap rtl:space-x-reverse dark:bg-slate-800 dark:text-slate-300 h-min text-slate-900" onClick={() => setPaybusinessModal(true)}>
           <span className="text-lg">
             <Icon icon="dashicons:money" />
           </span>
@@ -735,4 +735,4 @@ const HomeBredCurbs = ({ title }) => {
   );
 };
 
-export default HomeBredCurbs;
+export default ProductBredCurbs;

@@ -139,6 +139,7 @@ export const appProjectSlice = createSlice({
         category: action.payload.category,
       });
     },
+
     vieworders: (state, action) => {
       // update project and  store it into editItem when click edit button
 

@@ -14,7 +14,7 @@ const PageNotFound = () => {
       </div>
       <div className="max-w-[300px] mx-auto w-full">
         <Link
-          href="/analytics"
+          href="/ecommerce"
           className="btn bg-white hover:bg-opacity-75 transition-all duration-150 block text-center"
         >
           Go to homepage

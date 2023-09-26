@@ -46,8 +46,8 @@ const Select = ({
         {name && (
           <select
             onChange={onChange}
-            {...register(name)}
-            {...rest}
+            // {...register(name)}
+            // {...rest}
             className={`${
               error ? " has-error" : " "
             } form-control py-2  appearance-none ${className}  `}
