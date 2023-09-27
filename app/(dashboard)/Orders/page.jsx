@@ -50,6 +50,10 @@ const BalnkPage = () => {
   const [town, setTown] = useState("");
   const [shippingState, setShippingState] = useState("");
   const [date, setDate] = useState("");
+  const [latitude, setLatitude] = useState("");
+  const [longitude, setLongitude] = useState("");
+  const [address, setAddress] = useState("");
+  const [useridref, setUseridref] = useState("");
 
   const getDatePlus = (date ) => {
     var now =  new Date(date);
@@ -104,7 +108,7 @@ const naira = new Intl.NumberFormat("en-NG", {
         var token = localStorage.getItem("token");
     
         // fetch(`https://orangli.com/server/api/Products/orderById.php?orderid=${routerId}`, {
-        fetch(`https://orangli.com/server/api/Products/orderById.php?orderid=25`, {
+        fetch(`https://orangli.com/server/api/Products/orderById.php?orderid=2`, {
         headers: {
             "Authorization": `Bearer ${token}`
         }
@@ -120,23 +124,24 @@ const naira = new Intl.NumberFormat("en-NG", {
             
             setStatus_(parseInt(res.cart[0].cart_info.status));
             setOrderid((res.cart[0].cart_info.id));
-            // alert((res.cart[0].cart_info.status));
-            
-                    // setStatus(res.total)
+            setUseridref((res.cart[0].cart_info.userid));
+            const latitudeValue = res.cart[0].cart_info.current_lat;
+            const longitudeValue = res.cart[0].cart_info.current_long;
+
+         // Set latitude and longitude in state
+      setLatitude(latitudeValue);
+      setLongitude(longitudeValue);
+      convertToAddress(latitudeValue, longitudeValue);
+        
             getDatePlus(res.created_at);
           }else if(res.code == 401){
-            toast.error("An error occured, please login again", {
-              position: toast.POSITION.TOP_CENTER
-            });
-            setTimeout(() => {
-              window.location.href = "/"
-            }, 2000)
+           
           }
         })
-    
-        // fetch(`https://orangli.com/server/api/User/getShippingAddress.php?userid=${userid}`, {
-        //   headers: {
-        fetch(`https://orangli.com/server/api/User/getShippingAddress.php?userid=19555127-89984118-862822496`, {
+        
+        fetch(`https://orangli.com/server/api/User/getShippingAddress.php?userid=${useridref}`, {
+          // Rest of your fetch code here
+        // fetch(`https://orangli.com/server/api/User/getShippingAddress.php?userid=19555127-89984118-862822496`, {
           headers: {
               "Authorization": `Bearer ${token}`
           }
@@ -171,6 +176,26 @@ const naira = new Intl.NumberFormat("en-NG", {
           })
     
     }, [])
+
+    const convertToAddress = async (latitudeValue, longitudeValue) => {
+ 
+      try {
+        const response = await axios.get(
+          `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitudeValue},${longitudeValue}&key=AIzaSyAzU0Mgox4lSxYYiOo45G8hRSu52TQveG4`
+        );
+        
+        // console.log(response.data);
+        if (response.data.results.length > 0) {
+          setAddress(response.data.results[1].formatted_address);
+        } else {
+          // Handle case where no address is found
+          // setError("No results found for the given coordinates.");
+        }
+      } catch (err) {
+        // Handle any errors that occur during the API request
+        // setError("An error occurred while fetching data from the API.");
+      }
+    };
 
     const handlePendingStatus = async (status, itemId) => {
       setIsLoading(true);
@@ -562,7 +587,7 @@ const naira = new Intl.NumberFormat("en-NG", {
 
     <center> 
     
-    <Card title="Badges in Buttons">
+    <Card title=" Status Variation Badges ">
     {cartItems.map((item) => (
 
             <div key={item.cart_info.id}>
@@ -640,7 +665,24 @@ const naira = new Intl.NumberFormat("en-NG", {
                   }  transition duration-150 icon-box md:h-12 md:w-12 h-7 w-7 rounded-full flex flex-col items-center justify-center relative z-[66] ring-1 md:text-lg text-base font-medium`}
                 >
                   {statusIndex <= i ? (
-                    <span> {i + 1}</span>
+                    
+                    i === 0 ? (
+                      <Icon icon="ic:twotone-pending-actions" />// Replace with your first icon
+    
+    ) : i === 1 ? (
+      <Icon icon="flat-color-icons:paid" /> // Replace with your third icon
+      ) : i === 2 ? (
+      <Icon icon="uis:process" /> // Replace with your second icon
+    ) : i === 3 ? (
+      <Icon icon="wpf:in-transit" /> // Replace with your third icon
+    ) : i === 4 ? (
+      <Icon icon="solar:delivery-bold" /> // Replace with your third icon
+    ) : i === 5 ? (
+      <Icon icon="fluent-mdl2:completed-solid" /> // Replace with your third icon
+   
+    ) : (
+      <span>{i + 1}</span>
+    )
                   ) : (
                     <span className="text-3xl">
                       <Icon icon="bx:check-double" />
@@ -722,7 +764,7 @@ const naira = new Intl.NumberFormat("en-NG", {
                   
                       <tr >
                       <td className="table-td py-2"> <span>{item.cart_info?.id}</span></td>
-                      <td className="table-td py-2 "> {item.cart_info?.userid} </td>
+                      <td className="table-td py-2 "> <Button text="secondary" className=" btn-primary light" >{item.cart_info?.userid} </Button></td>
                       <td className="w-8 h-8 rounded-[100%] ltr:mr-2 rtl:ml-2">
                         <img
                             className="w-20 h-20 rounded"
@@ -804,7 +846,7 @@ const naira = new Intl.NumberFormat("en-NG", {
          
               <div className="grid grid-cols-12 gap-6">
           <div className="lg:col-span-4 col-span-12">
-            <Card title="SHipping information">
+            <Card title="Shipping information">
               <ul className="list space-y-8">
                 <li className="flex space-x-3 rtl:space-x-reverse">
                   <div className="flex-none text-2xl text-slate-600 dark:text-slate-300">
@@ -867,12 +909,29 @@ const naira = new Intl.NumberFormat("en-NG", {
                     </div>
                   </div>
                 </li>
+
+                <li className="flex space-x-3 rtl:space-x-reverse">
+                  <div className="flex-none text-2xl text-slate-600 dark:text-slate-300">
+                    <Icon icon="zondicons:location" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="uppercase text-xs text-slate-500 dark:text-slate-300 mb-1 leading-[12px]">
+                      Location status
+                    </div>
+                    <div className="text-base text-slate-600 dark:text-slate-50">
+                    {address ? <span>{address}</span> : "No address available"}
+                    </div>
+                  </div>
+                </li>
               </ul>
             </Card>
           </div>
           <div className="lg:col-span-8 col-span-12">
             <Card title="User Overview">
               <BasicArea height={190} />
+              <div className="text-base text-slate-600 dark:text-slate-50">
+                      Total : { priceTotal}
+                    </div>  
             </Card>
           </div>
         </div>
