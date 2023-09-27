@@ -2,6 +2,9 @@ import React,{useEffect,useState,useRef} from "react";
 import Card from "@/components/ui/Card";
 import Icon from "@/components/ui/Icon";
 import dynamic from "next/dynamic";
+import axios from 'axios';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
 const shapeLine1 = {
@@ -212,32 +215,66 @@ const GroupChart2 = () => {
   const [all_packages, setAll_packages] = useState([]);
   const [all_orders, setAll_orders] = useState([]);
   const [all_sub, setAll_sub] = useState([]);
-  const [all_users, setAll_users] = useState([]);
 
+  
   useEffect(() => {
-    var token = localStorage.getItem("token");
-    fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/User/Dashboard`, {
+    const token = localStorage.getItem("token");
+    axios.get('https://orangli.com/server/api/User/Dashboard', {
       headers: {
         "Authorization": `Bearer ${token}`
-      }
+      },
+      // Prevent caching
+      cache: 'no-store'
     })
-    .then(response => response.json())
-    .then((res) => {
-      // console.log(res);
-      if (res.code === 200) {
-        setAll_packages(res.all_packages);
-        setAll_orders(res.all_orders);
-        setAll_sub(res.all_sub);
-        setAll_users(res.all_users);
-      } else if (res.code === 401) {
-        // Handle unauthorized user
-      }
-    });
+      .then(response => {
+        
+        if (response.status === 200) {
+          return response.data;
+        } else {
+          toast.error(`${response.status}`, {
+            position: "top-right",
+            autoClose: 1500,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+          });
+
+          throw new Error(`HTTP error! Status: ${response.status}`);
+          
+        }
+      })
+      .then((res) => {
+        console.log(res);
+        if (res.code === 200) {
+          setAll_packages(res.all_packages);
+          setAll_orders(res.all_orders);
+          setAll_sub(res.all_sub);
+          setAll_users(res.all_users);
+        } else if (res.code === 401) {
+          // Handle unauthorized user
+        }
+      })
+      .catch(error => {
+        // Handle errors here
+        // console.error(error);
+        toast.error(error, {
+          position: "top-right",
+          autoClose: 1500,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+      });
   }, []);
 
   // Calculate counts
   const totalOrdersCount = all_orders;
-  const productsSoldCount = all_users;
   const growthCount = all_packages;
   const growthSubCount = all_sub;
 
@@ -279,6 +316,7 @@ const GroupChart2 = () => {
 
 
   return (
+    
     <>
       {" "}
       {statistics.map((item, i) => (
@@ -311,6 +349,7 @@ const GroupChart2 = () => {
               />
             </div>
           </Card>
+          <ToastContainer/>
         </div>
       ))}
     </>

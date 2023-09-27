@@ -97,7 +97,7 @@ useEffect(() => {
       setPercentageChange(percentageChange);
     } else if (res.code === 401) {
       setTimeout(() => {
-        window.location.href = "/BusinessLogin";
+        window.location.href = "/";
       }, 2000);
     }
   });

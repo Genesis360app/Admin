@@ -23,6 +23,7 @@
     "@svg-maps/world": "^1.0.1",
     "@tippyjs/react": "^4.2.6",
     "apexcharts": "^3.33.2",
+    "axios": "^1.5.1",
     "chart.js": "^4.2.1",
     "cleave.js": "^1.6.0",
     "date-fns": "^2.30.0",

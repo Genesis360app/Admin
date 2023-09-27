@@ -46,27 +46,30 @@ const IndeterminateCheckbox = React.forwardRef(
 
 
  // find current step schema
- const getStatus = (status ) => {
-  switch (status) {
-   case 0:
-     return "pending";
-   case 1:
-     return "credit";
-   case 2:
-     return "packaging";
-   case 3:
-     return "shipping";
-   case 4:
-     return "delivering";
-   case 5:
-     return "complete";
-   default:
-     return "";
-  }
-
- }
+ 
 
 const AllTransaction = ({ title = "All Transaction", item }) => {
+
+  const getStatus = (status ) => {
+    switch (status) {
+     case 0:
+       return "pending";
+     case 1:
+       return "Paid";
+     case 2:
+       return "Processing";
+     case 3:
+       return "in-transit";
+     case 4:
+       return "delivering";
+     case 5:
+       return "complete";
+     default:
+       return "";
+    }
+  
+   }
+
   const router = useRouter()
 
   const [orderItems, setOrderItems] = useState([]);
@@ -86,7 +89,7 @@ const AllTransaction = ({ title = "All Transaction", item }) => {
   const [shippingState, setShippingState] = useState("");
   const [status_, setStatus_] = useState(0);
   const orderStatus = getStatus(status_);
-  const steps = ["credit", "packaging", "shipping", "delivering", "completed"];
+  const steps = ["pending", "Paid", "Processing", "in-transit", "delivering", "complete"];
   const statusIndex = steps.indexOf(orderStatus);
   
 
@@ -276,8 +279,8 @@ useEffect(() => {
   })
   .then(response => response.json())
   .then((res) => {
-    console.log(res);
-    console.log(res);
+    // console.log(res);
+    // console.log(res);
     if (res.code === 200) {
       setCartItems(res.cart);
       setPriceTotal(res.total);
@@ -295,7 +298,7 @@ useEffect(() => {
   })
   .then(response => response.json())
   .then((res) => {
-    console.log(res);
+    // console.log(res);
     if (res.code === 200) {
       setContactPhone(res.payload.phone);
       setShippingState(res.payload.state);
@@ -320,7 +323,7 @@ useEffect(() => {
 
     
     
-<Modal className="w-[80%]"
+<Modal className="w-[60%]"
     activeModal={activeModal}
     onClose={() => setActiveModal(false)}
     title="Transaction Details"
@@ -336,7 +339,7 @@ useEffect(() => {
      <div>
  <Card >
         <div>
-          <div className="flex z-[5] items-center relative justify-center md:mx-8">
+        <div className="flex z-[5] items-center relative justify-center md:mx-8">
             {steps.map((item, i) => (
               <div
                 className="relative z-[1] items-center item flex flex-start flex-1 last:flex-none group"
@@ -661,7 +664,7 @@ useEffect(() => {
                             </Tooltip>
              
                             <Tooltip content="Edit" placement="top" arrow animation="shift-away">
-                            
+                            {/* <Link href={`/Orders/${item.cart_info.id}`}> */}
                             <button className="action-btn" 
                            onClick={() => router.push(`/Orders/${item.cart_info.id}`)}
                             type="button">
