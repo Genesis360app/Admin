@@ -5,9 +5,9 @@
 import { useRouter } from 'next/navigation'
 
 
-// function Page() {
-//   const router = useRouter();
-//   const { itemId } = router.query; // Access the itemId from the router query
+function Page() {
+  // const router = useRouter();
+  // const { itemId } = router.query; // Access the itemId from the router query
 
   // You can fetch data related to the item using the itemId
   // For example, you can make an API request to get item details
