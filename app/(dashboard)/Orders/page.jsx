@@ -1,25 +1,13 @@
-"use client"
+"use client";
 
-// pages/page.jsx
-
-import { useRouter } from 'next/navigation'
-
-
-function Page() {
-  // const router = useRouter();
-  // const { itemId } = router.query; // Access the itemId from the router query
-
-  // You can fetch data related to the item using the itemId
-  // For example, you can make an API request to get item details
-
+const BalnkPage = () => {
   return (
     <div>
-      <h1>Item Page</h1>
-      {/* <p>Item ID: {itemId}</p> */}
-      {/* Display other item details based on the fetched data */}
+      <h4 className="font-medium lg:text-2xl text-xl capitalize text-slate-900 inline-block ltr:pr-4 rtl:pl-4 mb-6">
+        Blank Page
+      </h4>
     </div>
   );
-}
+};
 
-export default Page;
-
+export default BalnkPage;
