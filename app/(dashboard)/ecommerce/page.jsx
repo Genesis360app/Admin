@@ -17,9 +17,12 @@ import MostSales2 from "@/components/partials/widget/most-sales2";
 import Products from "@/components/partials/widget/products";
 import HomeBredCurbs from "@/components/partials/HomeBredCurbs";
 import LatestOrder from "@/components/partials/table/LatestOrder";
+import { useRouter } from 'next/router';
 
 const Ecommerce = () => {
   const [filterMap, setFilterMap] = useState("nigeria");
+
+
   return (
     <div>
       <HomeBredCurbs title="Ecommerce" />
@@ -117,7 +120,7 @@ const Ecommerce = () => {
       </div>
       <br/>
       <div className="xl:col-span-6 col-span-12">
-      <LatestOrder title="Latest Orders" />
+      <LatestOrder title="Latest Orders"  />
       </div>
     </div>
   );

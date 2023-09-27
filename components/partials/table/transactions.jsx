@@ -142,7 +142,7 @@ const getPageNumbers = () => {
     })
     .then(response => response.json())
     .then((res) => {
-    console.log(res);
+    // console.log(res);
     if(res.code == 200){
         setHistory(res.history);   
       }else if(res.code == 401){
@@ -278,12 +278,12 @@ const getPageNumbers = () => {
         </div>
 
         
-        <div className="overflow-x-auto -mx-6">
+        <div className="-mx-6 overflow-x-auto">
           <div className="inline-block min-w-full align-middle">
             <div className="overflow-hidden ">
-              <table className="min-w-full divide-y divide-slate-100 table-fixed dark:divide-slate-700">
-               <thead className=" border-t border-slate-100 dark:border-slate-800">
-               <tr className="text-left text-[15px] font-semibold border-[#DFE5FF] border-y-2">
+            <table className="min-w-full divide-y table-fixed divide-slate-100 dark:divide-slate-700">
+                <thead className="bg-slate-200 dark:bg-slate-700">
+                  <tr >
                     <th scope="col" className="table-th">
                       ID
                     </th>

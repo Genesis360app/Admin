@@ -97,9 +97,6 @@ return (history || []).filter((item) => {
 }, [history, globalFilter]);
 
 
-
-
-
 const naira = new Intl.NumberFormat("en-NG", {
   style: "currency",
   currency: "NGN",
@@ -160,13 +157,14 @@ const getPageNumbers = () => {
     useEffect(() => {
         var token = localStorage.getItem("token");
         fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/Wallet/History.php`, {
+          cache: 'no-store',
         headers: {
             "Authorization": `Bearer ${token}`
         }
         })
         .then(response => response.json())
         .then((res) => {
-        console.log(res);
+        // console.log(res);
         if(res.code == 200){
             setHistory(res.history);   
           }else if(res.code == 401){
@@ -303,7 +301,7 @@ return !isNaN(date.getTime()) ? (
             <div className="overflow-hidden ">
             <table className="min-w-full divide-y table-fixed divide-slate-100 dark:divide-slate-700">
                 <thead className="bg-slate-200 dark:bg-slate-700">
-                  <tr className="text-left text-[15px] font-semibold border-[#DFE5FF] border-y-2">
+                  <tr >
                     <th scope="col" className="table-th">
                       ID
                     </th>

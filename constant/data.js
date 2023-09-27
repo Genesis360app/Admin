@@ -51,6 +51,12 @@ export const menuItems = [
     icon: "heroicons-outline:calendar",
     link: "products",
   },
+  // {
+  //   title: "orderid",
+  //   isHide: true,
+  //   icon: "heroicons-outline:calendar",
+  //   link: "Orders",
+  // },
 
   {
     title: "Chat",

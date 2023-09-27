@@ -120,7 +120,7 @@ const Customer = () => {
             <div
               className={`${
                 item.active ? "ring-2 ring-[#FFC155]" : ""
-              } h-10 w-10 rounded-full relative`}
+              } h-10 w-10 rounded-full relative`}  
             >
               {item.active && (
                 <span className="crown absolute -top-[14px] left-1/2 -translate-x-1/2">

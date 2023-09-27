@@ -4,8 +4,10 @@ import Card from "@/components/ui/Card";
 import Icon from "@/components/ui/Icon";
 import Tooltip from "@/components/ui/Tooltip";
 import Textinput from "@/components/ui/Textinput";
-
 import GlobalFilter from "./GlobalFilter";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 const IndeterminateCheckbox = React.forwardRef(
   ({ indeterminate, ...rest }, ref) => {
@@ -146,7 +148,7 @@ const filteredData = useMemo(() => {
     const fetchData = async () => {
       try {
         const response = await fetch(
-          "https://orangli.com/server/api/Products/Products.php"
+          `${process.env.NEXT_PUBLIC_BASE_URL}/Products/Products.php`
         );
 
         // Get the status code
@@ -157,14 +159,24 @@ const filteredData = useMemo(() => {
           const body = await response.json();
 
           setProductItems(body);
-          console.log(body);
+          // console.log(body);
         } else {
           // Handle non-200 status codes here
           console.error(`HTTP error! Status: ${statusCode}`);
         }
       } catch (error) {
         // Handle network errors here
-        console.error(error);
+        // console.error(error);
+        toast.info(error, {
+          position: "top-right",
+          autoClose: 1500,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
       }
     };
 
@@ -185,7 +197,7 @@ const filteredData = useMemo(() => {
             <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
               <table className="min-w-full divide-y table-fixed divide-slate-100 dark:divide-slate-700">
                 <thead className="bg-slate-200 dark:bg-slate-700">
-                  <tr className="text-left text-[15px] font-semibold border-[#DFE5FF] border-y-2">
+                  <tr >
                     <th scope="col" className="table-th">
                       ID
                     </th>

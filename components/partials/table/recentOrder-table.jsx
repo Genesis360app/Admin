@@ -4,11 +4,8 @@ import React,{useEffect,useState,useRef, useMemo} from "react";
 import { format } from "date-fns";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
-// import { recentOrder } from "@/constant/table-data";
-
+import Tooltip from "@/components/ui/Tooltip";
 import Icon from "@/components/ui/Icon";
-
 import {
   useTable,
   useRowSelect,
@@ -17,11 +14,111 @@ import {
   usePagination,
 } from "react-table";
 import { useRouter } from "next/navigation";
-
+import Link from "next/link";
 
 const RecentOrderTable = () => {
   const [orderItems, setOrderItems] = useState([]);
   const router = useRouter();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5); // Added pageSize state
+  const itemsPerPage = pageSize; // Use pageSize for itemsPerPage
+  const maxPageButtons = 5; // Number of page buttons to display
+  const [globalFilter, setGlobalFilter] = useState(""); // Global filter
+
+
+// Function to format date value
+function formattedDate(rawDate) {
+  const date = new Date(rawDate);
+
+  if (!isNaN(date.getTime())) {
+    const options = {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      // second: '2-digit',
+      hour12: true, // Use 24-hour format
+    };
+
+    const formattedDate = date.toLocaleString(undefined, options);
+    return <span>{formattedDate}</span>;
+  } else {
+    return <span>Invalid Date</span>;
+  }
+}
+
+
+  
+
+
+const naira = new Intl.NumberFormat("en-NG", {
+  style: "currency",
+  currency: "NGN",
+  maximumFractionDigits: 0,
+  minimumFractionDigits: 0,
+});
+
+const handleNextPage = () => {
+  if (currentPage < Math.ceil(filteredData.length / itemsPerPage)) {
+    setCurrentPage((prevPage) => prevPage + 1);
+  }
+};
+
+const handlePrevPage = () => {
+  if (currentPage > 1) {
+    setCurrentPage((prevPage) => prevPage - 1);
+  }
+};
+
+// Calculate the index range for the current page
+const startIndex = (currentPage - 1) * itemsPerPage;
+const endIndex = Math.min(startIndex + itemsPerPage, orderItems.length);
+
+const last25Items = orderItems.slice(-25);
+
+// Sort the last 25 items by the 'id' property in ascending order
+last25Items.sort((a, b) => {
+  const idA = a.cart_info?.id || 0; // Use a default value if 'a.cart_info.id' is null
+  const idB = b.cart_info?.id || 0; // Use a default value if 'b.cart_info.id' is null
+
+  return idB - idA; // Sort in ascending order by 'id'
+});
+
+// Get the paginated history data for the current page
+const paginatedHistory = last25Items.slice(startIndex, endIndex);
+
+
+// Calculate the total number of pages
+const totalPages = Math.ceil(last25Items.length / itemsPerPage);
+
+const getPageNumbers = () => {
+  const totalPages = Math.ceil(last25Items.length / itemsPerPage);
+  const middlePage = Math.ceil(maxPageButtons / 2);
+
+  let startPage = currentPage - middlePage + 1;
+  let endPage = currentPage + middlePage - 1;
+
+  if (totalPages <= maxPageButtons) {
+    startPage = 1;
+    endPage = totalPages;
+  } else if (currentPage <= middlePage) {
+    startPage = 1;
+    endPage = maxPageButtons;
+  } else if (currentPage >= totalPages - middlePage) {
+    startPage = totalPages - maxPageButtons + 1;
+    endPage = totalPages;
+  }
+
+  const pageNumbers = [];
+  for (let i = startPage; i <= endPage; i++) {
+    pageNumbers.push(i);
+  }
+
+  return pageNumbers;
+};
+
+
 
   useEffect(() => {
     var token = localStorage.getItem("token");
@@ -45,272 +142,127 @@ const RecentOrderTable = () => {
   }, []);
   
 
-const naira = new Intl.NumberFormat('en-NG', {
-  style : 'currency', 
-  currency: 'NGN',
- maximumFractionDigits:0,
- minimumFractionDigits:0
-
-});
-
-const last25Items = orderItems.slice(-25);
-
-// Sort the last 25 items by the 'id' property in ascending order
-last25Items.sort((a, b) => {
-  const idA = a.cart_info?.id || 0; // Use a default value if 'a.cart_info.id' is null
-  const idB = b.cart_info?.id || 0; // Use a default value if 'b.cart_info.id' is null
-
-  return idB - idA; // Sort in ascending order by 'id'
-});
-
-const allOrder = last25Items.map((item, i) => ({
-  id: item.cart_info?.id || i, // Use a default value if 'item.product' or 'item.product.id' is null
-  image: item.product?.image,
-  product_name: item.product?.product_name,
-  price: item.product?.price || "0",
-  qty: item.cart_info?.qty || "0",
-  channel: item.product?.channel || "BNPL",
-  status: item.order_tracking?.current_status.name,
-  date: item.cart_info?.created_at,
-}));
-
-
-
-  const COLUMNS = [
-    {
-      Header: "id",
-      accessor: "id",
-      Cell: (row) => {
-        return <span>#{row?.cell?.value}</span>;
-      },
-    },
-    {
-      Header: "image",
-      accessor: "image",
-      Cell: (row) => {
-        return (
-        <div>
-            <div className="flex items-center">
-              <div className="flex-none">
-                <div className="w-8 h-8 rounded-[100%] ltr:mr-2 rtl:ml-2">
-                  <img
-                    src={row?.cell?.value || "https://www.pngkey.com/png/full/233-2332677_image-500580-placeholder-transparent.png"}
-                  width={70}
-                  height={70}
-                  alt=""
-                    className="w-full h-full rounded-[5%] object-cover"
-                  />
-                </div>
-              </div>
-              
-            </div>
-          </div>
-        );
-      },
-    },
-
-    {
-      Header: "product name",
-      accessor: "product_name",
-      Cell: (row) => {
-        return <h4 className="text-sm font-medium text-slate-600">{row?.cell?.value}</h4>;
-      },
-    },
-
-    {
-      Header: "price",
-      accessor: "price",
-      Cell: (row) => {
-        return <span>{naira.format(parseFloat(row?.cell?.value))}</span>;
-      },
-    },
-    {
-      Header: "channel",
-      accessor: "channel",
-      Cell: (row) => {
-        return <span>{row?.cell?.value}</span>;
-      },
-    },
-    {
-      Header: "qty",
-      accessor: "qty",
-      Cell: (row) => {
-        return <span>{row?.cell?.value}</span>;
-      },
-    },
-  
-    {
-      Header: "status",
-      accessor: "status",
-      Cell: (row) => {
-        return (
-          <span className="block w-full">
-            <span
-            className={` inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 ${
-              row?.cell?.value === "delivered"
-                ? "text-success-500 bg-success-500"
-                : ""
-            } 
-            ${
-              row?.cell?.value === "closed"
-                ? "text-warning-500 bg-warning-500"
-                : ""
-            }
-            ${
-              row?.cell?.value === "paid"
-                ? "text-info-500 bg-info-500"
-                : ""
-            }
-            ${
-              row?.cell?.value === "processing"
-                ? "text-processing-400 bg-processing-400"
-                : ""
-            }
-            ${
-              row?.cell?.value === "closed"
-                ? "text-danger-500 bg-danger-500"
-                : ""
-            }
-                ${
-                  row?.cell?.value === "pending"
-                    ? "text-pending-500 bg-pending-500"
-                    : ""
-                } ${
-              row?.cell?.value === "in-transit"
-                ? "text-primary-500 bg-primary-500"
-                : ""
-            }
-            
-             `}
-          >
-            {row?.cell?.value}
-          </span>
-          </span>
-        );
-      },
-    },
-
-    {
-      Header: "date",
-      accessor: "date",
-      Cell: (row) => {
-        const rawDate = row?.cell?.value;
-        const date = new Date(rawDate);
-        
-        if (!isNaN(date.getTime())) {
-          const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
-          const formattedDate = date.toLocaleString(undefined, options); // Format the date with time
-          return <span>{formattedDate}</span>;
-        } else {
-          return <span>Invalid Date</span>;
-        }
-        
-      },
-    },
-  ];
- 
-  const columns = useMemo(() => COLUMNS, []);
-  const data = useMemo(() => allOrder, []);
-
-  
-
-  const tableInstance = useTable(
-    {
-      columns,
-      data,
-      initialState: {
-        pageSize: 6,
-      },
-    },
-
-    useGlobalFilter,
-    useSortBy,
-    usePagination,
-    useRowSelect
-  );
-  const {
-    getTableProps,
-    getTableBodyProps,
-    headerGroups,
-    footerGroups,
-    page,
-    nextPage,
-    previousPage,
-    canNextPage,
-    canPreviousPage,
-    pageOptions,
-    state,
-    gotoPage,
-    pageCount,
-    setPageSize,
-    setGlobalFilter,
-    prepareRow,
-  } = tableInstance;
-
-  const { pageIndex, pageSize } = state;
-  
 
 
   return (
     <>
     <ToastContainer/>
       <div>
-        <div className="overflow-x-auto -mx-6">
+      <div className="-mx-6 overflow-x-auto">
           <div className="inline-block min-w-full align-middle">
             <div className="overflow-hidden ">
-              <table
-                className="min-w-full divide-y divide-slate-100 table-fixed dark:divide-slate-700"
-                {...getTableProps}
-              >
-               <thead className="bg-slate-200 dark:bg-slate-700">
-                  {headerGroups.map((headerGroup) => (
-                    <tr {...headerGroup.getHeaderGroupProps()}>
-                      {headerGroup.headers.map((column) => (
-                        <th
-                          {...column.getHeaderProps(
-                            column.getSortByToggleProps()
-                          )}
-                          scope="col"
-                          className=" table-th "
-                        >
-                          {column.render("Header")}
-                          <span>
-                            {column.isSorted
-                              ? column.isSortedDesc
-                                ? " 🔽"
-                                : " 🔼"
-                              : ""}
-                          </span>
-                        </th>
-                      ))}
-                    </tr>
-                  ))}
+            <table className="min-w-full divide-y table-fixed divide-slate-100 dark:divide-slate-700">
+                <thead className="bg-slate-200 dark:bg-slate-700">
+                  <tr >
+                    <th scope="col" className="table-th">
+                      ID
+                    </th>
+                    <th scope="col" className="table-th">
+                    Image
+                    </th>
+                    <th scope="col" className="table-th">
+                    Product Name
+                    </th>
+                    <th scope="col" className="table-th">
+                    Price
+                    </th>
+                    <th scope="col" className="table-th">
+                    Qty
+                    </th>
+                    <th scope="col" className="table-th">
+                    Status
+                    </th>
+                    <th scope="col" className="table-th">
+                      Date
+                    </th>
+                    <th scope="col" className="table-th">
+                      Action
+                    </th>
+                    
+                  </tr>
                 </thead>
-                <tbody
-                  className="bg-white divide-y divide-slate-100 dark:bg-slate-800 dark:divide-slate-700"
-                  {...getTableBodyProps}
-                >
-                  {page.map((row) => {
-                    prepareRow(row);
-                    const { key, ...restRowProps } = row.getRowProps();
-                    return (
-                      <tr key={key} {...restRowProps}>
-                        {row.cells.map((cell) => {
-                          const { key, ...restCellProps } = cell.getCellProps();
-                          return (
-                            <td
-                              key={key}
-                              {...restCellProps}
-                              className="table-td"
-                            >
-                              {cell.render("Cell")}
+                {paginatedHistory.map((item) => (
+                  <React.Fragment key={item.cart_info?.id}>
+                <tbody  className="bg-white divide-y divide-slate-100 dark:bg-slate-800 dark:divide-slate-700" >
+                  
+                      <tr >
+                      <td className="table-td py-2"> <span>{item.cart_info?.id}</span></td>
+                      <td className="w-8 h-8 rounded-[100%] ltr:mr-2 rtl:ml-2">
+                        <img
+                            className="w-20 h-20 rounded"
+                            src={
+                              item.product === null
+                                ? "https://www.pngkey.com/png/full/233-2332677_image-500580-placeholder-transparent.png"
+                                : item.product.image
+                            }
+                            width={70}
+                            height={70}
+                            alt=""
+                          /></td>
+                        <td className="table-td py-2"> {item.product?.product_name} </td>
+                        <td className="table-td py-2">  {naira.format(item.product?.price || "0")}</td>
+                        <td className="table-td py-2"> {item.cart_info?.qty || "0"} </td>
+                        <td className="table-td py-2"> 
+                        <span className="block w-full">
+            <span
+            className={` inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 ${
+              item.order_tracking?.current_status.name === "delivered"
+                ? "text-success-500 bg-success-500"
+                : ""
+            } 
+            ${
+              item.order_tracking?.current_status.name === "closed"
+                ? "text-warning-500 bg-warning-500"
+                : ""
+            }
+            ${
+              item.order_tracking?.current_status.name === "paid"
+                ? "text-info-500 bg-info-500"
+                : ""
+            }
+            ${
+              item.order_tracking?.current_status.name === "processing"
+                ? "text-processing-400 bg-processing-400"
+                : ""
+            }
+            ${
+              item.order_tracking?.current_status.name === "closed"
+                ? "text-danger-500 bg-danger-500"
+                : ""
+            }
+                ${
+                  item.order_tracking?.current_status.name=== "pending"
+                    ? "text-pending-500 bg-pending-500"
+                    : ""
+                } ${
+                  item.order_tracking?.current_status.name === "in-transit"
+                ? "text-primary-500 bg-primary-500"
+                : ""
+            }
+            
+             `}
+          >
+            {item.order_tracking?.current_status.name}
+          </span>
+          </span>
+              </td>
+                        <td className="table-td py-2">  {formattedDate(item.cart_info?.created_at)} </td>
+
+                        <td className="table-td py-2">  <div className="flex space-x-3 rtl:space-x-reverse">
+                            <Tooltip content="View" placement="top" arrow animation="shift-away">
+                            <Link href={`/Orders/${item.cart_info.id}`}>
+                              <button className="action-btn" type="button">
+                                <Icon icon="heroicons:eye" />
+                              </button>
+                              </Link>
+                            </Tooltip>
+                            </div>
                             </td>
-                          );
-                        })}
                       </tr>
-                    );
-                  })}
+                    
                 </tbody>
+                </React.Fragment>
+                ))}
               </table>
             </div>
           </div>
@@ -320,37 +272,38 @@ const allOrder = last25Items.map((item, i) => ({
             <li className="text-xl leading-4 text-slate-900 dark:text-white rtl:rotate-180">
               <button
                 className={` ${
-                  !canPreviousPage ? "opacity-50 cursor-not-allowed" : ""
+                  currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
                 }`}
-                onClick={() => previousPage()}
-                disabled={!canPreviousPage}
+                onClick={handlePrevPage}
+                disabled={currentPage === 1}
               >
                 <Icon icon="heroicons-outline:chevron-left" />
               </button>
             </li>
-            {pageOptions.map((page, pageIdx) => (
-              <li key={pageIdx}>
+            {getPageNumbers().map((pageNumber) => (
+              <li key={pageNumber}>
                 <button
                   href="#"
                   aria-current="page"
                   className={` ${
-                    pageIdx === pageIndex
+                    pageNumber === currentPage
                       ? "bg-slate-900 dark:bg-slate-600  dark:text-slate-200 text-white font-medium "
                       : "bg-slate-100 dark:bg-slate-700 dark:text-slate-400 text-slate-900  font-normal  "
                   }    text-sm rounded leading-[16px] flex h-6 w-6 items-center justify-center transition-all duration-150`}
-                  onClick={() => gotoPage(pageIdx)}
+                  onClick={() => setCurrentPage(pageNumber)}
                 >
-                  {page + 1}
+                 {pageNumber}
                 </button>
               </li>
             ))}
+
             <li className="text-xl leading-4 text-slate-900 dark:text-white rtl:rotate-180">
               <button
                 className={` ${
-                  !canNextPage ? "opacity-50 cursor-not-allowed" : ""
+                  currentPage === totalPages ? "opacity-50 cursor-not-allowed" : ""
                 }`}
-                onClick={() => nextPage()}
-                disabled={!canNextPage}
+                onClick={handleNextPage}
+                disabled={currentPage === totalPages}
               >
                 <Icon icon="heroicons-outline:chevron-right" />
               </button>
