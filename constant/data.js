@@ -48,7 +48,7 @@ export const menuItems = [
   {
     title: "Products",
     isHide: true,
-    icon: "heroicons-outline:calendar",
+    icon: "dashicons:products",
     link: "products",
   },
   {
@@ -56,6 +56,12 @@ export const menuItems = [
     isHide: true,
     icon: "heroicons-outline:calendar",
     link: "Orders",
+  },
+  {
+    title: "Packages",
+    isHide: true,
+    icon: "emojione-monotone:package",
+    link: "packages",
   },
 
   {

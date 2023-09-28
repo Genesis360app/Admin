@@ -10,7 +10,7 @@ import Button from "@/components/ui/Button";
 import axios from 'axios';
 import BasicArea from "@/components/partials/chart/appex-chart/BasicArea";
 
-const BalnkPage = () => {
+const OrderPage = () => {
 
   const getStatus = (status ) => {
     switch (status) {
@@ -945,6 +945,6 @@ const naira = new Intl.NumberFormat("en-NG", {
 
 };
 
-export default BalnkPage;
+export default OrderPage;
 
 
