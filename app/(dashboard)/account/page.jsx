@@ -8,7 +8,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Select from "@/components/ui/Select";
 
-const PricingPage = () => {
+const AccountPage = () => {
   const [check, setCheck] = useState(true);
   const toggle = () => {setCheck(!check); };
   const [passwordVisibility, setPasswordVisibility] = useState(false);
@@ -611,5 +611,5 @@ const bizcategory = [
   
   ];
 
-export default PricingPage;
+export default AccountPage;
  
