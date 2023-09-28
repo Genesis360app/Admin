@@ -108,7 +108,7 @@ const naira = new Intl.NumberFormat("en-NG", {
         var token = localStorage.getItem("token");
     
         // fetch(`https://orangli.com/server/api/Products/orderById.php?orderid=${routerId}`, {
-        fetch(`https://orangli.com/server/api/Products/orderById.php?orderid=2`, {
+        fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/Products/orderById.php?orderid=2`, {
         headers: {
             "Authorization": `Bearer ${token}`
         }
@@ -117,8 +117,8 @@ const naira = new Intl.NumberFormat("en-NG", {
         .then((res) => {
         console.log(res);
         if(res.code == 200){
-            console.log("Orders");
-            console.log(res)
+            // console.log("Orders");
+            // console.log(res)
             setCartItems(res.cart)
             setPriceTotal(res.total)
             
@@ -139,7 +139,7 @@ const naira = new Intl.NumberFormat("en-NG", {
           }
         })
         
-        fetch(`https://orangli.com/server/api/User/getShippingAddress.php?userid=${useridref}`, {
+        fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/User/getShippingAddress.php?userid=${useridref}`, {
           // Rest of your fetch code here
         // fetch(`https://orangli.com/server/api/User/getShippingAddress.php?userid=19555127-89984118-862822496`, {
           headers: {

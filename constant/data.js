@@ -55,13 +55,20 @@ export const menuItems = [
     title: "orderid",
     isHide: true,
     icon: "heroicons-outline:calendar",
-    link: "Orders",
+    link: "orders",
   },
   {
     title: "Packages",
     isHide: true,
     icon: "emojione-monotone:package",
     link: "packages",
+  },
+  {
+    title: "Transactions",
+    isHide: true,
+    icon: "tdesign:undertake-transaction",
+    link: "transactions",
+    badge: "All",
   },
 
   {
