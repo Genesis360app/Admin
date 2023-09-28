@@ -70,6 +70,13 @@ export const menuItems = [
     link: "transactions",
     badge: "All",
   },
+  {
+    title: "Subscriptions",
+    isHide: true,
+    icon: "eos-icons:subscriptions-created-outlined",
+    link: "subscriptions",
+    badge: "All",
+  },
 
   {
     title: "Chat",
@@ -120,6 +127,27 @@ export const menuItems = [
         childtitle: "Project Details",
         childlink: "project-details",
       },
+    ],
+  },
+  {
+    isHeadr: true,
+    title: "Pages",
+  },
+  {
+    title: "Authentication",
+    icon: "mdi:account-edit-outline",
+    link: "#",
+    child: [
+      {
+        childtitle: "Create Account",
+        childlink: "account",
+        badge: "User Account",
+      },
+      {
+        childtitle: "Recover Password",
+        childlink: "forgetpassword",
+      },
+     
     ],
   },
   {
