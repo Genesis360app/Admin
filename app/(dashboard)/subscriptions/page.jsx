@@ -1,6 +1,6 @@
 "use client";
 
-import LatestOrder from "@/components/partials/table/LatestOrder";
+import AllSubcriptions from "@/components/partials/table/AllSubcriptions";
 import ProductBredCurbs from "@/components/partials/ProductBredCurbs";
 import dynamic from "next/dynamic";
 const Carousel = dynamic(() => import("@/components/ui/Carousel"), {
@@ -91,7 +91,7 @@ const All_orders = () => {
       </Card>
     
    
-      <LatestOrder />
+      <AllSubcriptions />
     </div>
     
   );

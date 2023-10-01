@@ -55,7 +55,14 @@ export const menuItems = [
     title: "orderid",
     isHide: true,
     icon: "heroicons-outline:calendar",
+    link: "order",
+  },
+  {
+    title: "Orders",
+    isHide: true,
+    icon: "solar:cart-2-bold",
     link: "orders",
+    badge: "All",
   },
   {
     title: "Packages",
@@ -75,6 +82,13 @@ export const menuItems = [
     isHide: true,
     icon: "eos-icons:subscriptions-created-outlined",
     link: "subscriptions",
+    badge: "All",
+  },
+  {
+    title: "Subscriptionbyid",
+    isHide: true,
+    icon: "eos-icons:subscriptions-created-outlined",
+    link: "subscriptionbyid",
     badge: "All",
   },
 

@@ -19,7 +19,9 @@ import Modal from "@/components/ui/Modal";
 import Button from "@/components/ui/Button";
 import Link from "next/link"; 
 import { useRouter } from 'next/navigation'
-
+import Badge from "@/components/ui/Badge";
+import Dropdown from "@/components/ui/Dropdown";
+import { Menu } from "@headlessui/react";
 
 const IndeterminateCheckbox = React.forwardRef(
   ({ indeterminate, ...rest }, ref) => {
@@ -48,7 +50,7 @@ const IndeterminateCheckbox = React.forwardRef(
  // find current step schema
  
 
-const AllOrders= ({ title = "All Orders", item }) => {
+const AllSubcriptions = ({ title = "All Subscriptions", item }) => {
 
   const getStatus = (status ) => {
     switch (status) {
@@ -91,12 +93,7 @@ const AllOrders= ({ title = "All Orders", item }) => {
   const orderStatus = getStatus(status_);
   const steps = ["pending", "Paid", "Processing", "in-transit", "delivering", "complete"];
   const statusIndex = steps.indexOf(orderStatus);
-  
-
-  // // Determine if the order is complete
-  // const isComplete = orderStatus === "complete";
-  
-
+  const [isLoading, setIsLoading] = useState(false);
 
 
 // Function to format date value
@@ -208,10 +205,7 @@ const getPageNumbers = () => {
 };
 
 
- // Function to handle printing
- const handlePrint = () => {
-  window.print();
-};
+
 
 useEffect(() => {
   const fetchData = async () => {
@@ -245,7 +239,7 @@ useEffect(() => {
 
       const res = await response.json();
 
-      console.log(res);
+    //   console.log(res);
 
       if (res.code === 200) {
         setOrderItems(res.cart);
@@ -269,6 +263,8 @@ useEffect(() => {
       });
     }
   };
+
+
 
   var token = localStorage.getItem("token");
   // Use the orderId prop directly
@@ -315,7 +311,32 @@ useEffect(() => {
 }, []);
     
 
-
+const actions = [
+    {
+        name: "Approve",
+        icon: "mdi:approve",
+        doit: (item) => {
+          setSelectedOrder(item);
+          setActiveModal(true);
+        },
+      },
+      
+    {
+      name: "Pend",
+      icon: "material-symbols:pending-actions-rounded",
+      doit: "(item) => dispatch(updateProject(item))",
+    },
+    {
+      name: "Query",
+      icon: "streamline:interface-help-question-square-frame-help-mark-query-question-square",
+      doit: "   ",
+    },
+    {
+      name: "Deny",
+      icon: "fluent:shifts-deny-24-regular",
+      doit: "   ",
+    },
+  ];
 
   return (
     <>
@@ -323,7 +344,7 @@ useEffect(() => {
 
     
     
-<Modal className="w-[60%]"
+    <Modal className="w-[49%]"
     activeModal={activeModal}
     onClose={() => setActiveModal(false)}
     title="Transaction Details"
@@ -337,51 +358,56 @@ useEffect(() => {
     }
   >
      <div>
- <Card >
-        <div>
-        <div className="flex z-[5] items-center relative justify-center md:mx-8">
-            {steps.map((item, i) => (
-              <div
-                className="relative z-[1] items-center item flex flex-start flex-1 last:flex-none group"
-                key={i}
-              >
-                <div
-                  className={`${
-                    statusIndex >= i
-                      ? "bg-slate-900 text-white ring-slate-900 ring-offset-2 dark:ring-offset-slate-500 dark:bg-slate-900 dark:ring-slate-900"
-                      : "bg-white ring-slate-900 ring-opacity-70  text-slate-900 dark:text-slate-300 dark:bg-slate-600 dark:ring-slate-600 text-opacity-70"
-                  }  transition duration-150 icon-box md:h-12 md:w-12 h-7 w-7 rounded-full flex flex-col items-center justify-center relative z-[66] ring-1 md:text-lg text-base font-medium`}
-                >
-                  {statusIndex <= i ? (
-                    <span> {i + 1}</span>
-                  ) : (
-                    <span className="text-3xl">
-                      <Icon icon="bx:check-double" />
-                    </span>
-                  )}
-                </div>
+     <center> 
+    
+    <Card title=" Status Variation Badges ">
 
-                <div
-                  className={`${
-                    statusIndex >= i
-                      ? "bg-slate-900 dark:bg-slate-900"
-                      : "bg-[#E0EAFF] dark:bg-slate-700"
-                  } absolute top-1/2 h-[2px] w-full`}
-                ></div>
-                <div
-                  className={` ${
-                    statusIndex >= i
-                      ? " text-slate-900 dark:text-slate-300"
-                      : "text-slate-500 dark:text-slate-300 dark:text-opacity-40"
-                  } absolute top-full text-base md:leading-6 mt-3 transition duration-150 md:opacity-100 opacity-0 group-hover:opacity-100`}
-                >
-                  <span className="w-max">{item}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-          </div>
-          </Card>
+
+    {/* {cartItems.map((item) => (
+
+            <div key={item.cart_info.id}> */}
+        <div className="space-xy-5">
+
+          <Button className="bg-secondary-500 text-white"
+        //    onClick={() => handlePendingStatus('pending', item.cart_info.id)} disabled={isLoading}
+          >
+            <div className="space-x-1 rtl:space-x-reverse">
+              <span>{isLoading ? 'Updating...' : 'Approve'}</span>
+              <Badge  icon="mdi:approve" className="bg-white text-slate-900 " />
+            </div>
+          </Button>
+          
+          <Button className="btn-info"
+            // onClick={() => handlePaidStatus('Paid', item.cart_info.id)} disabled={isLoading}
+          >
+            <div className="space-x-1 rtl:space-x-reverse">
+              <span>{isLoading ? 'Updating...' : 'Pend'}</span>
+              <Badge  icon="material-symbols:pending-actions-rounded" className="bg-white text-slate-900 " />
+            </div>
+          </Button>
+          <Button className="btn-warning"
+        //    onClick={() => handleProcessingStatus('Processing', item.cart_info.id)} disabled={isLoading}
+          >
+            <div className="space-x-1 rtl:space-x-reverse">
+              <span>{isLoading ? 'Updating...' : 'Query'}</span>
+              <Badge  icon="streamline:interface-help-question-square-frame-help-mark-query-question-square" className="bg-white text-slate-900 " />
+            </div>
+          </Button>
+          <Button className="btn-dark"
+        //    onClick={() => handleTransitStatus('In-Transit', item.cart_info.id)} disabled={isLoading}
+          >
+            <div className="space-x-1 rtl:space-x-reverse">
+              <span>{isLoading ? 'Updating...' : 'Deny '}</span>
+              <Badge  icon="fluent:shifts-deny-24-regular" className="bg-white text-slate-900" />
+            </div>
+          </Button>
+        
+       
+        </div>
+        {/* </div>
+        ))}    */}
+</Card>
+</center>
 </div>
 <br/>
         
@@ -493,42 +519,10 @@ useEffect(() => {
 
 
                 <br/>
-                <div className="w-full px-2 ml-auto">
-  <div className="bg-[#ffffe6] rounded-lg shadow-[0px_0px_2px_#0000004D] px-4 py-4 flex items-start justify-start">
-    <div className="flex-1">
-      
-    <p className="text-[32px] font-bold leading-[40px] mt-[5px] text-[#585820]">
-        Shipping Information
-      </p>
-      <br/>
-      <h2 className="text-[16px] leading-[20.16px] font-medium text-[#585820]">
-     <b>Shipping Address</b> {landmark}
-      </h2>
-      <br/>
-      <h2 className="text-[16px] leading-[20.16px] font-medium text-[#585820]">
-      <b>House Number :</b> {houseNumber + " " + streetAddress }
-      </h2>
-      <br/>
-      <h2 className="text-[16px] leading-[20.16px] font-medium text-[#585820]">
-      <b>State :</b> {town + " " + shippingState}
-      </h2>
-      <br/>
-      <h2 className="text-[16px] leading-[20.16px] font-medium text-[#585820]">
-      <b>Contact Number :</b>{contactPhone}
-      </h2>
-      
-    </div>
-    <div className="text-4xl text-blue-400">
-    <Icon icon="heroicons:pencil-square" className="text-[#1c404d] w-7 h-8 cursor-pointer"  onClick={handlePrint} />
-      
-    </div>
-  </div>
-</div>
+               
                          
   </Modal>
 
-
-  
       <Card>
         <div className="items-center justify-between mb-6 md:flex">
           <h4 className="card-title">{title}</h4>
@@ -558,10 +552,10 @@ useEffect(() => {
                     Price
                     </th>
                     <th scope="col" className="table-th">
-                    Payment Channel
+                    Package Name
                     </th>
                     <th scope="col" className="table-th">
-                    Qty
+                    Discount
                     </th>
                     <th scope="col" className="table-th">
                     Status
@@ -648,42 +642,64 @@ useEffect(() => {
 
                         <td className="table-td py-2">  {formattedDate(item.cart_info?.created_at)} </td>
 
-                        <td className="table-td py-2">  <div className="flex space-x-3 rtl:space-x-reverse">
-                            <Tooltip content="View" placement="top" arrow animation="shift-away">
-                            
-                              <button className="action-btn" 
-                              type="button"
-                              onClick={() => {
-                                setSelectedOrder(item);
-                                 setActiveModal(true);
-                             }}
-                              >
-                                <Icon icon="heroicons:eye" />
-                              </button>
-                            
-                            </Tooltip>
-             
-                            <Tooltip content="Edit" placement="top" arrow animation="shift-away">
-                            {/* <Link href={`/Orders/${item.cart_info.id}`}> */}
-                            <button className="action-btn" 
-                           onClick={() => router.push(`/Orders/${item.cart_info.id}`)}
-                            type="button">
-                             <Icon icon="heroicons:pencil-square" />
-                           </button>
-                           
-                         </Tooltip>
+                        <td className="table-td py-2">  
 
-                            </div>
+                         
+        <div>
+            <Dropdown
+              classMenuItems="right-0 w-[140px] top-[110%] "
+              label={
+                <span className="text-xl text-center block w-full">
+                  <Icon icon="heroicons-outline:dots-vertical" />
+                </span>
+              }
+            >
+              <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                {actions.map((item, i) => (
+                  <Menu.Item
+                    key={i}
+                    onClick={() => item.doit(item)}
+                  >
+                    <div
+                      className={`
+                
+                  ${
+                    item.name === "Deny"
+                      ? "bg-danger-500 text-danger-500 bg-opacity-30   hover:bg-opacity-100 hover:text-white"
+                      : "hover:bg-slate-900 hover:text-white dark:hover:bg-slate-600 dark:hover:bg-opacity-50"
+                  }
+                   w-full border-b border-b-gray-500 border-opacity-10 px-4 py-2 text-sm  last:mb-0 cursor-pointer 
+                   first:rounded-t last:rounded-b flex  space-x-2 items-center rtl:space-x-reverse `}
+                    >
+                      <span className="text-base">
+                        <Icon icon={item.icon} />
+                      </span>
+                      <span>{item.name}</span>
+                    </div>
+                  </Menu.Item>
+                ))}
+              </div>
+            </Dropdown>
+          </div>
+
+          
                             </td>
                       </tr>
                     
                 </tbody>
                 </React.Fragment>
                 ))}
+                <br/>
+                    <br/>
+                    <br/>
+                    <br/>
+                    <br/>
               </table>
             </div>
           </div>
         </div>
+
+       
         <div className="items-center justify-between mt-6 space-y-5 md:flex md:space-y-0">
           <div className="flex items-center space-x-3 rtl:space-x-reverse">
             <select
@@ -770,10 +786,15 @@ useEffect(() => {
             </li>
           </ul>
         </div>
+        
+      
+
+
         {/*end*/}
       </Card>
     </>
   );
 };
 
-export default AllOrders;
+
+export default AllSubcriptions;
