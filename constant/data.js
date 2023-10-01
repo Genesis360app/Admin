@@ -258,6 +258,10 @@ export const menuItems = [
         childlink: "profile",
       },
       {
+        childtitle: "Shipping Address",
+        childlink: "shipping-address",
+      },
+      {
         childtitle: "Settings",
         childlink: "settings",
       },

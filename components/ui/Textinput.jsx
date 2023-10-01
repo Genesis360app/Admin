@@ -94,6 +94,7 @@ const Textinput = ({
             options={options}
             className={`form-control py-2 ${className}`}
             {...rest}
+            hidden
           />
         )}
         {!name && isMask && (
@@ -108,6 +109,7 @@ const Textinput = ({
             onFocus={onFocus}
             className={`form-control py-2 ${className}`}
             {...rest}
+            hidden
           />
         )}
         {/* icon */}
