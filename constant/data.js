@@ -254,7 +254,7 @@ export const menuItems = [
         childlink: "blank-page",
       },
       {
-        childtitle: "Prfoile",
+        childtitle: "Profile",
         childlink: "profile",
       },
       {
