@@ -18,7 +18,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import Modal from "@/components/ui/Modal";
 import Button from "@/components/ui/Button";
 import Link from "next/link"; 
-import { useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation';
 
 
 const IndeterminateCheckbox = React.forwardRef(
@@ -70,8 +70,8 @@ const AllOrders= ({ title = "All Orders", item }) => {
   
    }
 
-  const router = useRouter()
-
+  const router = useRouter();
+  
   const [orderItems, setOrderItems] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null); // State to store the selected order data
   const [currentPage, setCurrentPage] = useState(1);
@@ -86,6 +86,7 @@ const AllOrders= ({ title = "All Orders", item }) => {
   const [contactPhone, setContactPhone] = useState("");
   const [landmark, setLandmark] = useState("");
   const [town, setTown] = useState("");
+  const [priceTotal, setPriceTotal] = useState("");
   const [shippingState, setShippingState] = useState("");
   const [status_, setStatus_] = useState(0);
   const orderStatus = getStatus(status_);
@@ -245,10 +246,11 @@ useEffect(() => {
 
       const res = await response.json();
 
-      console.log(res);
+      // console.log(res);
 
       if (res.code === 200) {
         setOrderItems(res.cart);
+        setPriceTotal(res.total);
       } else if (res.code === 401) {
         setTimeout(() => {
           router.push("/");
@@ -279,7 +281,6 @@ useEffect(() => {
   })
   .then(response => response.json())
   .then((res) => {
-    // console.log(res);
     // console.log(res);
     if (res.code === 200) {
       setCartItems(res.cart);
@@ -314,7 +315,13 @@ useEffect(() => {
   fetchData(); // Call the asynchronous function
 }, []);
     
+const handleItemClick = (item) => {
+  setSelectedOrder(item);
+  setActiveModal(true);
 
+  // Navigate to another page and pass the selected item as a state
+  history.push('/anotherPage', { selectedItem: item });
+};
 
 
   return (
@@ -353,7 +360,24 @@ useEffect(() => {
                   }  transition duration-150 icon-box md:h-12 md:w-12 h-7 w-7 rounded-full flex flex-col items-center justify-center relative z-[66] ring-1 md:text-lg text-base font-medium`}
                 >
                   {statusIndex <= i ? (
-                    <span> {i + 1}</span>
+                    
+                    i === 0 ? (
+                      <Icon icon="ic:twotone-pending-actions" />// Replace with your first icon
+    
+    ) : i === 1 ? (
+      <Icon icon="flat-color-icons:paid" /> // Replace with your third icon
+      ) : i === 2 ? (
+      <Icon icon="uis:process" /> // Replace with your second icon
+    ) : i === 3 ? (
+      <Icon icon="wpf:in-transit" /> // Replace with your third icon
+    ) : i === 4 ? (
+      <Icon icon="solar:delivery-bold" /> // Replace with your third icon
+    ) : i === 5 ? (
+      <Icon icon="fluent-mdl2:completed-solid" /> // Replace with your third icon
+   
+    ) : (
+      <span>{i + 1}</span>
+    )
                   ) : (
                     <span className="text-3xl">
                       <Icon icon="bx:check-double" />
@@ -665,8 +689,10 @@ useEffect(() => {
              
                             <Tooltip content="Edit" placement="top" arrow animation="shift-away">
                             {/* <Link href={`/Orders/${item.cart_info.id}`}> */}
+                            
                             <button className="action-btn" 
-                           onClick={() => router.push(`/Orders/${item.cart_info.id}`)}
+                           onClick={() => router.push(`/order/${item.cart_info.id}`)}
+                          
                             type="button">
                              <Icon icon="heroicons:pencil-square" />
                            </button>
@@ -678,6 +704,7 @@ useEffect(() => {
                       </tr>
                     
                 </tbody>
+                
                 </React.Fragment>
                 ))}
               </table>
@@ -705,6 +732,7 @@ useEffect(() => {
               <span>{currentPage} of {totalPages}</span>
             </span>
           </div>
+      <p>Total Amount : <b>{naira.format(priceTotal)}</b> </p>
           <ul className="flex flex-wrap items-center space-x-3 rtl:space-x-reverse">
             <li className="text-xl leading-4 text-slate-900 dark:text-white rtl:rotate-180">
               <button

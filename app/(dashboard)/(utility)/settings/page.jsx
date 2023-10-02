@@ -25,7 +25,7 @@ const settings = () => {
               href="#"
               className="inline-flex items-center space-x-3 rtl:space-x-reverse text-sm capitalize font-medium text-slate-600 dark:text-slate-300"
             >
-              <span>Chnage Settings</span> <Icon icon="heroicons:arrow-right" />
+              <span>Change Settings</span> <Icon icon="heroicons:arrow-right" />
             </Link>
           </div>
         </Card>
@@ -36,17 +36,17 @@ const settings = () => {
                 <Icon icon="heroicons:credit-card" />
               </div>
               <div className="flex-1 text-base text-slate-900 dark:text-white font-medium">
-                Payment Settings
+                Delivery Settings
               </div>
             </div>
             <div className="text-slate-600 dark:text-slate-300 text-sm">
-              Connect your bank account to your company profile, and more
+              Set up your delivery price range base on distance
             </div>
             <Link
-              href="#"
+              href="/delivery-fee"
               className="inline-flex items-center space-x-3 rtl:space-x-reverse text-sm capitalize font-medium text-slate-600 dark:text-slate-300"
             >
-              <span>Chnage Settings</span> <Icon icon="heroicons:arrow-right" />
+              <span>Change Settings</span> <Icon icon="heroicons:arrow-right" />
             </Link>
           </div>
         </Card>
@@ -64,10 +64,10 @@ const settings = () => {
               Set up your profile, add your profile photo, and more
             </div>
             <Link
-              href="#"
+              href="/profile"
               className="inline-flex items-center space-x-3 rtl:space-x-reverse text-sm capitalize font-medium text-slate-600 dark:text-slate-300"
             >
-              <span>Chnage Settings</span> <Icon icon="heroicons:arrow-right" />
+              <span>Change Settings</span> <Icon icon="heroicons:arrow-right" />
             </Link>
           </div>
         </Card>

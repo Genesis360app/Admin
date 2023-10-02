@@ -109,14 +109,14 @@ const naira = new Intl.NumberFormat("en-NG", {
         var token = localStorage.getItem("token");
     
         // fetch(`https://orangli.com/server/api/Products/orderById.php?orderid=${routerId}`, {
-        fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/Products/orderById.php?orderid=777`, {
+        fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/Products/orderById.php?orderid=246`, {
         headers: {
             "Authorization": `Bearer ${token}`
         }
         })
         .then(response => response.json())
         .then((res) => {
-        // console.log(res);
+        console.log(res);
         if(res.code == 200){
             // console.log("Orders");
             // console.log(res)
@@ -148,7 +148,7 @@ const naira = new Intl.NumberFormat("en-NG", {
           })
           .then(response => response.json())
           .then((res) => {
-          // console.log(res);
+          console.log(res);
           if(res.code == 200){
               setContactPhone(res.payload.phone);
               setShippingState(res.payload.state);
@@ -929,9 +929,9 @@ const naira = new Intl.NumberFormat("en-NG", {
           <div className="lg:col-span-8 col-span-12">
             <Card title="User Overview">
               <BasicArea height={190} />
-              {/* <div className="text-base text-slate-600 dark:text-slate-50">
+              <div className="text-base text-slate-600 dark:text-slate-50">
                       Total : { priceTotal}
-                    </div>   */}
+                    </div>  
             </Card>
           </div>
         </div>

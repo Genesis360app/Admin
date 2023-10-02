@@ -17,6 +17,7 @@ import { Menu } from "@headlessui/react";
 import { useSelector, useDispatch } from "react-redux";
 import Link from "next/link";
 import BasicArea from "@/components/partials/chart/appex-chart/BasicArea";
+import axios from 'axios'; // Import Axios at the top of your file
 
 
 
@@ -189,7 +190,7 @@ useEffect(() => {
 
       if (res.code === 200) {
         setSubByID(res.sub);
-        setUser_id((res.sub[0].sub_info.userid));
+        setUser_id((res.sub[1].sub_info.userid));
       } else if (res.code === 401) {
         setTimeout(() => {
           router.push("/");
@@ -228,6 +229,29 @@ useEffect(() => {
     
     }
   });
+
+  var token = localStorage.getItem("token");
+axios({
+  method: 'get',
+  url: `${process.env.NEXT_PUBLIC_BASE_URL}/User/getKYC.php?userid=${user_id}`,
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+})
+  .then((response) => {
+    // const res = response.data; // Access the response data
+
+    if (res.code === 200) {
+      setStatus(res.kyc.status);
+    } else if (res.code === 401) {
+      // Handle unauthorized error if needed
+    }
+  })
+  .catch((error) => {
+    // Handle errors here, such as network errors or invalid responses
+    console.error('Error:', error);
+  });
+  
 
   var token = localStorage.getItem("token");
   // Use the orderId prop directly
@@ -533,6 +557,7 @@ const handleDenyStatus = async (status, subscription_id) => {
   return (
     <>
     <ToastContainer/>
+
 
     <div className="profiel-wrap px-[35px] pb-10 md:pt-[84px] pt-10 rounded-lg bg-white dark:bg-slate-800 lg:flex lg:space-y-0 space-y-6 justify-between items-end relative z-[1]">
           <div className="bg-slate-900 dark:bg-slate-700 absolute left-0 top-0 md:h-1/2 h-[150px] w-full z-[-1] rounded-t-lg">

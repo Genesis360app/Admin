@@ -2,7 +2,7 @@ import React from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 
 const BasicMap = () => {
-  const position = [47.31322, -1.319482];
+  const position = [9.6000359, 7.9999721];
   return (
     <div className="w-full h-[300px]">
       <MapContainer

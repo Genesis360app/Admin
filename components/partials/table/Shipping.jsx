@@ -12,6 +12,7 @@ import Map from "./Map";
 import PlacesAutocomplete, { geocodeByAddress, getLatLng } from 'react-places-autocomplete';
 import { InfinitySpin } from 'react-loader-spinner';
 import Button from "@/components/ui/Button";
+import axios from "axios";
 
 const ShippingAddress = () => {
   const [houseNumber, setHouseNumber] = useState('');
@@ -40,62 +41,59 @@ const ShippingAddress = () => {
   const [selectedBank, setSelectedBank] = useState(null);
 
 
-      useEffect(() => {
-        const fetchData = async () => {
-          try {
-            var token = localStorage.getItem("token");
-            var userid = localStorage.getItem("userid");
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const userid = localStorage.getItem('userid');
+  
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/User/getAllUsers`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+  
+        if (!response.data) {
+          // Handle error if the response data is not available
+          toast.warning('Network response was not ok', {
+            position: 'top-right',
+            autoClose: 1500,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: 'light',
+          });
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+  
+        console.log(response.data);
+  
+        if (response.data.code === 200) {
+          // Handle successful response
+        } else if (response.data.code === 401) {
+          setTimeout(() => {
+            router.push('/');
+          }, 1500);
+        }
+      } catch (error) {
+        // Handle errors here
+        toast.error(error.message, {
+          position: 'top-right',
+          autoClose: 1500,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: 'light',
+        });
+      }
+    };
       
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}//User/getAllUsers`, {
-              
-              headers: {
-                "Authorization": `Bearer ${token}`,
-                
-              }
-            });
-      
-            if (!response.ok) {
-              // Handle error if the response is not OK
-              toast.warning("Network response was not ok", {
-                position: "top-right",
-                autoClose: 1500,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "light",
-              });
-              throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-      
-            const res = await response.json();
-      
-            console.log(res);
-      
-            if (res.code === 200) {
-            
-            } else if (res.code === 401) {
-              setTimeout(() => {
-                router.push("/");
-              }, 1500);
-            }
-          } catch (error) {
-         
-            // Handle errors here
-            toast.error(error, {
-              position: "top-right",
-              autoClose: 1500,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-              progress: undefined,
-              theme: "light",
-            });
-          }
-        };
-      
+
+
         const token = localStorage.getItem("token");
         fetch(`${process.env.NEXT_PUBLIC_BASE2_URL}/wallets/listBanks`, {
           headers: {
@@ -274,7 +272,7 @@ const ShippingAddress = () => {
         <Card title="User Shipping info ">
         <form>
         <div className="space-y-3">
-        
+
         {/* <div className="mt-[30px]">
         <label
          htmlFor="User"  className="form-label  mb-2"  >
