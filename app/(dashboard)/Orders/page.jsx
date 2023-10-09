@@ -1,6 +1,7 @@
 "use client";
 
-import LatestOrder from "@/components/partials/table/LatestOrder";
+// import LatestOrder from "@/components/partials/table/LatestOrder";
+import LatestOrder from "@/components/partials/orders/all-orders";
 import ProductBredCurbs from "@/components/partials/ProductBredCurbs";
 import dynamic from "next/dynamic";
 const Carousel = dynamic(() => import("@/components/ui/Carousel"), {
@@ -10,10 +11,7 @@ const Carousel = dynamic(() => import("@/components/ui/Carousel"), {
 import { SwiperSlide } from "swiper/react";
 import Card from "@/components/ui/Card";
 
-const All_orders = () => {
-
-
-    
+const All_orders = () => {    
   return (
     <div className="space-y-5 ">
       <Card title="Broadcast Banner">

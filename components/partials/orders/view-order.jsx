@@ -13,8 +13,10 @@ import { useParams } from 'react-router-dom';
 
 const OrderPage = () => {
     // const router = useRouter();
-    // const routerId = router.query.id;  
-    const { itemId } = useParams();
+    // const routerId = router.query.id; 
+
+    const { id } = useParams();
+    
   const getStatus = (status ) => {
     switch (status) {
      case 1:

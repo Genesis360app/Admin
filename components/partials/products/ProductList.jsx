@@ -1,37 +1,15 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { advancedTable } from "../../../constant/table-data";
 import Card from "@/components/ui/Card";
 import Icon from "@/components/ui/Icon";
 import Tooltip from "@/components/ui/Tooltip";
 import Textinput from "@/components/ui/Textinput";
-import GlobalFilter from "./GlobalFilter";
+import GlobalFilter from "../table/GlobalFilter";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 
-const IndeterminateCheckbox = React.forwardRef(
-  ({ indeterminate, ...rest }, ref) => {
-    const defaultRef = React.useRef();
-    const resolvedRef = ref || defaultRef;
 
-    React.useEffect(() => {
-      resolvedRef.current.indeterminate = indeterminate;
-    }, [resolvedRef, indeterminate]);
-
-    return (
-      <>
-        <input
-          type="checkbox"
-          ref={resolvedRef}
-          {...rest}
-          className="table-checkbox"
-        />
-      </>
-    );
-  }
-);
-
-const ExampleTwo = ({ title = "All Product" }) => {
+const ProductList = ({ title = "All Product" }) => {
   const [productItems, setProductItems] = useState([]);
   const [statusCode, setStatusCode] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -377,4 +355,4 @@ const filteredData = useMemo(() => {
   );
 };
 
-export default ExampleTwo;
+export default ProductList;

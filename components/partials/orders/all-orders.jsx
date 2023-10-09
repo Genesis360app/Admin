@@ -12,36 +12,17 @@ import {
   useGlobalFilter,
   usePagination,
 } from "react-table";
-import GlobalFilter from "./GlobalFilter";
+import GlobalFilter from "../table/GlobalFilter";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Modal from "@/components/ui/Modal";
 import Button from "@/components/ui/Button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 
 
-const IndeterminateCheckbox = React.forwardRef(
-  ({ indeterminate, ...rest }, ref) => {
-    const defaultRef = React.useRef();
-    const resolvedRef = ref || defaultRef;
 
-    React.useEffect(() => {
-      resolvedRef.current.indeterminate = indeterminate;
-    }, [resolvedRef, indeterminate]);
-
-    return (
-      <>
-        <input
-          type="checkbox"
-          ref={resolvedRef}
-          {...rest}
-          className="table-checkbox"
-        />
-      </>
-    );
-  }
-);
 
 
 
@@ -76,6 +57,8 @@ const AllOrders= ({ title = "All Orders", item }) => {
      router.push(`/orders/${item.cart_info.id}`);
    };
   
+
+
   const [orderItems, setOrderItems] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null); // State to store the selected order data
   const [currentPage, setCurrentPage] = useState(1);

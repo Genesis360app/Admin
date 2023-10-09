@@ -230,6 +230,59 @@ useEffect(() => {
     }
   });
 
+
+  const fetchDatas = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const userid = localStorage.getItem('userid');
+
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/User/riskAnalysis?userid=20285485-1986772-930711696&from=11-01-2022&to=01-01-2023`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.data) {
+        // Handle error if the response data is not available
+        toast.warning('Network response was not ok', {
+          position: 'top-right',
+          autoClose: 1500,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: 'light',
+        });
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      console.log(response.data);
+
+      if (response.data.code === 200) {
+        // Handle successful response
+      } else if (response.data.code === 401) {
+        setTimeout(() => {
+          router.push('/');
+        }, 1500);
+      }
+    } catch (error) {
+      // Handle errors here
+      toast.error(error.message, {
+        position: 'top-right',
+        autoClose: 1500,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'light',
+      });
+    }
+  };
+
+
+
   var token = localStorage.getItem("token");
 axios({
   method: 'get',
@@ -285,6 +338,7 @@ axios({
 
 
   fetchData(); // Call the asynchronous function
+  fetchDatas(); // Call the asynchronous function
 }, []);
     
 
