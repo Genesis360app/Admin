@@ -4,13 +4,13 @@ import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import useWidth from "@/hooks/useWidth";
 import Button from "@/components/ui/Button";
-import ProductGrid from "@/components/partials/products/ProductGrid";
+import ProductGrid from "@/components/partials/products/productGrid";
 import ProductList from "@/components/partials/products/ProductList";
 import GridLoading from "@/components/skeleton/Grid";
 import TableLoading from "@/components/skeleton/Table";
-import { toggleAddModal } from "@/components/partials/app/projects/store";
-import AddProject from "@/components/partials/app/projects/AddProject";
-import EditProject from "@/components/partials/app/projects/EditProject";
+// import { toggleAddModal } from "@/components/partials/app/projects/store";
+// import AddProject from "@/components/partials/app/projects/AddProject";
+// import EditProject from "@/components/partials/app/projects/EditProject";
 import { ToastContainer } from "react-toastify";
 import GlobalFilter from "./GlobalFilter";
 

@@ -9,9 +9,6 @@ import ProgressBar from "@/components/ui/ProgressBar";
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import { ToastContainer, toast } from 'react-toastify';
-import Tooltip from "@/components/ui/Tooltip";
-import Textinput from "@/components/ui/Textinput";
-import GlobalFilter from "../table/GlobalFilter";
 import 'react-toastify/dist/ReactToastify.css';
 
 
@@ -75,11 +72,6 @@ const ProductGrid = ({ project, globalFilter }) => {
     minimumFractionDigits: 0,
   });
 
-
-
- 
-
- 
   
   const isOrderEmpty = productItems.length === 0;
 
