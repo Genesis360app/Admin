@@ -70,6 +70,16 @@ const CardSlider = () => {
       .then(data => {
         // console.log(data);
         if (data.code === 200) {
+          toast.success(data.message, {
+            position: "top-right",
+            autoClose: 1500,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "dark",
+          });
           setBank_name(data.bank);
           setAccount_number(data.account_number);
           setAccount_name(data.account_name);
@@ -146,7 +156,7 @@ const CardSlider = () => {
       <button type="button" className="btn btn-dark" 
       onClick={ handleGenerateCard}
       disabled={isLoading}>
-                {isLoading ? 'Generating...' : 'Generate'}
+                Generate
             </button>
       <Swiper effect={"cards"} grabCursor={true} modules={[EffectCards]}>
         {cardLists.map((item, i) => (
@@ -167,7 +177,7 @@ const CardSlider = () => {
     className=" text-xl text-center font-bold text-white w-[25%] absolute top-4 right-[-35px]"
   >
     {isCopied ? (
-      <div>&nbsp; Copied</div>
+     <Icon icon="mingcute:check-fill" />
     ) : (
       <Icon icon="solar:copy-bold" />
     )}
