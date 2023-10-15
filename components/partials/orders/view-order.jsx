@@ -96,7 +96,7 @@ last25Items.sort((a, b) => {
 
   return idB - idA; // Sort in ascending order by 'id'
 });
-
+  
 const naira = new Intl.NumberFormat("en-NG", {
   style: "currency",
   currency: "NGN",

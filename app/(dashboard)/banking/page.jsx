@@ -412,10 +412,8 @@ const [lastname, setLastname] = useState("");
                   {firstname ? (
                <>
               <div className="bg-slate-100 dark:bg-slate-900 rounded-md p-4">
-                <Textinput
-                
-                  isMask
-                  type="text"
+                <input
+                 type="text"
                   id="account_name"
                   name="account_name"
                   value={firstname + "" + lastname} 
@@ -438,8 +436,9 @@ const [lastname, setLastname] = useState("");
         </center>
       )}
       {firstname && (
-        <button
-        className="bg-gradient-to-r from-[#00b09b] from-10% via-sky-500 via-30% to-[#96c93d] to-90% .. w-full text-white p-4 font-bold text-xl mt-4"
+       
+        <button type="button" className="btn btn-dark bg-gradient-to-r from-[#00b09b] from-10% via-sky-500 via-30% to-[#96c93d] to-90%" 
+  
           onClick={sendMoney}
           disabled={!userId || !recieverName || !amount || isLoading}
         >

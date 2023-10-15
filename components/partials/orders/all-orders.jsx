@@ -140,9 +140,9 @@ return (last25Items || []).filter((item) => {
 }, [orderItems, globalFilter]);
 
 
-const naira = new Intl.NumberFormat("en-NG", {
+const naira = new Intl.NumberFormat("en-EU", {
   style: "currency",
-  currency: "NGN",
+  currency: "EUR",
   maximumFractionDigits: 0,
   minimumFractionDigits: 0,
 });
