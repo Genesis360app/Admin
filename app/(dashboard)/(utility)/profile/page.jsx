@@ -43,7 +43,7 @@ const profile = () => {
     })
     .then(response => response.json())
     .then((res) => {
-    console.log(res);
+    // console.log(res);
     if(res.code == 200){
       setAvatar(res.user.avatar);
       setFirstname(res.user.first_name);
@@ -91,7 +91,7 @@ const profile = () => {
       const res = await response.json();
   
       if (res.code === 200) {
-        toast.error(res.message, {
+        toast.success(res.message, {
           position: "top-right",
           autoClose: 1500,
           hideProgressBar: false,

@@ -68,7 +68,7 @@ const ShippingAddress = () => {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
   
-        console.log(response.data);
+        // console.log(response.data);
   
         if (response.data.code === 200) {
           // Handle successful response
@@ -190,7 +190,7 @@ const ShippingAddress = () => {
         })
           .then((response) => response.json())
           .then((res) => {
-            console.log(res);
+            // console.log(res);
             if (res.code === 200) {
               setContactPhone(res.payload.phone);
               setShippingState(res.payload.state);
@@ -273,25 +273,6 @@ const ShippingAddress = () => {
         <form>
         <div className="space-y-3">
 
-        {/* <div className="mt-[30px]">
-        <label
-         htmlFor="User"  className="form-label  mb-2"  >
-        Select User
-        </label>
-        
-<Select
-  id="bank"
-  name="bank"
-  onChange={(selectedOption) => {
-    setSelectedBank(selectedOption);
-    console.log("Selected Bank:", selectedOption);
-  }}
-  value={selectedBank}
-  options={bankOptions}
-  styles={customStyles} // Apply custom styles
-  className="form-control py-2 appearance-none"
-/>
-</div> */}
 
 
            <div className="mt-[30px]">

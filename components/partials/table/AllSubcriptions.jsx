@@ -1,101 +1,55 @@
 'use client'
-/* eslint-disable react/display-name */
+
 import React,{useEffect,useState,useMemo} from "react";
 import { advancedTable } from "../../../constant/table-data";
 import Card from "@/components/ui/Card";
 import Icon from "@/components/ui/Icon";
 import Tooltip from "@/components/ui/Tooltip";
-import {
-  useTable,
-  useRowSelect,
-  useSortBy,
-  useGlobalFilter,
-  usePagination,
-} from "react-table";
 import GlobalFilter from "./GlobalFilter";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Modal from "@/components/ui/Modal";
 import Button from "@/components/ui/Button";
-import Link from "next/link"; 
 import { useRouter } from 'next/navigation'
 import Badge from "@/components/ui/Badge";
 import Dropdown from "@/components/ui/Dropdown";
 import { Menu } from "@headlessui/react";
-
-const IndeterminateCheckbox = React.forwardRef(
-  ({ indeterminate, ...rest }, ref) => {
-    const defaultRef = React.useRef();
-    const resolvedRef = ref || defaultRef;
-
-    React.useEffect(() => {
-      resolvedRef.current.indeterminate = indeterminate;
-    }, [resolvedRef, indeterminate]);
-
-    return (
-      <>
-        <input
-          type="checkbox"
-          ref={resolvedRef}
-          {...rest}
-          className="table-checkbox"
-        />
-      </>
-    );
-  }
-);
+import { useSelector, useDispatch } from "react-redux";
+import Link from "next/link";
+import BasicArea from "@/components/partials/chart/appex-chart/BasicArea";
+import axios from 'axios'; // Import Axios at the top of your file
 
 
 
- // find current step schema
- 
-
-const AllSubcriptions = ({ title = "All Subscriptions", item }) => {
-
-  const getStatus = (status ) => {
-    switch (status) {
-     case 0:
-       return "pending";
-     case 1:
-       return "Paid";
-     case 2:
-       return "Processing";
-     case 3:
-       return "in-transit";
-     case 4:
-       return "delivering";
-     case 5:
-       return "complete";
-     default:
-       return "";
-    }
-  
-   }
-
+const AllSubcriptions = ({ title = ("All Subscriptions"), item }) => {
+  const dispatch = useDispatch();
   const router = useRouter()
-
-  const [orderItems, setOrderItems] = useState([]);
-  const [selectedOrder, setSelectedOrder] = useState(null); // State to store the selected order data
+  const [subByID, setSubByID] = useState([]);
+  const [selectedSub, setSelectedSub] = useState(null); // State to store the selected order data
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(5); // Added pageSize state
   const itemsPerPage = pageSize; // Use pageSize for itemsPerPage
   const maxPageButtons = 5; // Number of page buttons to display
   const [globalFilter, setGlobalFilter] = useState(""); // Global filter
-  const [activeModal, setActiveModal] = useState(false);
-  const [stepNumber, setStepNumber] = useState(0);
-  const [houseNumber, setHouseNumber] = useState("");
-  const [streetAddress, setStreetAddress] = useState("");
-  const [contactPhone, setContactPhone] = useState("");
-  const [landmark, setLandmark] = useState("");
-  const [town, setTown] = useState("");
-  const [shippingState, setShippingState] = useState("");
-  const [status_, setStatus_] = useState(0);
-  const orderStatus = getStatus(status_);
-  const steps = ["pending", "Paid", "Processing", "in-transit", "delivering", "complete"];
-  const statusIndex = steps.indexOf(orderStatus);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [user_id, setUser_id] = useState("");
+  const [phone, setPhone] = useState("");
+  const [activeModal, setActiveModal] = useState(false);
+  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
+  const [firstname, setFirstname] = useState("");
+  const [lastname, setLastname] = useState("");
+  const [businessIsPartner, setBusinessIsPartner] = useState("");
+  const [income, setIncome] = useState("");
+  const [spending_limit, setSpending_limit] = useState("");
+  const [outstanding, setOutstanding] = useState("");
+  const [avatar, setAvatar] = useState("");
+  const [isBusiness, setIsbusiness] = useState(null);
+  const [status, setStatus] = useState(null);
 
-
+  const userid = "24011343-7323075-4480759";
+  
 // Function to format date value
 function formattedDate(rawDate) {
   const date = new Date(rawDate);
@@ -118,35 +72,35 @@ function formattedDate(rawDate) {
   }
 }
 
-const last25Items = orderItems;
+const last25Items = subByID;
 
 // Sort the last 25 items by the 'id' property in ascending order
 last25Items.sort((a, b) => {
   const idA = a.cart_info?.id || 0; // Use a default value if 'a.cart_info.id' is null
   const idB = b.cart_info?.id || 0; // Use a default value if 'b.cart_info.id' is null
 
-  return idB - idA; // Sort in ascending order by 'id'
+  return  idB  - idA; // Sort in ascending order by 'id'
 });
 
 // Function to filter data based on globalFilter value
 // Function to filter data based on globalFilter value
 const filteredData = useMemo(() => {
 return (last25Items || []).filter((item) => {
-  const cart_id = (item.cart_info?.id|| "").toString(); // Access product_name safely and convert to lowercase
-  const product_name = (item.product?.product_name || "").toString(); // Access package_id safely and convert to string
-  const qty = (item.cart_info?.qty|| "").toString(); // Access package_id safely and convert to string
+  const sub_id = (item.sub_info?.id|| "").toString(); // Access product_name safely and convert to lowercase
+  const status_text = (item.sub_info?.status_text || "").toString(); // Access package_id safely and convert to string
+  const package_name = (item.package?.package_name|| "").toString(); // Access package_id safely and convert to string
 
   // Check if globalFilter is defined and not null before using trim
   const filterText = globalFilter ? globalFilter.trim() : "";
 
   // Customize this logic to filter based on your specific requirements
   return (
-    cart_id.includes(filterText.toLowerCase()) ||
-    product_name.includes(filterText)||
-    qty.includes(filterText)
+    sub_id.includes(filterText.toLowerCase()) ||
+    status_text.includes(filterText)||
+    package_name.includes(filterText)
   );
 });
-}, [orderItems, globalFilter]);
+}, [subByID, globalFilter]);
 
 
 const naira = new Intl.NumberFormat("en-NG", {
@@ -204,18 +158,13 @@ const getPageNumbers = () => {
   return pageNumbers;
 };
 
-
-
-
 useEffect(() => {
   const fetchData = async () => {
     try {
       var token = localStorage.getItem("token");
-      var userid = localStorage.getItem("userid");
+      // var userid = localStorage.getItem("userid");
 
-
-
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/Products/getOrders.php`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/Products/getSubscription.php?userid=${userid}`, {
         cache: 'no-store',
         headers: {
           "Authorization": `Bearer ${token}`
@@ -239,10 +188,11 @@ useEffect(() => {
 
       const res = await response.json();
 
-    //   console.log(res);
+      // console.log(res);
 
       if (res.code === 200) {
-        setOrderItems(res.cart);
+        setSubByID(res.sub);
+        setUser_id((res.sub[1].sub_info.userid));
       } else if (res.code === 401) {
         setTimeout(() => {
           router.push("/");
@@ -265,10 +215,60 @@ useEffect(() => {
   };
 
 
+  const fetchDatas = async () => {
+    try {
+      const token = localStorage.getItem('token');
 
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/User/getKYC.php?userid=${userid}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.data) {
+        // Handle error if the response data is not available
+        toast.warning('Network response was not ok', {
+          position: 'top-right',
+          autoClose: 1500,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: 'light',
+        });
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      
+
+      if (response.data.code === 200) {
+        // console.log(response.data);
+        // Handle successful response
+        setStatus(response.data.kyc.status);
+      } else if (response.data.code === 401) {
+        setTimeout(() => {
+          router.push('/');
+        }, 1500);
+      }
+    } catch (error) {
+      // Handle errors here
+      toast.error(error.message, {
+        position: 'top-right',
+        autoClose: 1500,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'light',
+      });
+    }
+  };
+  
   var token = localStorage.getItem("token");
   // Use the orderId prop directly
-  fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/Products/orderById.php?orderid=${selectedOrder?.cart_info?.id}`, {
+  fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/Products/orderById.php?orderid=${selectedSub?.sub_info?.userid}`, {
     headers: {
       "Authorization": `Bearer ${token}`
     }
@@ -276,78 +276,290 @@ useEffect(() => {
   .then(response => response.json())
   .then((res) => {
     // console.log(res);
-    // console.log(res);
     if (res.code === 200) {
-      setCartItems(res.cart);
-      setPriceTotal(res.total);
-      setStatus_(parseInt(res.cart[0].cart_info.status));
-      getDatePlus(res.created_at);
+      setSubByID(res.sub);
     } else if (res.code === 401) {
     
-    }
-  });
-
-  fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/User/getShippingAddress.php?userid=${selectedOrder?.cart_info?.userid}`, {
-    headers: {
-      "Authorization": `Bearer ${token}`
-    }
-  })
-  .then(response => response.json())
-  .then((res) => {
-    // console.log(res);
-    if (res.code === 200) {
-      setContactPhone(res.payload.phone);
-      setShippingState(res.payload.state);
-      setTown(res.payload.town);
-      setStreetAddress(res.payload.address);
-      setLandmark(res.payload.landmark);
-      setHouseNumber(res.payload.house_number);
-    } else if (res.code === 401) {
-      // Handle the error appropriately
     }
   });
 
   fetchData(); // Call the asynchronous function
+  fetchDatas(); 
 }, []);
     
 
-const actions = [
-    {
-        name: "Approve",
-        icon: "mdi:approve",
-        doit: (item) => {
-          setSelectedOrder(item);
-          setActiveModal(true);
-        },
-      },
+const handleApproveStatus = async (status, subscription_id) => {
+  
+  setIsLoading(true);
+  try {
+    const token = localStorage.getItem('token'); // Replace with your authentication method
+    const headers = {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'multipart/form-data',
+    };
+
+    const body = {
+      subscription_id: subscription_id, // Use the itemId parameter here
+      status: status, // Use the status parameter here
+    };
+
+    const response = await axios.post(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/User/UpdateSubscription.php`,
       
-    {
-      name: "Pend",
-      icon: "material-symbols:pending-actions-rounded",
-      doit: "(item) => dispatch(updateProject(item))",
-    },
-    {
-      name: "Query",
-      icon: "streamline:interface-help-question-square-frame-help-mark-query-question-square",
-      doit: "   ",
-    },
-    {
-      name: "Deny",
-      icon: "fluent:shifts-deny-24-regular",
-      doit: "   ",
-    },
-  ];
+      body,
+      { headers, cache: 'no-store' }
+    );
+
+    // Handle the response as needed
+    // console.log(response.data);
+    if (response.status === 200) {
+      // Handle a successful response here
+      toast.success(
+        'subscription marked as Approved',
+        {
+          position: 'top-right',
+          autoClose: 1500,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: 'light',
+        }
+      );
+      setTimeout(() => {
+        window.location.reload();
+      }, 3000);
+      setIsLoading(false);
+    } else if (response.status === 401) {
+      // Handle unauthorized access
+    } else {
+      // Handle other status codes or errors
+    }
+  } catch (error) {
+    setError('An error occurred while updating the order status.');
+   
+    toast.error(error, {
+      position: "top-right",
+      autoClose: 1500,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+    });
+    setIsLoading(false);
+  }
+};
+
+const handlePendingStatus = async (status, subscription_id) => {
+ 
+  setIsLoading(true);
+  try {
+    const token = localStorage.getItem('token'); // Replace with your authentication method
+    const headers = {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'multipart/form-data',
+    };
+
+    const body = {
+      subscription_id: subscription_id, // Use the itemId parameter here
+      status: status, // Use the status parameter here
+    };
+
+    const response = await axios.post(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/User/UpdateSubscription.php`,
+      body,
+      { headers, cache: 'no-store' }
+    );
+
+    // Handle the response as needed
+    // console.log(response.data);
+
+    if (response.status === 200) {
+      // Handle a successful response here
+      toast.info(
+        'subscription marked as Pending',
+        {
+          position: 'top-right',
+          autoClose: 1500,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: 'light',
+        }
+      );
+      setTimeout(() => {
+        window.location.reload();
+      }, 3000);
+      setIsLoading(false);
+    } else if (response.status === 401) {
+      // Handle unauthorized access
+    } else {
+      // Handle other status codes or errors
+    }
+  } catch (error) {
+    setError('An error occurred while updating the order status.');
+
+    toast.error(error, {
+      position: "top-right",
+      autoClose: 1500,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+    });
+    setIsLoading(false);
+  }
+};
+
+
+const handleQueryStatus = async (status, subscription_id) => {
+
+  setIsLoading(true);
+  try {
+    const token = localStorage.getItem('token'); // Replace with your authentication method
+    const headers = {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'multipart/form-data',
+    };
+
+    const body = {
+      subscription_id: subscription_id, // Use the itemId parameter here
+      status: status, // Use the status parameter here
+    };
+
+    const response = await axios.post(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/User/UpdateSubscription.php`,
+      
+      body,
+      { headers, cache: 'no-store' }
+    );
+
+    // Handle the response as needed
+    // console.log(response.data);
+    if (response.status === 200) {
+      // Handle a successful response here
+      toast.warning(
+        'subscription has been Queried',
+        {
+          position: 'top-right',
+          autoClose: 1500,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: 'light',
+        }
+      );
+      setTimeout(() => {
+        window.location.reload();
+      }, 3000);
+      setIsLoading(false);
+    } else if (response.status === 401) {
+      // Handle unauthorized access
+    } else {
+      // Handle other status codes or errors
+    }
+  } catch (error) {
+    setError('An error occurred while updating the order status.');
+   
+    toast.error(error, {
+      position: "top-right",
+      autoClose: 1500,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+    });
+    setIsLoading(false);
+  }
+};
+
+const handleDenyStatus = async (status, subscription_id) => {
+
+  setIsLoading(true);
+  try {
+    const token = localStorage.getItem('token'); // Replace with your authentication method
+    const headers = {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'multipart/form-data',
+    };
+
+    const body = {
+      subscription_id: subscription_id, // Use the itemId parameter here
+      status: status, // Use the status parameter here
+    };
+
+    const response = await axios.post(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/User/UpdateSubscription.php`,
+      
+      body,
+      { headers, cache: 'no-store' }
+    );
+
+    // Handle the response as needed
+    // console.log(response.data);
+    if (response.status === 200) {
+      // Handle a successful response here
+      toast.error(
+        'subscription has been Denied',
+        {
+          position: 'top-right',
+          autoClose: 1500,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: 'light',
+        }
+      );
+      setTimeout(() => {
+        window.location.reload();
+      }, 3000);
+      setIsLoading(false);
+    } else if (response.status === 401) {
+      // Handle unauthorized access
+    } else {
+      // Handle other status codes or errors
+    }
+  } catch (error) {
+    setError('An error occurred while updating the order status.');
+   
+    toast.error(error, {
+      position: "top-right",
+      autoClose: 1500,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+    });
+    setIsLoading(false);
+  }
+};
+
+
+
 
   return (
     <>
     <ToastContainer/>
 
-    
-    
-    <Modal className="w-[49%]"
+    {/* <Modal className="w-[49%]"
     activeModal={activeModal}
     onClose={() => setActiveModal(false)}
-    title="Transaction Details"
+    title="Subscription Details"
     footer={
       <Button
         text="Close"
@@ -363,13 +575,11 @@ const actions = [
     <Card title=" Status Variation Badges ">
 
 
-    {/* {cartItems.map((item) => (
-
-            <div key={item.cart_info.id}> */}
+ 
         <div className="space-xy-5">
 
           <Button className="bg-secondary-500 text-white"
-        //    onClick={() => handlePendingStatus('pending', item.cart_info.id)} disabled={isLoading}
+           onClick={() => handleApproveStatus('approve', selectedSub.sub_info.id)} disabled={isLoading}
           >
             <div className="space-x-1 rtl:space-x-reverse">
               <span>{isLoading ? 'Updating...' : 'Approve'}</span>
@@ -378,23 +588,22 @@ const actions = [
           </Button>
           
           <Button className="btn-info"
-            // onClick={() => handlePaidStatus('Paid', item.cart_info.id)} disabled={isLoading}
-          >
+            onClick={() => handlePendingStatus('pending', selectedSub.sub_info.id)} disabled={isLoading}  >
+          
             <div className="space-x-1 rtl:space-x-reverse">
               <span>{isLoading ? 'Updating...' : 'Pend'}</span>
               <Badge  icon="material-symbols:pending-actions-rounded" className="bg-white text-slate-900 " />
             </div>
           </Button>
           <Button className="btn-warning"
-        //    onClick={() => handleProcessingStatus('Processing', item.cart_info.id)} disabled={isLoading}
-          >
+          onClick={() => handleQueryStatus('queried', selectedSub.sub_info.id)} disabled={isLoading}>
             <div className="space-x-1 rtl:space-x-reverse">
               <span>{isLoading ? 'Updating...' : 'Query'}</span>
               <Badge  icon="streamline:interface-help-question-square-frame-help-mark-query-question-square" className="bg-white text-slate-900 " />
             </div>
           </Button>
           <Button className="btn-dark"
-        //    onClick={() => handleTransitStatus('In-Transit', item.cart_info.id)} disabled={isLoading}
+          onClick={() => handleDenyStatus('denied', selectedSub.sub_info.id)} disabled={isLoading}
           >
             <div className="space-x-1 rtl:space-x-reverse">
               <span>{isLoading ? 'Updating...' : 'Deny '}</span>
@@ -404,8 +613,7 @@ const actions = [
         
        
         </div>
-        {/* </div>
-        ))}    */}
+        
 </Card>
 </center>
 </div>
@@ -416,30 +624,39 @@ const actions = [
             <div className="overflow-hidden ">
             <table className="min-w-full divide-y table-fixed divide-slate-100 dark:divide-slate-700">
                 <thead className="bg-slate-200 dark:bg-slate-700">
-                  <tr>
+                <tr>
                       <th scope="col" className="table-th">
                       ID
                     </th>
-                    <th scope="col" className="table-th">
-                    Image
+                      <th scope="col" className="table-th">
+                     Customer ID
                     </th>
                     <th scope="col" className="table-th">
-                    Product Name
+                    Package
                     </th>
                     <th scope="col" className="table-th">
                     Price
                     </th>
                     <th scope="col" className="table-th">
-                    Payment Channel
+                    Package Name
                     </th>
                     <th scope="col" className="table-th">
-                    Qty
+                    Duration
+                    </th>
+                    <th scope="col" className="table-th">
+                    Interest (%)
                     </th>
                     <th scope="col" className="table-th">
                     Status
                     </th>
                     <th scope="col" className="table-th">
+                      Due Date
+                    </th>
+                    <th scope="col" className="table-th">
                       Date
+                    </th>
+                    <th scope="col" className="table-th">
+                      Kyc
                     </th>
                    
                     </tr>
@@ -447,68 +664,58 @@ const actions = [
                 <tbody  className="bg-white divide-y divide-slate-100 dark:bg-slate-800 dark:divide-slate-700" >
                   
                       <tr >
-                      <td className="table-td py-2"> <span> {selectedOrder?.cart_info?.id}</span></td>
-                      <td className="w-8 h-8 rounded-[100%] ltr:mr-2 rtl:ml-2">
-                        <img
-                            className="w-20 h-20 rounded"
-                            src={
-                              selectedOrder?.product === null
-                                ? "https://www.pngkey.com/png/full/233-2332677_image-500580-placeholder-transparent.png"
-                                : selectedOrder?.product?.image
-                            }
-                            width={70}
-                            height={70}
-                            alt=""
-                          /></td>
-                        <td className="table-td py-2"> {selectedOrder?.product?.product_name} </td>
-                        <td className="table-td py-2">  {naira.format(selectedOrder?.product?.price || "0")}</td>
-                        <td className="table-td py-2"> BNPL</td>
-                        <td className="table-td py-2"> {selectedOrder?.cart_info?.qty || "0"} </td>
+                      <td className="table-td py-2"> <span>{selectedSub.sub_info?.id}</span></td>
+                      <td className="table-td py-2 "> {selectedSub.sub_info?.userid} </td>
+                        <td className="table-td py-2"> {selectedSub.sub_info?.package_} </td>
+                        <td className="table-td py-2">  {naira.format(selectedSub.sub_info?.price || "0")}</td>
+                        <td className="table-td py-2"> {selectedSub.package?.package_name } </td>
+                        <td className="table-td py-2"> {selectedSub.sub_info?.duration } days</td>
+                        <td className="table-td py-2"> {selectedSub.sub_info?.interest || "0"} </td>
                         <td className="table-td py-2"> 
                         <span className="block w-full">
             <span
             className={` inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 ${
-              selectedOrder?.order_tracking?.current_status.name === "delivered"
+              selectedSub.sub_info?.status_text === "approve"
                 ? "text-success-500 bg-success-500"
                 : ""
             } 
             ${
-              selectedOrder?.order_tracking?.current_status.name === "closed"
+              selectedSub.sub_info?.status_text === "pending"
                 ? "text-warning-500 bg-warning-500"
                 : ""
             }
             ${
-              selectedOrder?.order_tracking?.current_status.name === "paid"
-                ? "text-info-500 bg-info-500"
-                : ""
-            }
+              selectedSub.sub_info?.status_text === "queried"
+                    ? "text-pending-500 bg-pending-500"
+                    : ""
+                }
+            
             ${
-              selectedOrder?.order_tracking?.current_status.name === "processing"
-                ? "text-processing-400 bg-processing-400"
-                : ""
-            }
-            ${
-              selectedOrder?.order_tracking?.current_status.name === "closed"
+              selectedSub.sub_info?.status_text === "denied"
                 ? "text-danger-500 bg-danger-500"
                 : ""
             }
-                ${
-                  selectedOrder?.order_tracking?.current_status.name=== "pending"
-                    ? "text-pending-500 bg-pending-500"
-                    : ""
-                } ${
-                  selectedOrder?.order_tracking?.current_status.name === "in-transit"
-                ? "text-primary-500 bg-primary-500"
-                : ""
-            }
-            
+                
              `}
           >
-            {selectedOrder?.order_tracking?.current_status.name}
+            { selectedSub.sub_info?.status_text}
           </span>
           </span>
-              </td>
-                        <td className="table-td py-2">  {formattedDate(selectedOrder?.cart_info?.created_at)} </td>
+                        </td>
+              <td className="table-td py-2">  {formattedDate(selectedSub.sub_info?.due_date)} </td>
+               <td className="table-td py-2">  {formattedDate(selectedSub.sub_info?.created_at)} </td>
+               <td className="table-td py-2">  
+               {status == 1 ?  (
+            <div className=" text-success-500 bg-success-500 px-3 inline-block  min-w-[60px] text-xs font-medium text-center mx-auto py-1 rounded-[999px] bg-opacity-25">
+            Approve
+            </div> 
+            ):(
+              <div className=" text-danger-500 bg-danger-500 px-3 inline-block  min-w-[60px]  text-xs font-medium text-center mx-auto py-1 rounded-[999px] bg-opacity-25">
+             Pending
+             
+            </div>
+            )}
+               </td>
 
                       </tr>
                       </tbody>
@@ -521,8 +728,8 @@ const actions = [
                 <br/>
                
                          
-  </Modal>
-
+  </Modal> */}
+    
       <Card>
         <div className="items-center justify-between mb-6 md:flex">
           <h4 className="card-title">{title}</h4>
@@ -543,10 +750,7 @@ const actions = [
                      Customer ID
                     </th>
                     <th scope="col" className="table-th">
-                    Image
-                    </th>
-                    <th scope="col" className="table-th">
-                    Product Name
+                    Package
                     </th>
                     <th scope="col" className="table-th">
                     Price
@@ -555,10 +759,16 @@ const actions = [
                     Package Name
                     </th>
                     <th scope="col" className="table-th">
-                    Discount
+                    Duration
+                    </th>
+                    <th scope="col" className="table-th">
+                    Interest (%)
                     </th>
                     <th scope="col" className="table-th">
                     Status
+                    </th>
+                    <th scope="col" className="table-th">
+                      Due Date
                     </th>
                     <th scope="col" className="table-th">
                       Date
@@ -571,82 +781,53 @@ const actions = [
                
                 </thead>
                 {paginatedHistory.map((item) => (
-                  <React.Fragment key={item.cart_info?.id}>
+                  <React.Fragment key={item.sub_info?.id}>
                 <tbody  className="bg-white divide-y divide-slate-100 dark:bg-slate-800 dark:divide-slate-700" >
                   
                       <tr >
-                      <td className="table-td py-2"> <span>{item.cart_info?.id}</span></td>
-                      <td className="table-td py-2 "> {item.cart_info?.userid} </td>
-                      <td className="w-8 h-8 rounded-[100%] ltr:mr-2 rtl:ml-2">
-                        <img
-                            className="w-20 h-20 rounded"
-                            src={
-                              item.product === null
-                                ? "https://www.pngkey.com/png/full/233-2332677_image-500580-placeholder-transparent.png"
-                                : item.product.image
-                            }
-                            width={70}
-                            height={70}
-                            alt=""
-                          />
-                          </td>
-                        
-                        <td className="table-td py-2"> {item.product?.product_name} </td>
-                        <td className="table-td py-2">  {naira.format(item.product?.price || "0")}</td>
-                        <td className="table-td py-2"> BNPL </td>
-                        <td className="table-td py-2"> {item.cart_info?.qty || "0"} </td>
+                      <td className="table-td py-2"> <span>{item.sub_info?.id}</span></td>
+                      <td className="table-td py-2 "> {item.sub_info?.userid} </td>
+                        <td className="table-td py-2"> {item.sub_info?.package_} </td>
+                        <td className="table-td py-2">  {naira.format(item.sub_info?.price || "0")}</td>
+                        <td className="table-td py-2"> {item.package?.package_name } </td>
+                        <td className="table-td py-2"> {item.sub_info?.duration } days</td>
+                        <td className="table-td py-2"> {item.sub_info?.interest || "0"} </td>
                         <td className="table-td py-2"> 
                         <span className="block w-full">
             <span
             className={` inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 ${
-              item.order_tracking?.current_status.name === "delivered"
+              item.sub_info?.status_text === "approve"
                 ? "text-success-500 bg-success-500"
                 : ""
             } 
             ${
-              item.order_tracking?.current_status.name === "closed"
+              item.sub_info?.status_text === "pending"
                 ? "text-warning-500 bg-warning-500"
                 : ""
             }
             ${
-              item.order_tracking?.current_status.name === "paid"
-                ? "text-info-500 bg-info-500"
-                : ""
-            }
+                  item.sub_info?.status_text === "queried"
+                    ? "text-pending-500 bg-pending-500"
+                    : ""
+                }
+            
             ${
-              item.order_tracking?.current_status.name === "processing"
-                ? "text-processing-400 bg-processing-400"
-                : ""
-            }
-            ${
-              item.order_tracking?.current_status.name === "closed"
+              item.sub_info?.status_text === "denied"
                 ? "text-danger-500 bg-danger-500"
                 : ""
             }
-                ${
-                  item.order_tracking?.current_status.name=== "pending"
-                    ? "text-pending-500 bg-pending-500"
-                    : ""
-                } ${
-                  item.order_tracking?.current_status.name === "in-transit"
-                ? "text-primary-500 bg-primary-500"
-                : ""
-            }
-            
+                
              `}
           >
-            {item.order_tracking?.current_status.name}
+            { item.sub_info?.status_text}
           </span>
           </span>
               </td>
-
-                        <td className="table-td py-2">  {formattedDate(item.cart_info?.created_at)} </td>
-
-                        <td className="table-td py-2">  
-
-                         
+              <td className="table-td py-2">  {formattedDate(item.sub_info?.due_date)} </td>
+               <td className="table-td py-2">  {formattedDate(item.sub_info?.created_at)} </td>
+             <td className="table-td py-2">                    
         <div>
-            <Dropdown
+              <Dropdown
               classMenuItems="right-0 w-[140px] top-[110%] "
               label={
                 <span className="text-xl text-center block w-full">
@@ -655,36 +836,77 @@ const actions = [
               }
             >
               <div className="divide-y divide-slate-100 dark:divide-slate-800">
-                {actions.map((item, i) => (
-                  <Menu.Item
-                    key={i}
-                    onClick={() => item.doit(item)}
-                  >
-                    <div
-                      className={`
                 
-                  ${
-                    item.name === "Deny"
-                      ? "bg-danger-500 text-danger-500 bg-opacity-30   hover:bg-opacity-100 hover:text-white"
-                      : "hover:bg-slate-900 hover:text-white dark:hover:bg-slate-600 dark:hover:bg-opacity-50"
-                  }
-                   w-full border-b border-b-gray-500 border-opacity-10 px-4 py-2 text-sm  last:mb-0 cursor-pointer 
-                   first:rounded-t last:rounded-b flex  space-x-2 items-center rtl:space-x-reverse `}
-                    >
+                  <Menu.Item
+                   onClick={() => { setSelectedSub(item);setActiveModal(true); }} disabled={isLoading}
+                  >
+                     <div className= "hover:bg-slate-900 hover:text-white dark:hover:bg-slate-600 dark:hover:bg-opacity-50 w-full border-b border-b-gray-500 border-opacity-10 px-4 py-2 text-sm  last:mb-0 cursor-pointer first:rounded-t last:rounded-b flex space-x-2 items-center rtl:space-x-reverse"
+                 >
                       <span className="text-base">
-                        <Icon icon={item.icon} />
+                        <Icon icon='mdi:eye'/>
                       </span>
-                      <span>{item.name}</span>
+                      <span> View</span>
                     </div>
+                    
                   </Menu.Item>
-                ))}
+                  
+                  <Menu.Item
+                  onClick={() => handleApproveStatus('approve', item.sub_info.id)} disabled={isLoading}
+                  >
+                     <div className= "hover:bg-slate-900 hover:text-white dark:hover:bg-slate-600 dark:hover:bg-opacity-50 w-full border-b border-b-gray-500 border-opacity-10 px-4 py-2 text-sm  last:mb-0 cursor-pointer first:rounded-t last:rounded-b flex space-x-2 items-center rtl:space-x-reverse"
+                 >
+                      <span className="text-base">
+                        <Icon icon='mdi:approve'/>
+                      </span>
+                      <span> {isLoading ? 'Updating...' : 'Approve'}</span>
+                    </div>
+                    
+                  </Menu.Item>
+
+                  <Menu.Item
+                     onClick={() => handlePendingStatus('pending', item.sub_info.id)} disabled={isLoading}  >
+                  
+                    <div className= "hover:bg-slate-900 hover:text-white dark:hover:bg-slate-600 dark:hover:bg-opacity-50 w-full border-b border-b-gray-500 border-opacity-10 px-4 py-2 text-sm  last:mb-0 cursor-pointer first:rounded-t last:rounded-b flex space-x-2 items-center rtl:space-x-reverse"
+                 >
+                      <span className="text-base">
+                        <Icon icon='material-symbols:pending-actions-rounded'/>
+                      </span>
+                      <span> {isLoading ? 'Updating...' : 'Pend'}</span>
+                    </div>
+                    
+                  </Menu.Item>
+                  <Menu.Item
+                   onClick={() => handleQueryStatus('queried', item.sub_info.id)} disabled={isLoading}>
+                     <div className= "hover:bg-slate-900 hover:text-white dark:hover:bg-slate-600 dark:hover:bg-opacity-50 w-full border-b border-b-gray-500 border-opacity-10 px-4 py-2 text-sm  last:mb-0 cursor-pointer first:rounded-t last:rounded-b flex space-x-2 items-center rtl:space-x-reverse"
+                 >
+                      <span className="text-base">
+                        <Icon icon='streamline:interface-help-question-square-frame-help-mark-query-question-square'/>
+                      </span>
+                      <span> {isLoading ? 'Updating...' : 'Query'}</span>
+                    </div>
+                    
+                  </Menu.Item>
+
+                  <Menu.Item 
+                  onClick={() => handleDenyStatus('denied', item.sub_info.id)} disabled={isLoading}
+                   >
+                    <div
+                      className="bg-danger-500 text-danger-500 bg-opacity-30   hover:bg-opacity-100 hover:text-white w-full border-b border-b-gray-500 border-opacity-10 px-4 py-2 text-sm  last:mb-0 cursor-pointer 
+                   first:rounded-t last:rounded-b flex  space-x-2 items-center rtl:space-x-reverse " >
+                      <span className="text-base">
+                        <Icon icon='fluent:shifts-deny-24-regular'/>
+                      </span>
+                      <span> {isLoading ? 'Updating...' : 'Deny'}</span>
+                    </div>
+                    
+                  </Menu.Item>
               </div>
             </Dropdown>
           </div>
 
+           </td>
           
-                            </td>
-                      </tr>
+                </tr>
                     
                 </tbody>
                 </React.Fragment>
@@ -694,11 +916,13 @@ const actions = [
                     <br/>
                     <br/>
                     <br/>
+                    <br/>
+                 
+                    
               </table>
             </div>
           </div>
         </div>
-
        
         <div className="items-center justify-between mt-6 space-y-5 md:flex md:space-y-0">
           <div className="flex items-center space-x-3 rtl:space-x-reverse">

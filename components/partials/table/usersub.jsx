@@ -19,22 +19,27 @@ import Link from "next/link";
 import BasicArea from "@/components/partials/chart/appex-chart/BasicArea";
 import axios from 'axios'; // Import Axios at the top of your file
 
-
+const backgrounds = [
+  'https://img.pikbest.com/origin/09/05/42/54gpIkbEsT8SV.jpg!w700wp',
+  'https://img.pikbest.com/origin/09/05/42/54gpIkbEsT8SV.jpg!w700wp',
+  'https://img.pikbest.com/origin/09/07/20/73bpIkbEsT85E.jpg!w700wp',
+  'https://img.pikbest.com/origin/09/05/42/54gpIkbEsT8SV.jpg!w700wp',
+  'https://img.pikbest.com/origin/09/05/42/91VpIkbEsTEHU.jpg!w700wp',
+  'https://img.pikbest.com/origin/09/05/42/91VpIkbEsTEHU.jpg!w700wp',
+  'https://img.pikbest.com/origin/09/05/42/95XpIkbEsTGaW.jpg!sw800',
+];
 
 const AllSubcriptions = ({ title = ("User Subscriptions"), item }) => {
   const dispatch = useDispatch();
   const router = useRouter()
-
+  const [currentBackground, setCurrentBackground] = useState(0);
   const [subByID, setSubByID] = useState([]);
-  const [selectedOrder, setSelectedOrder] = useState(null); // State to store the selected order data
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(5); // Added pageSize state
   const itemsPerPage = pageSize; // Use pageSize for itemsPerPage
   const maxPageButtons = 5; // Number of page buttons to display
   const [globalFilter, setGlobalFilter] = useState(""); // Global filter
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [user_id, setUser_id] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
@@ -47,6 +52,8 @@ const AllSubcriptions = ({ title = ("User Subscriptions"), item }) => {
   const [avatar, setAvatar] = useState("");
   const [isBusiness, setIsbusiness] = useState(null);
   const [status, setStatus] = useState(null);
+
+  const userid = "24011343-7323075-4480759";
   
 // Function to format date value
 function formattedDate(rawDate) {
@@ -160,9 +167,9 @@ useEffect(() => {
   const fetchData = async () => {
     try {
       var token = localStorage.getItem("token");
-      var userid = localStorage.getItem("userid");
+      // var userid = localStorage.getItem("userid");
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/Products/getSubscription.php?userid=24011343-7323075-4480759`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/Products/getSubscription.php?userid=${userid}`, {
         cache: 'no-store',
         headers: {
           "Authorization": `Bearer ${token}`
@@ -212,31 +219,12 @@ useEffect(() => {
     }
   };
 
-  var token = localStorage.getItem("token");
-  // Use the orderId prop directly
-  fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/User/getKYC.php?userid=${user_id}`, {
-    headers: {
-      "Authorization": `Bearer ${token}`
-    }
-  })
-  .then(response => response.json())
-  .then((res) => {
-    
-    // console.log(res);
-    if (res.code === 200) {
-      setStatus(res.kyc.status);
-    } else if (res.code === 401) {
-    
-    }
-  });
-
 
   const fetchDatas = async () => {
     try {
       const token = localStorage.getItem('token');
-      const userid = localStorage.getItem('userid');
 
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/User/riskAnalysis?userid=20285485-1986772-930711696&from=11-01-2022&to=01-01-2023`, {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/User/getKYC.php?userid=${userid}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -257,10 +245,12 @@ useEffect(() => {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
-      console.log(response.data);
+      
 
       if (response.data.code === 200) {
+        // console.log(response.data);
         // Handle successful response
+        setStatus(response.data.kyc.status);
       } else if (response.data.code === 401) {
         setTimeout(() => {
           router.push('/');
@@ -280,35 +270,11 @@ useEffect(() => {
       });
     }
   };
-
-
-
-  var token = localStorage.getItem("token");
-axios({
-  method: 'get',
-  url: `${process.env.NEXT_PUBLIC_BASE_URL}/User/getKYC.php?userid=${user_id}`,
-  headers: {
-    Authorization: `Bearer ${token}`,
-  },
-})
-  .then((response) => {
-    // const res = response.data; // Access the response data
-
-    if (res.code === 200) {
-      setStatus(res.kyc.status);
-    } else if (res.code === 401) {
-      // Handle unauthorized error if needed
-    }
-  })
-  .catch((error) => {
-    // Handle errors here, such as network errors or invalid responses
-    console.error('Error:', error);
-  });
   
 
   var token = localStorage.getItem("token");
   // Use the orderId prop directly
-  fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/User/getUser.php?userid=${user_id}`, {
+  fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/User/getUser.php?userid=${userid}`, {
     headers: {
       "Authorization": `Bearer ${token}`
     }
@@ -338,13 +304,12 @@ axios({
 
 
   fetchData(); // Call the asynchronous function
-  fetchDatas(); // Call the asynchronous function
+  fetchDatas(); 
 }, []);
     
 
 const handleApproveStatus = async (status, subscription_id) => {
-  console.log(status)
-  console.log(subscription_id)
+  
   setIsLoading(true);
   try {
     const token = localStorage.getItem('token'); // Replace with your authentication method
@@ -366,11 +331,11 @@ const handleApproveStatus = async (status, subscription_id) => {
     );
 
     // Handle the response as needed
-    console.log(response.data);
+    // console.log(response.data);
     if (response.status === 200) {
       // Handle a successful response here
       toast.success(
-        'Ordered Product Mark as Paid, Ready for Processing',
+        'subscription marked as Approved',
         {
           position: 'top-right',
           autoClose: 1500,
@@ -409,8 +374,7 @@ const handleApproveStatus = async (status, subscription_id) => {
 };
 
 const handlePendingStatus = async (status, subscription_id) => {
-  console.log(status)
-  console.log(subscription_id)
+ 
   setIsLoading(true);
   try {
     const token = localStorage.getItem('token'); // Replace with your authentication method
@@ -431,12 +395,12 @@ const handlePendingStatus = async (status, subscription_id) => {
     );
 
     // Handle the response as needed
-    console.log(response.data);
+    // console.log(response.data);
 
     if (response.status === 200) {
       // Handle a successful response here
       toast.info(
-        'Order is awaiting payment',
+        'subscription marked as Pending',
         {
           position: 'top-right',
           autoClose: 1500,
@@ -476,8 +440,7 @@ const handlePendingStatus = async (status, subscription_id) => {
 
 
 const handleQueryStatus = async (status, subscription_id) => {
-  console.log(status)
-  console.log(subscription_id)
+
   setIsLoading(true);
   try {
     const token = localStorage.getItem('token'); // Replace with your authentication method
@@ -499,11 +462,11 @@ const handleQueryStatus = async (status, subscription_id) => {
     );
 
     // Handle the response as needed
-    console.log(response.data);
+    // console.log(response.data);
     if (response.status === 200) {
       // Handle a successful response here
-      toast.success(
-        'We are currently processing your order with care',
+      toast.warning(
+        'subscription has been Queried',
         {
           position: 'top-right',
           autoClose: 1500,
@@ -542,9 +505,7 @@ const handleQueryStatus = async (status, subscription_id) => {
 };
 
 const handleDenyStatus = async (status, subscription_id) => {
-  // console.log('deny')
-  console.log(status)
-  console.log(subscription_id)
+
   setIsLoading(true);
   try {
     const token = localStorage.getItem('token'); // Replace with your authentication method
@@ -566,11 +527,11 @@ const handleDenyStatus = async (status, subscription_id) => {
     );
 
     // Handle the response as needed
-    console.log(response.data);
+    // console.log(response.data);
     if (response.status === 200) {
       // Handle a successful response here
-      toast.success(
-        'Order is now in transit and on its way to your location',
+      toast.error(
+        'subscription has been Denied',
         {
           position: 'top-right',
           autoClose: 1500,
@@ -608,13 +569,36 @@ const handleDenyStatus = async (status, subscription_id) => {
   }
 };
 
+
+// background changes
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentBackground((prevBackground) =>
+        (prevBackground + 1) % backgrounds.length
+      );
+    }, 60000); // Change every 1 minute (in milliseconds)
+
+    return () => {
+      clearInterval(interval); // Clear the interval when the component unmounts
+    };
+  }, []);
+
   return (
     <>
     <ToastContainer/>
 
 
-    <div className="profiel-wrap px-[35px] pb-10 md:pt-[84px] pt-10 rounded-lg bg-white dark:bg-slate-800 lg:flex lg:space-y-0 space-y-6 justify-between items-end relative z-[1]">
-          <div className="bg-slate-900 dark:bg-slate-700 absolute left-0 top-0 md:h-1/2 h-[150px] w-full z-[-1] rounded-t-lg">
+    <div className="profiel-wrap px-[35px] pb-10 md:pt-[84px] pt-10 rounded-lg bg-white dark:bg-[#000000] lg:flex lg:space-y-0 space-y-6 justify-between items-end relative z-[1]">
+    <div
+  className="bg-slate-900 dark:bg-slate-700 absolute left-0 top-0 md:h-1/2 h-[150px] w-full z-[-1] rounded-t-lg"
+  style={{
+backgroundImage: `url(${backgrounds[currentBackground]})`,
+backgroundRepeat: 'no-repeat',
+backgroundSize: 'cover', 
+}}
+>
+ 
           <div className="flex-none flex md:space-x-3 space-x-1 items-center rtl:space-x-reverse absolute right-3 top-3">
           <Link href={`tel:${phone}`}>
             <div className="msg-action-btn">

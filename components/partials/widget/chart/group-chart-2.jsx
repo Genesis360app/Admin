@@ -247,7 +247,7 @@ const GroupChart2 = () => {
         }
       })
       .then((res) => {
-        console.log(res);
+        // console.log(res);
         if (res.code === 200) {
           setAll_packages(res.all_packages);
           setAll_orders(res.all_orders);
@@ -287,14 +287,6 @@ const GroupChart2 = () => {
       text: "text-info-500",
       icon: "heroicons:shopping-cart",
     },
-    // {
-    //   name: shapeLine2,
-    //   title: "Total Customer",
-    //   count: productsSoldCount,
-    //   bg: "bg-[#FFEDE6] dark:bg-slate-900",
-    //   text: "text-warning-500",
-    //   icon: "heroicons:cube",
-    // },
     {
       name: shapeLine3,
       title: "Total Packages",

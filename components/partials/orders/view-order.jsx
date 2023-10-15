@@ -118,10 +118,9 @@ const naira = new Intl.NumberFormat("en-NG", {
         })
         .then(response => response.json())
         .then((res) => {
-        console.log(res);
+        // console.log(res);
         if(res.code == 200){
-            // console.log("Orders");
-            // console.log(res)
+           
             setCartItems(res.cart)
             setPriceTotal(res.total)
             
@@ -150,7 +149,7 @@ const naira = new Intl.NumberFormat("en-NG", {
           })
           .then(response => response.json())
           .then((res) => {
-          console.log(res);
+          // console.log(res);
           if(res.code == 200){
               setContactPhone(res.payload.phone);
               setShippingState(res.payload.state);

@@ -6,6 +6,7 @@ import Card from "@/components/ui/Card";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { InfinitySpin } from 'react-loader-spinner';
+import Map from "@/components/partials/table/Map";
 import dynamic from "next/dynamic";
 
 const Simple = () => {
@@ -33,11 +34,13 @@ const Simple = () => {
         
    
     var token = localStorage.getItem('token');
+    var userid = localStorage.getItem('userid');
     var payload = new FormData();
     payload.append('kilometre', kilometre);
     payload.append('amount', amount);
 
-    fetch(`${process.env.NEXT_PUBLIC_BASE2_URL}/logistics/set_pricing/20285485-1986772-930711696`, {
+
+    fetch(`${process.env.NEXT_PUBLIC_BASE2_URL}/logistics/set_pricing/${userid}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -84,21 +87,61 @@ const Simple = () => {
 };  
 
 
-       
+useEffect(() => {
+  var userid = localStorage.getItem('userid');
+  var token = localStorage.getItem('token');
+  fetch(`${process.env.NEXT_PUBLIC_BASE2_URL}/logistics/get_pricing/${userid}`, {
+  
+  cache:'no-cache',
+
+  headers: {
+      Authorization: `Bearer ${token}`,
+    },
+   
+  })
+    .then((response) => response.json())
+    .then((res) => {
+      console.log(res);
+      if (res.code === 200) {
+        
+        
+      } else if (res.code === 401) {
+        
+        toast.error("An error occurred, please login again", {
+          position: "top-right",
+          autoClose: 1500,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+        
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 2000);
+      }
+    });
+}, 
+
+
+[]);
+  
 
   return (
     
     
-    <div>
+    <>
     
     <div className=" space-y-5">
       <Card title="Basic Map">
-        <BasicMap />
+        <Map />
       </Card>
      
     </div>
     <br/>
-      <div className="grid xl:grid-cols-2 grid-cols-1 gap-5">
+      <div className="grid xl:grid-cols-2  grid-cols-1 gap-5">
         <Card title="Delivery Fee Settings">
           <form  className="space-y-4 ">
             <Textinput
@@ -139,7 +182,7 @@ const Simple = () => {
           </form>
         </Card>
       </div>
-    </div>
+    </>
  
   
   );

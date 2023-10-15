@@ -98,7 +98,7 @@ const ProductGrid = ({ project, globalFilter }) => {
           const body = await response.json();
 
           setProductItems(body);
-          console.log(body);
+          // console.log(body);
         } else {
           // Handle non-200 status codes here
           console.error(`HTTP error! Status: ${statusCode}`);

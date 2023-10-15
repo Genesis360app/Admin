@@ -1,6 +1,6 @@
 "use client";
 
-import SubById from "@/components/partials/table/[id]";
+import SubById from "@/components/partials/table/usersub";
 import ProductBredCurbs from "@/components/partials/ProductBredCurbs";
 import dynamic from "next/dynamic";
 const Carousel = dynamic(() => import("@/components/ui/Carousel"), {
