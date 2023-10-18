@@ -34,6 +34,32 @@ export const menuItems = [
       // },
     ],
   },
+
+
+
+  {
+    isHeadr: true,
+    title: "Business",
+  },
+  {
+    title: "Businesses",
+    icon: "ion:business-outline",
+    link: "#",
+    child: [
+      {
+        childtitle: " All Businesses",
+        childlink: "all_business",
+        icon: "ic:outline-add-business",
+      },
+      {
+        childtitle: "Pay Business",
+        childlink: "pay_business",
+        icon: "arcticons:amazon-business",
+      },
+     
+    ],
+  },
+  
   // {
   //   title: "changelog",
   //   icon: "heroicons:arrow-trending-up",
@@ -41,6 +67,37 @@ export const menuItems = [
   //   isHide: false,
   //   badge: "1.0.0",
   // },
+  {
+    isHeadr: true,
+    title: "customers",
+  },
+  
+  {
+    title: "Genesis Customers",
+    isHide: true,
+    icon: "solar:cart-2-bold",
+    link: "all_customers",
+    badge: "All",
+  },
+  
+ 
+  {
+    title: "Subscriptions",
+    isHide: true,
+    icon: "eos-icons:subscriptions-created-outlined",
+    link: "subscriptions",
+    badge: "All",
+  },
+  {
+    title: "Packages",
+    isHide: true,
+    icon: "emojione-monotone:package",
+    link: "packages",
+  },
+ 
+
+  
+
   {
     isHeadr: true,
     title: "apps",
@@ -52,12 +109,7 @@ export const menuItems = [
     icon: "dashicons:products",
     link: "products",
   },
-  {
-    title: "orderid",
-    isHide: true,
-    icon: "heroicons-outline:calendar",
-    link: "order1",
-  },
+
   {
     title: "Orders",
     isHide: true,
@@ -65,12 +117,7 @@ export const menuItems = [
     link: "orders",
     badge: "All",
   },
-  {
-    title: "Packages",
-    isHide: true,
-    icon: "emojione-monotone:package",
-    link: "packages",
-  },
+ 
   {
     title: "Transactions",
     isHide: true,
@@ -78,12 +125,12 @@ export const menuItems = [
     link: "transactions",
     badge: "All",
   },
+
   {
-    title: "Subscriptions",
+    title: "orderid",
     isHide: true,
-    icon: "eos-icons:subscriptions-created-outlined",
-    link: "subscriptions",
-    badge: "All",
+    icon: "heroicons-outline:calendar",
+    link: "order1",
   },
   {
     title: "Subscriptionbyid",

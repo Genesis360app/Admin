@@ -331,7 +331,7 @@ const HomeBredCurbs = ({ title }) => {
     var data = new FormData();
   
     if (userid && token) {
-      data.append("sender_email", senderemail);
+      data.append("sender_email", email);
       data.append("receiver_email", recieveremail);
       data.append("amount", sendamount);
       try {
@@ -649,7 +649,7 @@ const HomeBredCurbs = ({ title }) => {
                   className="text-xs text-slate-500 dark:text-slate-400 block cursor-pointer mb-1"
                   htmlFor="cd"
                 >
-                  Recipient username
+                  Recipient Email
                 </label>
 
                 <Textinput

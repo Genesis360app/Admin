@@ -600,7 +600,7 @@ const handleItemClick = (item) => {
                             src={
                               item.product === null
                                 ? "https://www.pngkey.com/png/full/233-2332677_image-500580-placeholder-transparent.png"
-                                : item.product.image
+                                : item.product?.image
                             }
                             width={70}
                             height={70}

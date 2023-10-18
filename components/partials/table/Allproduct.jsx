@@ -15,7 +15,7 @@ import { ToastContainer } from "react-toastify";
 import GlobalFilter from "./GlobalFilter";
 
 
-const ProjectPostPage = () => {
+const ProductPostPage = () => {
   const [filler, setfiller] = useState("grid");
   const { width, breakpoints } = useWidth();
   const [isLoaded, setIsLoaded] = useState(false);
@@ -116,4 +116,4 @@ const ProjectPostPage = () => {
   );
 };
 
-export default ProjectPostPage;
+export default ProductPostPage;
