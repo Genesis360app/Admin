@@ -561,7 +561,7 @@ const handleApprovekyc = async (status, id) => {
         window.location.reload();
       }, 3000);
       setIsLoading(false);
-    } else if (response.status === 401) {
+    } else if (response.code === 401) {
       // Handle unauthorized access
     } else {
       // Handle other status codes or errors

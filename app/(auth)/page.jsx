@@ -18,8 +18,8 @@ const Login = () => {
                 <img
                   src={
                     isDark
-                      ? "/assets/images/logo/logo-white.svg"
-                      : "/assets/images/logo/logo.svg"
+                      ? "/assets/images/logo/Genesis360green.png"
+                      : "/assets/images/logo/Genesislogo.png"
                   }
                   alt=""
                   className="mb-10"
@@ -48,8 +48,8 @@ const Login = () => {
                     <img
                       src={
                         isDark
-                          ? "/assets/images/logo/logo-white.svg"
-                          : "/assets/images/logo/logo.svg"
+                        ? "/assets/images/logo/Genesis360green.png"
+                      : "/assets/images/logo/Genesislogo.png"
                       }
                       alt=""
                       className="mx-auto"
