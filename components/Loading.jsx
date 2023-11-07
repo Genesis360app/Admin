@@ -30,6 +30,15 @@ const Loading = () => {
       </svg>
 
       <span className=" inline-block mt-1 font-medium  text-sm">
+      <img
+                      src={
+                        isDark
+                        ? "/assets/images/logo/Genesis360green.png"
+                      : "/assets/images/logo/Genesislogo.png"
+                      }
+                      alt=""
+                      className="mx-auto h-15 w-20"
+                    />
         Loading ...
       </span>
     </div>

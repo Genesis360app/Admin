@@ -11,16 +11,10 @@ import { SwiperSlide } from "swiper/react";
 import Card from "@/components/ui/Card";
 
 const All_orders = () => {
-
-
-    
   return (
     <div className="space-y-5 ">
-      
-   
       <Allproducts />
     </div>
-    
   );
 };
 

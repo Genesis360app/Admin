@@ -29,16 +29,16 @@ const SidebarLogo = ({ menuHover }) => {
         <div className="flex items-center space-x-4">
           <div className="logo-icon">
             {!isDark && !isSemiDark ? (
-              <img src="/assets/images/logo/logo-c.svg" alt="" />
+              <img src="/assets/images/logo/logo.png" alt="" className="w-10" />
             ) : (
-              <img src="/assets/images/logo/logo-c-white.svg" alt="" />
+              <img src="/assets/images/logo/logo.png" alt="" className="w-10" />
             )}
           </div>
 
           {(!collapsed || menuHover) && (
             <div>
               <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
-                DashCode
+                Genesis360
               </h1>
             </div>
           )}

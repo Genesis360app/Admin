@@ -10,12 +10,11 @@ export const menuItems = [
     isOpen: true,
     isHide: true,
     child: [
-      
       {
         childtitle: "Ecommerce Dashboard",
         childlink: "ecommerce",
       },
-     
+
       {
         childtitle: " CRM Dashbaord",
         childlink: "crm",
@@ -24,7 +23,7 @@ export const menuItems = [
         childtitle: "Banking Dashboard",
         childlink: "banking",
       },
-       // {
+      // {
       //   childtitle: "Project  Dashbaord",
       //   childlink: "project",
       // },
@@ -34,8 +33,6 @@ export const menuItems = [
       // },
     ],
   },
-
-
 
   {
     isHeadr: true,
@@ -56,10 +53,9 @@ export const menuItems = [
         childlink: "pay_business",
         icon: "arcticons:amazon-business",
       },
-     
     ],
   },
-  
+
   // {
   //   title: "changelog",
   //   icon: "heroicons:arrow-trending-up",
@@ -71,7 +67,7 @@ export const menuItems = [
     isHeadr: true,
     title: "customers",
   },
-  
+
   {
     title: "Genesis Customers",
     isHide: true,
@@ -79,8 +75,7 @@ export const menuItems = [
     link: "all_customers",
     badge: "All",
   },
-  
- 
+
   {
     title: "Subscriptions",
     isHide: true,
@@ -94,9 +89,6 @@ export const menuItems = [
     icon: "emojione-monotone:package",
     link: "packages",
   },
- 
-
-  
 
   {
     isHeadr: true,
@@ -117,7 +109,7 @@ export const menuItems = [
     link: "orders",
     badge: "All",
   },
- 
+
   {
     title: "Transactions",
     isHide: true,
@@ -130,7 +122,7 @@ export const menuItems = [
     title: "orderid",
     isHide: true,
     icon: "heroicons-outline:calendar",
-    link: "order1",
+    link: "order",
   },
   {
     title: "Subscriptionbyid",
@@ -160,7 +152,7 @@ export const menuItems = [
   //   icon: "heroicons-outline:view-boards",
   //   link: "kanban",
   // },
-  
+
   // {
   //   title: "Calender",
   //   isHide: true,
@@ -209,7 +201,6 @@ export const menuItems = [
         childtitle: "Recover Password",
         childlink: "forgetpassword",
       },
-     
     ],
   },
   // {
@@ -278,8 +269,6 @@ export const menuItems = [
     link: "#",
     isHide: false,
     child: [
-     
-    
       {
         childtitle: "Profile",
         childlink: "profile",
@@ -319,23 +308,34 @@ export const menuItems = [
       //   childtitle: "Blank page",
       //   childlink: "blank-page",
       // },
-      
-    //   {
-    //     childtitle: "404 page",
-    //     childlink: "error-page",
-    //   },
 
-    //   {
-    //     childtitle: "Coming Soon",
-    //     childlink: "coming-soon",
-    //   },
-    //   {
-    //     childtitle: "Under Maintanance page",
-    //     childlink: "under-construction",
-    //   },
+      //   {
+      //     childtitle: "404 page",
+      //     childlink: "error-page",
+      //   },
 
+      //   {
+      //     childtitle: "Coming Soon",
+      //     childlink: "coming-soon",
+      //   },
+      //   {
+      //     childtitle: "Under Maintanance page",
+      //     childlink: "under-construction",
+      //   },
     ],
   },
+
+  {
+    isHeadr: true,
+    title: "AI Assistance",
+  },
+  {
+    title: "Bank Analysis",
+    isHide: true,
+    icon: "eos-icons:subscriptions-created-outlined",
+    link: "bank_analysis",
+  },
+
   // {
   //   isHeadr: true,
   //   title: "Elements",

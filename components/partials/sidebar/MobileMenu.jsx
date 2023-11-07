@@ -38,9 +38,9 @@ const MobileMenu = ({ className = "custom-class" }) => {
           <div className="flex items-center space-x-4">
             <div className="logo-icon">
               {!isDark && !isSemiDark ? (
-                <img src="/assets/images/logo/logo-c.svg" alt="" />
+                <img src="/assets/images/logo/logo.png" alt="" className="w-10"  />
               ) : (
-                <img src="/assets/images/logo/logo-c-white.svg" alt="" />
+                <img src="/assets/images/logo/logo.png" alt="" className="w-10"  />
               )}
             </div>
             <div>
@@ -82,9 +82,9 @@ const MobileMenu = ({ className = "custom-class" }) => {
             </div>
           </div>
           <div className="mt-6">
-            <button className="btn bg-white hover:bg-opacity-80 text-slate-900 btn-sm w-full block">
+            {/* <button className="btn bg-white hover:bg-opacity-80 text-slate-900 btn-sm w-full block">
               Upgrade
-            </button>
+            </button> */}
           </div>
         </div>
       </SimpleBar>

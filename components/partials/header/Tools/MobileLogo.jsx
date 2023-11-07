@@ -2,13 +2,13 @@ import React from "react";
 import Link from "next/link";
 import useDarkMode from "@/hooks/useDarkMode";
 
-import MainLogo from "@/assets/images/logo/logo.svg";
-import LogoWhite from "@/assets/images/logo/logo-white.svg";
+import MainLogo from "@/assets/images/logo/logo.png";
+import LogoWhite from "@/assets/images/logo/logo.png";
 const MobileLogo = () => {
   const [isDark] = useDarkMode();
   return (
-    <Link href="/analytics">
-      <img src={isDark ? LogoWhite : MainLogo} alt="" />
+    <Link href="/ecommerce">
+      <img src={isDark ? LogoWhite : MainLogo} alt="" className="w-10" />
     </Link>
   );
 };
