@@ -42,6 +42,87 @@ const fetchTransactions = async () => {
     }
   };
 
+  const getBankAccount = async (
+    bvn) => {
+    try {
+
+      const userString = localStorage.getItem("user");
+      if (!userString) {
+        throw new Error('User token not found');
+      }
+  
+      const user = JSON.parse(userString);
+  
+      if (!user || !user.token || !user.userId) {
+        throw new Error('Invalid user data');
+      }
+      
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/wallet/generate-wallet`,
+        {
+          bvn,
+          
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+  
+      if (response.data) {
+        
+      }
+  
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        // console.error('Axios Error:', error);
+        throw error.response?.data || 'Internal Server Error';
+      } else {
+        // console.error('Unexpected Error:', error);
+        throw 'An unexpected error occurred';
+      }
+    }
+  };
+  const getWallet = async () => {
+    try {
+        const userString = localStorage.getItem("user");
+        if (!userString) {
+          throw new Error('User token not found');
+        }
+    
+        const user = JSON.parse(userString);
+    
+        if (!user || !user.token || !user.userId) {
+          throw new Error('Invalid user data');
+        }
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/wallet/user-wallet`,
+        {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+            'Content-Type': 'application/json',
+            'ngrok-skip-browser-warning': 'true',
+          },
+        }
+      );
+  
+      if (response) {
+        // console.log(response);
+
+      }
+  
+      return response;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw error.response?.data ||handleApiError; // Include error.message for unexpected errors
+      } else {
+        throw 'An unexpected error occurred';
+      }
+    }
+  };
   const handleApiError = (error) => {
     if (axios.isAxiosError(error)) {
       const response  = error.response;
@@ -76,6 +157,9 @@ const fetchTransactions = async () => {
   };
   export const walletService = {
     fetchTransactions,
+    getBankAccount,
+    getWallet,
+
     };
     
 // export default userService;

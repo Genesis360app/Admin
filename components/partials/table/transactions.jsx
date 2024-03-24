@@ -51,6 +51,9 @@ const TransactionsTable = () => {
     }
   }
 
+
+  
+
   // Function to filter data based on globalFilter value
   // Function to filter data based on globalFilter value
   const filteredData = useMemo(() => {
@@ -125,13 +128,13 @@ const TransactionsTable = () => {
         const response = await walletService.fetchTransactions(); // Call fetchUsers as a function
 
         if (response) {
-          console.log(response); // Use response.data
+          // console.log(response); // Use response.data
           setHistory(response.transactions);
         } else {
           // Handle case where response or response.data is undefined
         }
       } catch (err) {
-        console.error("Error:", err);
+        // console.error("Error:", err);
       }
     };
     transactionData();

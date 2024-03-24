@@ -76,8 +76,8 @@ const AllTransaction = ({ title = "All Transaction" }) => {
   // Function to filter data based on globalFilter value
   const filteredData = useMemo(() => {
     return (history || []).filter((item) => {
-      const transaction_ref = (item?.transaction_ref || "").toString(); // Access product_name safely and convert to lowercase
-      const txn_Id = (item?.id || "").toString(); // Access package_id safely and convert to string
+      const transaction_ref = (item?.description || "").toString(); // Access product_name safely and convert to lowercase
+      const amount = (item?.amount || "").toString(); // Access package_id safely and convert to string
       const date = (formattedDate(item?.created_at) || "").toString(); // Access package_id safely and convert to string
 
       // Check if globalFilter is defined and not null before using trim
@@ -86,7 +86,7 @@ const AllTransaction = ({ title = "All Transaction" }) => {
       // Customize this logic to filter based on your specific requirements
       return (
         transaction_ref.includes(filterText.toLowerCase()) ||
-        txn_Id.includes(filterText) ||
+        amount.includes(filterText) ||
         date.includes(filterText)
       );
     });
@@ -146,13 +146,13 @@ const AllTransaction = ({ title = "All Transaction" }) => {
         const response = await walletService.fetchTransactions(); // Call fetchUsers as a function
 
         if (response) {
-          console.log(response); // Use response.data
+          // console.log(response); // Use response.data
           setHistory(response.transactions);
         } else {
           // Handle case where response or response.data is undefined
         }
       } catch (err) {
-        console.error("Error:", err);
+        // console.error("Error:", err);
       }
     };
     transactionData();

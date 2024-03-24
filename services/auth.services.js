@@ -24,6 +24,49 @@ const login = async (email, password) => {
     }
   };
 
+  const register = async (
+    username,
+    firstname,
+    lastname,
+    password,
+    email,
+    phone,
+    rcNumber,
+    isBusiness,
+    isRegistered,
+    referralCode,
+    business_name,
+    business_address,
+    business_category,
+  ) => {
+    try {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/users/register`, {
+        username,
+        firstname,
+        lastname,
+        email,
+        password,
+        phone,
+        rcNumber,
+        isBusiness,
+        isRegistered,
+        referralCode,
+        business_name,
+        business_address,
+        business_category,
+      });
+  
+      if (response) {
+        // localStorage.setItem('user', JSON.stringify(response.data));
+      }
+  
+      return response.data;
+    } catch (error) {
+      handleApiError(error);
+      throw error;
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem("user");
   };
@@ -75,4 +118,5 @@ const login = async (email, password) => {
   login,
   logout,
   getCurrentUser,
+  register,
 };

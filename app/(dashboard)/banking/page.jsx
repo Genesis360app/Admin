@@ -11,6 +11,7 @@ import AccountReceivable from "@/components/partials/widget/chart/account-receiv
 import AccountPayable from "@/components/partials/widget/chart/account-payable";
 import ExampleTwo from "@/components/partials/table/AllTransactions";
 import { walletService } from "@/services/wallet.services";
+import { userService } from "@/services/users.service";
 const CardSlider = dynamic(
   () => import("@/components/partials/widget/CardSlider"),
   {
@@ -51,7 +52,7 @@ const BankingPage = () => {
   const date = new Date();
   const hour = date.getHours();
   const [loggedIn, setLoggedIn] = useState(false);
-  const [firstname, setFirstname] = useState("");
+  const [username, setUsername] = useState("");
   const [wallet, setWallet] = useState(null);
   const [userId, setUserId] = useState("");
   const [recieverName, setRecieverName] = useState("");
@@ -112,43 +113,23 @@ const BankingPage = () => {
   };
 
   useEffect(() => {
-    var userid = localStorage.getItem("userid");
-    var token = localStorage.getItem("token");
-    fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/User/getUser.php?userid=${userid}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    )
-      .then((response) => response.json())
-      .then((res) => {
-        // console.log(res);
-        if (res.code === 200) {
-          setWallet(res.user.wallet);
-          setUserId(res.user.user_id);
-          setFirstname(res.user.first_name);
-          setLoggedIn(true);
-        } else if (res.code === 401) {
-          toast.error(res.message, {
-            position: "top-right",
-            autoClose: 1500,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "light",
-          });
-
-          setTimeout(() => {
-            router.push("/");
-          }, 1500);
-          // Handle unauthorized error...
+    const fetchData = async () => {
+      try {
+        const response = await userService.fetchProfile(); // Call fetchUsers as a function
+  
+        if (response) {
+          // console.log(response); // Use response.data
+          setUsername(response.data.user.username);
+        } else {
+          // Handle case where response or response.data is undefined
         }
-      });
+      } catch (err) {
+        // console.error("Error:", err);
+      }
+    };
+    fetchData();
   }, []);
+
 
   const sendMoney = async () => {
     if (wallet !== null) {
@@ -289,7 +270,7 @@ const BankingPage = () => {
                 ) : (
                   <span className="block font-normal">Good Morning</span>
                 )}
-                <span className="block">{firstname}</span>
+                <span className="block">{username}</span>
               </h4>
               <p className="text-sm dark:text-slate-300">
                 Welcome to Genesis360

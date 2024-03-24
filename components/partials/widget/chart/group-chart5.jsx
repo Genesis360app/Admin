@@ -1,6 +1,7 @@
 import React,{useEffect,useState,useRef} from "react";
 import { colors } from "@/constant/data";
 import dynamic from "next/dynamic";
+import { walletService } from "@/services/wallet.services";
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 const columnCharthome2 = {
   series: [
@@ -220,24 +221,25 @@ const GroupChart5 = () => {
   const [spending_limit, setSpending_limit] = useState(null);
 
   useEffect(() => {
-    var token = localStorage.getItem("token");
-    var userid = localStorage.getItem("userid");
-    fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/User/getUser.php?userid=${userid}`, {
-      headers: {
-          "Authorization": `Bearer ${token}`
-      }
-      })
-      .then(response => response.json())
-      .then((res) => {
-      // console.log(res);
-      if(res.code == 200){
-         
-          setWallet(res.user.wallet);
-          setSpendings(res.user.spendings);
-          setSpending_limit(res.user.spending_limit);
+    const fetchData = async () => {
+      try {
+        const response = await walletService.getWallet();
+
+        if (response.status === 200) {
+          const userData = response.data;
+          // console.log(userData);
+          setWallet(userData.balance);
+        } else {
+          _notifyError("Account not available");
         }
-      });
+      } catch (err) {
+        // console.error("Error:", err);
+      }
+    };
+    fetchData();
   }, []);
+
+
 
   const wallet_balance = wallet;
   const acc_spending = spendings;
