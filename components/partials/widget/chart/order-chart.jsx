@@ -2,7 +2,7 @@ import dynamic from "next/dynamic";
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 import { colors } from "@/constant/data";
 import React, { useEffect, useState } from "react";
-
+import { orderService } from "@/services/order.services";
 const OrderChart = ({
   className = "bg-slate-50 dark:bg-slate-900 rounded pt-3 px-4",
   barColor = colors.warning,
@@ -79,49 +79,40 @@ const OrderChart = ({
   ]);
 
   useEffect(() => {
-    // Fetch historical order data for the chosen period.
-    var token = localStorage.getItem("token");
-    fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/User/Dashboard`, {
-      headers: {
-        "Authorization": `Bearer ${token}`
+    const fetchData = async () => {
+      try {
+        // Fetch total order count from the server
+        const response = await orderService.totalOderCount();
+  
+        if (response && response.orderCount) {
+          // Set the total order count in state
+          setAllOrders(response.orderCount);
+  
+          // Calculate the percentage change compared to the previous period
+          const currentOrders = response.orderCount;
+          const previousOrders = historicalOrdersData[historicalOrdersData.length - 1];
+          const changePercentage = ((currentOrders - previousOrders) / previousOrders) * 100;
+          setPercentageChange(changePercentage);
+  
+          // Update the chart series with historical order data
+          setSeries([{ name: "Revenue", data: historicalOrdersData }]);
+          
+          // Store the current orders count in local storage for future reference
+          localStorage.setItem("allOrders", currentOrders.toString());
+        } else {
+          // Handle case where response or response.orderCount is undefined
+        }
+      } catch (err) {
+        // console.error("Error:", err);
       }
-    })
-    .then(response => response.json())
-    .then((res) => {
-      if (res.code === 200) {
-        setAllOrders(res.all_orders);
-      } else if (res.code === 401) {
-        // Handle unauthorized user
-      }
-    });
-
-    // You'll need to replace this with your actual data fetching logic.
+    };
+  
+    // You'll need to replace this with your actual data fetching logic
     const historicalOrdersData = [40, 70, 45, 100, 75, 40, 80, 90];
-
-    // Calculate the percentage change compared to the previous period.
-    const currentOrders = allOrders; // Current orders count
-    const previousOrders =
-      historicalOrdersData[historicalOrdersData.length - 1]; // Orders count for the previous period
-
-    // Calculate percentage change formula
-    const changePercentage = ((currentOrders - previousOrders) / previousOrders) * 100;
-
-    setPercentageChange(changePercentage);
-
-    // Update the chart series with historical order data.
-    setSeries([
-      {
-        name: "Revenue",
-        data: historicalOrdersData,
-      },
-    ]);
-
-    // Store the current orders count in local storage for future reference.
-    localStorage.setItem("allOrders", currentOrders.toString());
-
-    setAllOrders(currentOrders);
-  }, [allOrders]);
-
+  
+    fetchData();
+  }, []);
+  
   return (
     <div className={className}>
       <div className="text-sm text-slate-600 dark:text-slate-300 mb-[6px]">

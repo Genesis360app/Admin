@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 import useDarkMode from "@/hooks/useDarkMode";
+import { userService } from "@/services/users.service";
 
 const ProfitChart = ({
   className = "bg-slate-50 dark:bg-slate-900 rounded pt-3 px-4",
@@ -82,34 +83,35 @@ const ProfitChart = ({
 
   const [allUsers, setAllUsers] = useState([]);
   const [prevAllUsers, setPrevAllUsers] = useState(0);
+  const [newAllUsers, setNewAllUsers] = useState(null);
+
 
   useEffect(() => {
-    var token = localStorage.getItem("token");
-    fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/User/Dashboard`, {
-      headers: {
-        "Authorization": `Bearer ${token}`
+    const fetchData = async () => {
+      try {
+        const response = await userService.totalCustomer();
+  
+        if (response && response.No_Of_Registered_Users) {
+          setAllUsers(response.No_Of_Registered_Users);
+        } else {
+          // Handle case where response or response.No_Of_Registered_Users is undefined
+        }
+      } catch (err) {
+        console.error("Error:", err);
       }
-    })
-    .then(response => response.json())
-    .then((res) => {
-      if (res.code === 200) {
-        const newAllUsers = res.all_users;
-        setAllUsers(newAllUsers);
-
-        // Calculate percentage change
-        const percentageChange = ((newAllUsers - prevAllUsers) / prevAllUsers) * 100;
-
-        // Update previous all users and store it in local storage
-        setPrevAllUsers(newAllUsers);
-        localStorage.setItem("allUsers", newAllUsers.toString());
-
-        // Update percentageChange state
-        setPercentageChange(percentageChange);
-      } else if (res.code === 401) {
-        // Handle unauthorized user
-      }
-    });
-  }, [prevAllUsers]);
+    };
+  
+    fetchData();
+  }, []);
+  
+  useEffect(() => {
+    if (prevAllUsers !== null && newAllUsers !== null) {
+      const percentageChange = ((newAllUsers - prevAllUsers) / prevAllUsers) * 100;
+      setPercentageChange(percentageChange);
+      localStorage.setItem("allUsers", newAllUsers.toString());
+    }
+  }, [prevAllUsers, newAllUsers]);
+  
 
   // Declare percentageChange state
   const [percentageChange, setPercentageChange] = useState(0);

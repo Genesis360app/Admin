@@ -16,7 +16,8 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Modal from "@/components/ui/Modal";
 import Button from "@/components/ui/Button";
-
+import { walletService } from "@/services/wallet.services";
+import { Naira } from "@/utils/alart";
 const IndeterminateCheckbox = React.forwardRef(
   ({ indeterminate, ...rest }, ref) => {
     const defaultRef = React.useRef();
@@ -91,13 +92,6 @@ const AllTransaction = ({ title = "All Transaction" }) => {
     });
   }, [history, globalFilter]);
 
-  const naira = new Intl.NumberFormat("en-NG", {
-    style: "currency",
-    currency: "NGN",
-    maximumFractionDigits: 0,
-    minimumFractionDigits: 0,
-  });
-
   const handleNextPage = () => {
     if (currentPage < Math.ceil(filteredData.length / itemsPerPage)) {
       setCurrentPage((prevPage) => prevPage + 1);
@@ -147,31 +141,21 @@ const AllTransaction = ({ title = "All Transaction" }) => {
   };
 
   useEffect(() => {
-    var token = localStorage.getItem("token");
-    fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/Wallet/History.php`, {
-      cache: "no-store",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((response) => response.json())
-      .then((res) => {
-        // console.log(res);
-        if (res.code == 200) {
-          setHistory(res.history);
-        } else if (res.code == 401) {
-          toast.info(`An error occurred, please login again`, {
-            position: "top-right",
-            autoClose: 1500,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "light",
-          });
+    const transactionData = async () => {
+      try {
+        const response = await walletService.fetchTransactions(); // Call fetchUsers as a function
+
+        if (response) {
+          console.log(response); // Use response.data
+          setHistory(response.transactions);
+        } else {
+          // Handle case where response or response.data is undefined
         }
-      });
+      } catch (err) {
+        console.error("Error:", err);
+      }
+    };
+    transactionData();
   }, []);
 
   return (
@@ -197,7 +181,7 @@ const AllTransaction = ({ title = "All Transaction" }) => {
                 Transaction ID
               </h2>
               <p className="text-[20px] leading-[20px] font-medium mt-[5px] ">
-                # {selectedHistory?.id}
+                {selectedHistory?.id}
               </p>
             </div>
             <div>
@@ -230,10 +214,10 @@ const AllTransaction = ({ title = "All Transaction" }) => {
           <div className="flex justify-between mt-[30px]">
             <div>
               <h2 className="text-[20px] leading-[25px] font-bold">
-                Transaction Ref
+                Payment Mode
               </h2>
               <p className="text-[20px] leading-[20px] font-medium mt-[5px] ">
-                {selectedHistory?.transaction_ref}
+                {selectedHistory?.paymentMode}
               </p>
             </div>
             <div>
@@ -241,7 +225,7 @@ const AllTransaction = ({ title = "All Transaction" }) => {
                 Amount
               </h2>
               <p className="text-[20px] leading-[20px] text-right font-medium mt-[5px]">
-                {naira.format(selectedHistory?.amount)}
+                {Naira.format(selectedHistory?.amount)}
               </p>
             </div>
           </div>
@@ -252,7 +236,7 @@ const AllTransaction = ({ title = "All Transaction" }) => {
                 Description
               </h2>
               <p className="text-[20px] leading-[20px] font-medium mt-[5px] ">
-                {selectedHistory?.remark}
+                {selectedHistory?.description}
               </p>
             </div>
             <div>
@@ -260,7 +244,7 @@ const AllTransaction = ({ title = "All Transaction" }) => {
                 Transaction Type
               </h2>
               <p className="text-[20px] leading-[20px] text-right font-medium mt-[5px]">
-                {selectedHistory?.txn_type}
+                {selectedHistory?.type}
               </p>
             </div>
           </div>
@@ -279,7 +263,7 @@ const AllTransaction = ({ title = "All Transaction" }) => {
                 User ID
               </h2>
               <p className="text-[20px] leading-[20px] text-right font-medium mt-[5px]">
-                {selectedHistory?.userid}
+                {selectedHistory?.user}
               </p>
             </div>
           </div>
@@ -306,13 +290,13 @@ const AllTransaction = ({ title = "All Transaction" }) => {
                       Amount
                     </th>
                     <th scope="col" className="table-th">
-                      Txn Type
+                      Payment Mode
                     </th>
                     <th scope="col" className="table-th">
-                      Remark
+                      Description
                     </th>
                     <th scope="col" className="table-th">
-                      Reference Id
+                      Type
                     </th>
                     <th scope="col" className="table-th">
                       Status
@@ -330,21 +314,25 @@ const AllTransaction = ({ title = "All Transaction" }) => {
                     <tbody className="bg-white divide-y divide-slate-100 dark:bg-slate-800 dark:divide-slate-700">
                       <tr>
                         <td className="table-td">
-                          <span>{item.id}</span>
+                          <span>
+                            {item.id.slice(0, 8)}...{item.id.slice(-10)}
+                          </span>
                         </td>
-                        <td className="table-td">{item.amount}</td>
-                        <td className="table-td">{item.txn_type}</td>
+                        <td className="table-td">
+                          {Naira.format(item.amount)}
+                        </td>
+                        <td className="table-td">{item.paymentMode}</td>
                         <td className="table-td">
                           <span className="text-slate-500 dark:text-slate-400">
                             <span className="block text-slate-600 dark:text-slate-300">
-                              {item.remark}
+                              {item.description}
                             </span>
                           </span>
                         </td>
                         <td className="table-td">
                           <span className="text-slate-500 dark:text-slate-400">
                             <span className="block text-xs text-slate-500">
-                              Trans ID: {item.transaction_ref}
+                              {item.type}
                             </span>
                           </span>
                         </td>
@@ -365,9 +353,7 @@ const AllTransaction = ({ title = "All Transaction" }) => {
                             </span>
                           </span>
                         </td>
-                        <td className="table-td">
-                          {formattedDate(item.created_at)}
-                        </td>
+                        <td className="table-td">{formattedDate(item.date)}</td>
                         <td className="table-td">
                           <div className="flex space-x-3 rtl:space-x-reverse">
                             <Tooltip

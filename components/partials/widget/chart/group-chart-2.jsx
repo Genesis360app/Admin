@@ -5,6 +5,8 @@ import dynamic from "next/dynamic";
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { orderService } from "@/services/order.services";
+import { Naira } from "@/utils/alart";
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
 const shapeLine1 = {
@@ -212,93 +214,86 @@ const shapeLine3 = {
 
 
 const GroupChart2 = () => {
-  const [all_packages, setAll_packages] = useState([]);
-  const [all_orders, setAll_orders] = useState([]);
-  const [all_sub, setAll_sub] = useState([]);
+  const [isProductCount, setIsProductCount] = useState([]);
+  const [isTotalorders, setIsTotalorders] = useState([]);
+  const [istotalSales, setIstotalSales] = useState([]);
 
   
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    axios.get('https://orangli.com/server/api/User/Dashboard', {
-      headers: {
-        "Authorization": `Bearer ${token}`
-      },
-      // Prevent caching
-      cache: 'no-store'
-    })
-      .then(response => {
-        
-        if (response.status === 200) {
-          return response.data;
-        } else {
-          toast.error(`${response.status}`, {
-            position: "top-right",
-            autoClose: 1500,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "light",
-          });
+    const fetchData = async () => {
+      try {
+        const response = await orderService.totalSales(); // Call fetchUsers as a function
 
-          throw new Error(`HTTP error! Status: ${response.status}`);
-          
+        if (response) {
+          // console.log(response); // Use response.data
+          setIstotalSales(response.totalsales);
+        } else {
+          // Handle case where response or response.data is undefined
         }
-      })
-      .then((res) => {
-        // console.log(res);
-        if (res.code === 200) {
-          setAll_packages(res.all_packages);
-          setAll_orders(res.all_orders);
-          setAll_sub(res.all_sub);
-          setAll_users(res.all_users);
-        } else if (res.code === 401) {
-          // Handle unauthorized user
+      } catch (err) {
+        // console.error("Error:", err);
+      }
+    };
+
+    const oderCountData = async () => {
+      try {
+        const response = await orderService.totalOderCount(); // Call fetchUsers as a function
+
+        if (response) {
+          // console.log(response); // Use response.data
+          setIsTotalorders(response.orderCount);
+        } else {
+          // Handle case where response or response.data is undefined
         }
-      })
-      .catch(error => {
-        // Handle errors here
-        // console.error(error);
-        toast.error(error, {
-          position: "top-right",
-          autoClose: 1500,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
-      });
+      } catch (err) {
+        // console.error("Error:", err);
+      }
+    };
+    const productCountData = async () => {
+      try {
+        const response = await orderService.totalProduct(); // Call fetchUsers as a function
+
+        if (response) {
+          // console.log(response); // Use response.data
+          setIsProductCount(response.productCount);
+        } else {
+          // Handle case where response or response.data is undefined
+        }
+      } catch (err) {
+        // console.error("Error:", err);
+      }
+    };
+    fetchData();
+    productCountData();
+    oderCountData();
   }, []);
 
   // Calculate counts
-  const totalOrdersCount = all_orders;
-  const growthCount = all_packages;
-  const growthSubCount = all_sub;
+  const totalSaleCount = istotalSales;
+  const orderCounts = isTotalorders;
+  const totalProductCount = isProductCount;
 
   const statistics = [
     {
       name: shapeLine1,
-      title: "Total Orders",
-      count: totalOrdersCount,
+      title: "Total Sales",
+      count: totalSaleCount,
       bg: "bg-[#E5F9FF] dark:bg-slate-900",
       text: "text-info-500",
       icon: "heroicons:shopping-cart",
     },
     {
       name: shapeLine3,
-      title: "Total Packages",
-      count: growthCount,
+      title: "Total Order",
+      count: orderCounts,
       bg: "bg-[#EAE6FF] dark:bg-slate-900",
       text: "text-[#5743BE]",
       icon: "heroicons:arrow-trending-up-solid",
     },
     {
       name: shapeLine2,
-      title: "Total Subscription",
-      count: growthSubCount,
+      title: "Total Product",
+      count: totalProductCount,
       bg: "bg-[#FFEDE6] dark:bg-slate-900",
       text: "text-warning-500",
       icon: "heroicons:cube",
@@ -327,7 +322,8 @@ const GroupChart2 = () => {
                   {item.title}
                 </div>
                 <div className="text-slate-900 dark:text-white text-lg font-medium">
-                  {item.count}
+                {item.count.toLocaleString(undefined, { style: 'decimal' })}
+
                 </div>
               </div>
             </div>

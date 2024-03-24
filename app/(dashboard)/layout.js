@@ -25,6 +25,7 @@ import Loading from "@/components/Loading";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import useNavbarType from "@/hooks/useNavbarType";
 import { motion, AnimatePresence } from "framer-motion";
+import { authService } from "@/services/auth.services";
 export default function RootLayout({ children }) {
   const { width, breakpoints } = useWidth();
   const [collapsed] = useSidebar();
@@ -42,6 +43,8 @@ export default function RootLayout({ children }) {
   //   }
   //   //darkMode;
   // }, [isAuth]);
+
+
   const location = usePathname();
   // header switch class
   const switchHeaderClass = () => {

@@ -1,12 +1,17 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Dropdown from "@/components/ui/Dropdown";
 import Icon from "@/components/ui/Icon";
 import { Menu, Transition } from "@headlessui/react";
 import { useDispatch, useSelector } from "react-redux";
 import { handleLogout } from "@/components/partials/auth/store";
 import { useRouter } from "next/navigation";
+import { authService } from "@/services/auth.services";
+import { _notifySuccess, _notifyError } from "@/utils/alart";
 
 const ProfileLabel = () => {
+  const [currentUser, setCurrentUser] = useState(undefined);
+  const [isSubmitting, setisSubmitting] = useState(false);
+
   return (
     <div className="flex items-center">
       <div className="flex-1 ltr:mr-[10px] rtl:ml-[10px]">
@@ -33,6 +38,37 @@ const ProfileLabel = () => {
 const Profile = () => {
   const dispatch = useDispatch();
   const router = useRouter();
+  const [isSubmitting, setisSubmitting] = useState(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const user =authService.getCurrentUser();
+
+        if (!user || !user.token) {
+          // If user token is empty or user is not logged in, redirect to login page
+          router.push("/"); // Replace "/BusinessLogin" with your actual login page path
+          return; // Return early to prevent further execution
+        }
+
+        // If user is logged in, set current user and fetch profile
+        setCurrentUser(user);
+      } catch (err) {
+        console.error("Error:", err);
+      }
+    };
+
+    fetchData();
+  }, [router]);
+
+
+
+  const logout = () => {
+    setisSubmitting(true); // Fix the syntax error here
+    authService.logout();
+    _notifySuccess("Logout Successful");
+    router.push ("/");
+  };
 
   const ProfileMenu = [
     {
@@ -67,9 +103,7 @@ const Profile = () => {
     {
       label: "Logout",
       icon: "heroicons-outline:login",
-      action: () => {
-        dispatch(handleLogout(false));
-      },
+      action: logout
     },
   ];
 

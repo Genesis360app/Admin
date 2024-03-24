@@ -15,6 +15,7 @@ import {
 } from "react-table";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { orderService } from "@/services/order.services";
 
 const RecentOrderTable = () => {
   const [orderItems, setOrderItems] = useState([]);
@@ -79,8 +80,8 @@ const last25Items = orderItems.slice(-25);
 
 // Sort the last 25 items by the 'id' property in ascending order
 last25Items.sort((a, b) => {
-  const idA = a.cart_info?.id || 0; // Use a default value if 'a.cart_info.id' is null
-  const idB = b.cart_info?.id || 0; // Use a default value if 'b.cart_info.id' is null
+  const idA = a?.id || 0; // Use a default value if 'a.cart_info.id' is null
+  const idB = b?.id || 0; // Use a default value if 'b.cart_info.id' is null
 
   return idB - idA; // Sort in ascending order by 'id'
 });
@@ -118,30 +119,23 @@ const getPageNumbers = () => {
   return pageNumbers;
 };
 
-
-
   useEffect(() => {
-    var token = localStorage.getItem("token");
-    fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/Products/getOrders.php`, {
-      headers: {
-        "Authorization": `Bearer ${token}`
-      }
-    })
-    .then(response => response.json())
-    .then((res) => {
-      // console.log(res);
-      if (res.code === 200) {
-        setOrderItems(res.cart);
-      } else if (res.code === 401) {
-        // Handle unauthorized user
-        setTimeout(() => {
-          router.push("/");
-        }, 1500);
-      }
-    });
-  }, []);
-  
+    const fetchData = async () => {
+      try {
+        const response = await orderService.fetchOrders(); // Call fetchUsers as a function
 
+        if (response) {
+          // console.log(response); // Use response.data
+          setOrderItems(response);
+        } else {
+          // Handle case where response or response.data is undefined
+        }
+      } catch (err) {
+        // console.error("Error:", err);
+      }
+    };
+    fetchData();
+  }, []);
 
 
   return (
@@ -153,104 +147,137 @@ const getPageNumbers = () => {
             <div className="overflow-hidden ">
             <table className="min-w-full divide-y table-fixed divide-slate-100 dark:divide-slate-700">
                 <thead className="bg-slate-200 dark:bg-slate-700">
-                  <tr >
+                <tr>
                     <th scope="col" className="table-th">
                       ID
                     </th>
                     <th scope="col" className="table-th">
-                    Image
+                      Customer Username
                     </th>
                     <th scope="col" className="table-th">
-                    Product Name
+                      Mobile Number
                     </th>
                     <th scope="col" className="table-th">
-                    Price
+                      Location
                     </th>
                     <th scope="col" className="table-th">
-                    Qty
+                      Price
                     </th>
                     <th scope="col" className="table-th">
-                    Status
+                      Payment Channel
+                    </th>
+
+                    <th scope="col" className="table-th">
+                      City
+                    </th>
+
+                    <th scope="col" className="table-th">
+                      Status
                     </th>
                     <th scope="col" className="table-th">
                       Date
                     </th>
                     <th scope="col" className="table-th">
+                      Est-Delivery
+                    </th>
+
+                    <th scope="col" className="table-th">
                       Action
                     </th>
-                    
                   </tr>
                 </thead>
                 {paginatedHistory.map((item) => (
-                  <React.Fragment key={item.cart_info?.id}>
-                <tbody  className="bg-white divide-y divide-slate-100 dark:bg-slate-800 dark:divide-slate-700" >
-                  
-                      <tr >
-                      <td className="table-td py-2"> <span>{item.cart_info?.id}</span></td>
-                      <td className="w-8 h-8 rounded-[100%] ltr:mr-2 rtl:ml-2">
-                        <img
-                            className="w-20 h-20 rounded"
-                            src={
-                              item.product === null
-                                ? "https://www.pngkey.com/png/full/233-2332677_image-500580-placeholder-transparent.png"
-                                : item.product.image
-                            }
-                            width={70}
-                            height={70}
-                            alt=""
-                          /></td>
-                        <td className="table-td py-2"> {item.product?.product_name} </td>
-                        <td className="table-td py-2">  {naira.format(item.product?.price || "0")}</td>
-                        <td className="table-td py-2"> {item.cart_info?.qty || "0"} </td>
-                        <td className="table-td py-2"> 
-                        <span className="block w-full">
-            <span
-            className={` inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 ${
-              item.order_tracking?.current_status.name === "delivered"
-                ? "text-success-500 bg-success-500"
-                : ""
-            } 
+                  <React.Fragment key={item?.id}>
+                    <tbody className="bg-white divide-y divide-slate-100 dark:bg-slate-800 dark:divide-slate-700">
+                      <tr>
+                        <td className="table-td py-2">
+                          {" "}
+                          <span>
+                            {item.id.slice(0, 8)}...{item.id.slice(-10)}
+                          </span>
+                        </td>
+                        <td className="table-td py-2 ">
+                          {" "}
+                          {item.user?.username}{" "}
+                        </td>
+                        <td className="table-td py-2 ">
+                          {" "}
+                          {"+234" + "" + item.phone}{" "}
+                        </td>
+
+                       
+
+                        <td className="table-td py-2 ">
+                          {item.trackingId?.location || "No Location"}
+                        </td>
+                        <td className="table-td py-2">
+                          {" "}
+                          {naira.format(item?.totalPrice || "0")}
+                        </td>
+                        <td className="table-td py-2">
+                          {" "}
+                          {item.transaction?.paymentMode}{" "}
+                        </td>
+
+                        <td className="table-td py-2"> {item?.city} </td>
+                        <td className="table-td py-2">
+                          <span className="block w-full">
+                            <span
+                              className={` inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 ${
+                                item.trackingId?.status === "Delivered"
+                                  ? "text-success-500 bg-success-500"
+                                  : ""
+                              } 
             ${
-              item.order_tracking?.current_status.name === "closed"
+              item.trackingId?.status === "Closed"
                 ? "text-warning-500 bg-warning-500"
                 : ""
             }
             ${
-              item.order_tracking?.current_status.name === "paid"
+              item.trackingId?.status === "Paid"
                 ? "text-info-500 bg-info-500"
                 : ""
             }
             ${
-              item.order_tracking?.current_status.name === "processing"
+              item.trackingId?.status === "Processing"
                 ? "text-processing-400 bg-processing-400"
                 : ""
             }
             ${
-              item.order_tracking?.current_status.name === "closed"
+              item.trackingId?.status === "Closed"
                 ? "text-danger-500 bg-danger-500"
                 : ""
             }
                 ${
-                  item.order_tracking?.current_status.name=== "pending"
+                  item.trackingId?.status === "Pending"
                     ? "text-pending-500 bg-pending-500"
                     : ""
                 } ${
-                  item.order_tracking?.current_status.name === "in-transit"
-                ? "text-primary-500 bg-primary-500"
-                : ""
-            }
+                                item.trackingId?.status === "In-transit"
+                                  ? "text-primary-500 bg-primary-500"
+                                  : ""
+                              }
             
              `}
-          >
-            {item.order_tracking?.current_status.name}
-          </span>
-          </span>
-              </td>
-                        <td className="table-td py-2">  {formattedDate(item.cart_info?.created_at)} </td>
+                            >
+                              {item.trackingId?.status}
+                            </span>
+                          </span>
+                        </td>
 
+                        <td className="table-td py-2">
+                          {" "}
+                          {formattedDate(item?.dateOrdered)}{" "}
+                        </td>
+                        <td className="table-td py-2">
+                          {" "}
+                          {formattedDate(
+                            item.trackingId?.estimatedDelivery
+                          )}{" "}
+                        </td>
                         <td className="table-td py-2">  <div className="flex space-x-3 rtl:space-x-reverse">
                             <Tooltip content="View" placement="top" arrow animation="shift-away">
-                            <Link href={`/Orders/${item.cart_info.id}`}>
+                            <Link href={`/Order/${item?.id}`}>
                               <button className="action-btn" type="button">
                                 <Icon icon="heroicons:eye" />
                               </button>

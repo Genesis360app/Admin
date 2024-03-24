@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@emotion/styled": "^11.11.0",
     "@fullcalendar/core": "^6.1.4",
     "@fullcalendar/daygrid": "^6.1.4",
     "@fullcalendar/interaction": "^6.1.4",
@@ -19,6 +20,7 @@
     "@hookform/resolvers": "^2.9.11",
     "@iconify/react": "^4.1.0",
     "@mono.co/connect.js": "^0.2.2",
+    "@mui/material": "^5.15.14",
     "@react-google-maps/api": "^2.19.2",
     "@reduxjs/toolkit": "^1.9.3",
     "@south-paw/react-vector-maps": "^3.2.0",
@@ -32,6 +34,7 @@
     "dayjs": "^1.11.7",
     "eslint": "8.36.0",
     "eslint-config-next": "13.2.4",
+    "formik": "^2.4.5",
     "framer-motion": "^10.10.0",
     "http-proxy-middleware": "^2.0.6",
     "js-cookie": "^3.0.5",

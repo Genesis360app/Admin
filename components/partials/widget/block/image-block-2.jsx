@@ -1,11 +1,11 @@
 import React, {useEffect, useState,useCallback} from "react";
 import { useRouter } from "next/navigation";
-
+import { userService } from "@/services/users.service";
 const ImageBlock2 = () => {
   const date = new Date();
   const hour = date.getHours();
   const [loggedIn, setLoggedIn] = useState(false);
-  const [firstname, setFirstname] = useState("");
+  const [username, setUsername] = useState("");
   const router = useRouter();
 
   useEffect(() => {
@@ -42,6 +42,27 @@ const ImageBlock2 = () => {
       });
   }, []);
 
+
+
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await userService.fetchProfile(); // Call fetchUsers as a function
+  
+        if (response) {
+          // console.log(response); // Use response.data
+          setFirstname(response.data.user.username);
+        } else {
+          // Handle case where response or response.data is undefined
+        }
+      } catch (err) {
+        console.error("Error:", err);
+      }
+    };
+    fetchData();
+  }, []);
+
   return (
     <div
       className="bg-no-repeat bg-cover bg-center p-5 rounded-[6px] relative"
@@ -59,7 +80,7 @@ const ImageBlock2 = () => {
       : <span className="block font-normal">Good Afternoon</span>
     :  <span className="block font-normal">Good Morning</span>
     }
-          <span className="block">{firstname}</span>
+          <span className="block">{username}</span>
         </h4>
         <p className="text-sm text-white font-normal">Welcome to Genesis360</p>
       </div>

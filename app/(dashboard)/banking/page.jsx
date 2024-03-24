@@ -10,7 +10,7 @@ import HistoryChart from "@/components/partials/widget/chart/history-chart";
 import AccountReceivable from "@/components/partials/widget/chart/account-receivable";
 import AccountPayable from "@/components/partials/widget/chart/account-payable";
 import ExampleTwo from "@/components/partials/table/AllTransactions";
-
+import { walletService } from "@/services/wallet.services";
 const CardSlider = dynamic(
   () => import("@/components/partials/widget/CardSlider"),
   {

@@ -7,6 +7,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import Tooltip from "@/components/ui/Tooltip";
 import axios from 'axios'; 
 import { useRouter } from "next/navigation";
+import { userService } from "@/services/users.service";
 // import { useRouter } from 'next/router';
 
 const TransactionsTable = () => {
@@ -73,6 +74,7 @@ return (all_user || []).filter((item) => {
   const lname = (item?.last_name || "").toString(); // Access package_id safely and convert to string
   const phone = (item?.phone || "").toString(); // Access package_id safely and convert to string
   const email = (item?.email || "").toString(); // Access package_id safely and convert to string
+  const username = (item?.username || "").toString(); // Access package_id safely and convert to string
 
 
   // Check if globalFilter is defined and not null before using trim
@@ -85,7 +87,8 @@ return (all_user || []).filter((item) => {
     email.includes(filterText)||
     phone.includes(filterText)||
     lname.includes(filterText)||
-    fname.includes(filterText)
+    fname.includes(filterText)||
+    username.includes(filterText)
   );
 });
 }, [all_user, globalFilter]);
@@ -150,62 +153,27 @@ const getPageNumbers = () => {
 };
 
 
+
 useEffect(() => {
-    const fetchDatas = async () => {
-      try {
-        const token = localStorage.getItem('token');
-  
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/User/getAllUsers`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-  
-        if (!response.data) {
-          // Handle error if the response data is not available
-          toast.warning('Network response was not ok', {
-            position: 'top-right',
-            autoClose: 1500,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: 'light',
-          });
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-  
-        
-  
-        console.log(response.data);
-        if (response.data.code === 200) {
-          // Handle successful response
-          setAll_user(response.data.payload);
-        } else if (response.data.code === 401) {
-          setTimeout(() => {
-            router.push('/');
-          }, 1500);
-        }
-      } catch (error) {
-        // Handle errors here
-        toast.error(error.message, {
-          position: 'top-right',
-          autoClose: 1500,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: 'light',
-        });
+  const fetchData = async () => {
+    try {
+      const response = await userService.fetchUsers(); // Call fetchUsers as a function
+
+      if (response) {
+        // console.log(response); // Use response.data
+        setAll_user(response);
+      } else {
+        // Handle case where response or response.data is undefined
       }
-    };
-    
-    // Call the asynchronous function
-    fetchDatas(); 
-  }, []);
-  
+    } catch (err) {
+      // console.error("Error:", err);
+    }
+  };
+  fetchData();
+}, []);
+
+
+
 
   return (
     <>
@@ -231,7 +199,7 @@ useEffect(() => {
                       ID
                     </th>
                     <th scope="col" className="table-th">
-                    User ID
+                    Username
                     </th>
                     <th scope="col" className="table-th">
                     Avatar
@@ -269,14 +237,14 @@ useEffect(() => {
                   className="bg-white divide-y divide-slate-100 dark:bg-slate-800 dark:divide-slate-700" >
 
                       <tr >
-                      <td className="table-td py-2"> <span>{item.id}</span></td>
-                      <td className="table-td py-2"> <span>{item.user_id}</span></td>
-                      <td className="table-td py-2"> <span> <img src={
-                              item.avatar === ""
-                                ? "https://img.freepik.com/free-psd/3d-illustration-human-avatar-profile_23-2150671142.jpg"
-                                : item.avatar
-                            } alt="avatar"
-                      className="w-full h-full rounded-full"  />
+                      <td className="table-td py-2"> <span>{item.id.slice(0, 8)}...{item.id.slice(-10)}</span></td>
+                      <td className="table-td py-2"> <span>{item.username}</span></td>
+                      <td className="table-td py-2"> <span> <img
+               src={item.image ? item.image : " https://cdnb.artstation.com/p/assets/images/images/034/457/389/large/shin-min-jeong-.jpg?1612345145"}
+
+                alt="avatar"
+                className="w-full h-full rounded-full"
+              />
                     </span></td>
                       <td className="table-td py-2"> <span>{item.first_name + " " + item.last_name }</span></td>
                       <td className="table-td py-2"> <span>{item.email}</span></td>
@@ -284,17 +252,17 @@ useEffect(() => {
                       <td className="table-td py-2"> <span>  
                       {item.wallet < 100 ?  (
                         <div className="inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 text-danger-500 bg-danger-500">
-                        {item.wallet !== null ? naira.format(parseFloat(item.wallet)) : 'N/A'}
+                        {item.loanOutstanding !== null ? naira.format(parseFloat(item.loanOutstanding)) : '₦0.00'}
                      </div> 
                          ):(
                     <div className="inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 text-primary-500 bg-primary-500">
-                    {item.wallet !== null ? naira.format(parseFloat(item.wallet)) : 'N/A'}
+                    {item.loanOutstanding !== null ? naira.format(parseFloat(item.loanOutstanding)) : '₦0.00'}
              
                         </div>
                     )}</span></td>
 
                       <td className="table-td py-2"> 
-                {item.isBusiness == 1 ?  (
+                {item.isBusiness == true ?  (
             <div className="inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 text-success-500 bg-success-500">
             Business
             </div> 
@@ -307,9 +275,7 @@ useEffect(() => {
               </td>
                       <td className="table-td py-2"> 
                  <span>
-                {item.isBusiness == 1 ?  (
-              <>
-              {item.businessIsPartner == 1 ?  (
+                 {item.isVerified == true ?  (
             <div className="inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 text-success-500 bg-success-500">
             Verified
             </div> 
@@ -319,15 +285,8 @@ useEffect(() => {
              
             </div>
             )}
-             
-            
-              </>
-            ):(
-
-              ""
-            )}
                       </span></td>
-                      <td className="table-td py-2"> <span>{formattedDate(item.created_at)}</span></td>
+                      <td className="table-td py-2"> <span>{formattedDate(item.createdAt)}</span></td>
 
                       <td className="table-td py-2">
 

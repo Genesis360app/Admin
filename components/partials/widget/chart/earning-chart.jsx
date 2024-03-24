@@ -3,7 +3,7 @@ import dynamic from "next/dynamic";
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 import useDarkMode from "@/hooks/useDarkMode";
 import Cookies from "js-cookie"; // Import js-cookie
-
+import { orderService } from "@/services/order.services";
 
 const EarningChart = ({
   className = "bg-slate-50 dark:bg-slate-900 rounded py-3 px-4 md:col-span-2",
@@ -69,39 +69,38 @@ const EarningChart = ({
  
 
   const [totalOrders, setTotalOrders] = useState(prevTotalOrders);
+  const [newTotalOrders, setNewTotalOrders] = useState(null);
 
   
-useEffect(() => {
-  var token = localStorage.getItem("token");
-
-  fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/Products/getOrders.php`, {
-    headers: {
-      "Authorization": `Bearer ${token}`
-    }
-  })
-  .then(response => response.json())
-  .then((res) => {
-    // console.log(res);
-    if (res.code === 200) {
-      const newTotalOrders = res.total;
-      setTotalOrders(newTotalOrders);
-
-      // Calculate percentage change
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await orderService.totalSales();
+  
+        if (response && response.totalsales) {
+          setTotalOrders(response.totalsales);
+        } else {
+          // Handle case where response or response.totalsales is undefined
+        }
+      } catch (err) {
+        console.error("Error:", err);
+      }
+    };
+  
+    fetchData();
+  }, []);
+  
+  useEffect(() => {
+    if (prevTotalOrders !== null && newTotalOrders !== null) {
       const percentageChange = ((newTotalOrders - prevTotalOrders) / prevTotalOrders) * 100;
-
-      // Update previous total orders and store it in local storage
-      setPrevTotalOrders(newTotalOrders);
-      localStorage.setItem("totalOrders", newTotalOrders.toString());
-
-      // Update percentageChange state
       setPercentageChange(percentageChange);
-    } else if (res.code === 401) {
-      setTimeout(() => {
-        window.location.href = "/";
-      }, 2000);
+      localStorage.setItem("totalOrders", newTotalOrders.toString());
     }
-  });
-}, [prevTotalOrders]);
+  }, [prevTotalOrders, newTotalOrders]);
+  
+
+
+
 
 // Declare percentageChange state
 const [percentageChange, setPercentageChange] = useState(0);
