@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import Card from "@/components/ui/Card";
 import Icon from "@/components/ui/Icon";
 import Tooltip from "@/components/ui/Tooltip";
@@ -13,8 +13,13 @@ import Alert from "@/components/ui/Alert";
 import Select from "react-select";
 import Button from "@/components/ui/Button";
 import axios from "axios";
+import { productService } from "@/services/product.services";
+import HTMLReactParser from "html-react-parser";
+import { _notifySuccess, _notifyError } from "@/utils/alart";
+import { CircularProgress } from "@mui/material";
+import JoditEditor from "jodit-react";
 
-const ProductList = ({ title = "All Product" }) => {
+const ProductList = ({ title = "All Product", placeholder }) => {
   const [productItems, setProductItems] = useState([]);
   const [statusCode, setStatusCode] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -24,17 +29,22 @@ const ProductList = ({ title = "All Product" }) => {
   const [globalFilter, setGlobalFilter] = useState(""); // Global filter
   const [edit_productModal, setEdit_productModal] = useState(false);
   const [merge_productModal, setMerge_productModal] = useState(false);
+  const [delete_productModal, setDelete_productModal] = useState(false);
   const [selectedEdit, setSelectedEdit] = useState(null);
-  const [product_name, setProduct_name] = useState("");
-  const [product_id, setProduct_id] = useState("");
   const [price, setPrice] = useState("");
-  const [product_desc, setProduct_desc] = useState("");
   const [discount, setDiscount] = useState("");
-  const [package_id, setPackage_id] = useState("");
   const [image, setImage] = useState("");
+  const [files, setFiles] = useState([]);
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [countInStock, setCountInStock] = useState("");
+  const [selectedImages, setSelectedImages] = useState([]);
+  const editor = useRef(null);
   const [all_packages, setAll_packages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
+  const [showRefreshButton, setShowRefreshButton] = useState(false);
 
   // Function to format date value
   function formattedDate(rawDate) {
@@ -62,9 +72,11 @@ const ProductList = ({ title = "All Product" }) => {
   // Function to filter data based on globalFilter value
   const filteredData = useMemo(() => {
     return (productItems || []).filter((item) => {
-      const productName = (item.product?.product_name || "").toLowerCase(); // Access product_name safely and convert to lowercase
-      const productId = (item.product?.id || "").toString(); // Access package_id safely and convert to string
-      const date = (formattedDate(item.product?.created_at) || "").toString(); // Access package_id safely and convert to string
+      const productName = (item?.name || "").toLowerCase(); // Access product_name safely and convert to lowercase
+      const productPrice = (item?.price || "").toString(); // Access product_name safely and convert to lowercase
+      const productDiscount = (item?.discount || "").toString(); // Access product_name safely and convert to lowercase
+      const productId = (item?.id || "").toString(); // Access package_id safely and convert to string
+      const date = (formattedDate(item?.dateCreated) || "").toString(); // Access package_id safely and convert to string
 
       // Check if globalFilter is defined and not null before using trim
       const filterText = globalFilter ? globalFilter.trim() : "";
@@ -72,6 +84,8 @@ const ProductList = ({ title = "All Product" }) => {
       // Customize this logic to filter based on your specific requirements
       return (
         productName.includes(filterText.toLowerCase()) ||
+        productPrice.includes(filterText) ||
+        productDiscount.includes(filterText) ||
         productId.includes(filterText) ||
         date.includes(filterText)
       );
@@ -136,243 +150,203 @@ const ProductList = ({ title = "All Product" }) => {
   const isOrderEmpty = productItems.length === 0;
 
   useEffect(() => {
-    const fetchPackage = async () => {
+    const allProductData = async () => {
       try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/Products/Packages.php`
-        );
+        const response = await productService.fetchAllProduct(); // Call fetchUsers as a function
 
-        // Get the status code
-        const statusCode = response.status;
-        setStatusCode(statusCode);
-
-        if (statusCode === 200) {
-          const body = await response.json();
-
-          setAll_packages(body);
-          // console.log(body);
+        if (response) {
+          // console.log(response.data); // Use response.data
+          setProductItems(response.data);
         } else {
-          // Handle non-200 status codes here
-          console.error(`HTTP error! Status: ${statusCode}`);
+          // Handle case where response or response.data is undefined
         }
-      } catch (error) {
-        // Handle network errors here
-        // console.error(error);
-        toast.info(error, {
-          position: "top-right",
-          autoClose: 1500,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
+      } catch (err) {
+        // console.error("Error:", err);
       }
     };
-
-    const fetchData = async () => {
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/Products/Products.php`
-        );
-
-        // Get the status code
-        const statusCode = response.status;
-        setStatusCode(statusCode);
-
-        if (statusCode === 200) {
-          const body = await response.json();
-
-          setProductItems(body);
-          // console.log(body);
-        } else {
-          // Handle non-200 status codes here
-          console.error(`HTTP error! Status: ${statusCode}`);
-        }
-      } catch (error) {
-        // Handle network errors here
-        // console.error(error);
-        toast.info(error, {
-          position: "top-right",
-          autoClose: 1500,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
-      }
-    };
-
-    fetchPackage();
-    fetchData();
+    allProductData();
   }, []);
 
+  // const handleEditProduct = async () => {
+  //   var token = localStorage.getItem("token");
+  //   var payload = new FormData();
+  //   payload.append("product_name", product_name);
+  //   payload.append("price", price);
+  //   payload.append("product_desc", product_desc);
+  //   payload.append("discount", discount);
+  //   payload.append("package_id", package_id);
+  //   payload.append("image", image);
+  //   payload.append("product_id", product_id);
+
+  //   try {
+  //     const response = await fetch(
+  //       `${process.env.NEXT_PUBLIC_BASE_URL}/Products/updateProduct.php`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //         method: "POST",
+  //         body: payload,
+  //       }
+  //     );
+
+  //     const data = await response.json();
+  //     toast.success(data.message, {
+  //       position: "top-right",
+  //       autoClose: 1500,
+  //       hideProgressBar: false,
+  //       closeOnClick: true,
+  //       pauseOnHover: true,
+  //       draggable: true,
+  //       progress: undefined,
+  //       theme: "light",
+  //     });
+
+  //     setIsLoading(false);
+  //     setTimeout(() => {
+  //       window.location.reload();
+  //     }, 3000);
+  //   } catch (error) {
+  //     // Handle errors, maybe show an error message
+  //     setError("An error occurred while uploading product.");
+  //     toast.error("An error occurred while uploading product.", {
+  //       position: "top-right",
+  //       autoClose: 3000,
+  //       hideProgressBar: false,
+  //       closeOnClick: true,
+  //       pauseOnHover: true,
+  //       draggable: true,
+  //       progress: undefined,
+  //       theme: "light",
+  //     });
+  //     setIsLoading(false);
+  //   }
+  // };
+
   const handleEditProduct = async () => {
-    var token = localStorage.getItem("token");
-    var payload = new FormData();
-    payload.append("product_name", product_name);
-    payload.append("price", price);
-    payload.append("product_desc", product_desc);
-    payload.append("discount", discount);
-    payload.append("package_id", package_id);
-    payload.append("image", image);
-    payload.append("product_id", product_id);
-
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/Products/updateProduct.php`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          method: "POST",
-          body: payload,
-        }
-      );
-
-      const data = await response.json();
-      toast.success(data.message, {
-        position: "top-right",
-        autoClose: 1500,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
-
-      setIsLoading(false);
-      setTimeout(() => {
-        window.location.reload();
-      }, 3000);
-    } catch (error) {
-      // Handle errors, maybe show an error message
-      setError("An error occurred while uploading product.");
-      toast.error("An error occurred while uploading product.", {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
-      setIsLoading(false);
-    }
-  };
-
-  const handleMergeProduct = async () => {
-    var token = localStorage.getItem("token");
-    var payload = new FormData();
-    payload.append("package_id", package_id);
-    payload.append("product_id", product_id);
-
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/Products/attachProduct.php`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          method: "POST",
-          body: payload,
-        }
-      );
-
-      const data = await response.json();
-      toast.success("Product Merge Successfully with Package", {
-        position: "top-right",
-        autoClose: 1500,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
-
-      setIsLoading(false);
-      setTimeout(() => {
-        window.location.reload();
-      }, 3000);
-    } catch (error) {
-      // Handle errors, maybe show an error message
-      setError("An error occurred while uploading product.");
-      toast.error("An error occurred while uploading product.", {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
-      setIsLoading(false);
-    }
-  };
-
-  const handleDeleteProduct = async (product_id) => {
     setIsLoading(true);
     try {
-      const token = localStorage.getItem("token"); // Replace with your authentication method
-      const headers = {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data",
-      };
+      const userString = localStorage.getItem("user");
 
-      const body = {
-        id: product_id, // Use the itemId parameter here
-      };
+      if (!userString) {
+        throw new Error("User token not found");
+      }
 
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/Products/deleteProduct.php`,
+      const user = JSON.parse(userString);
 
-        body,
-        { headers, cache: "no-store" }
+      if (!user || !user.token || !user.userId) {
+        throw new Error("Invalid user data");
+      }
+
+      const editById = selectedEdit?.id;
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("description", description);
+      formData.append("price", price);
+      formData.append("discount", discount);
+      formData.append("countInStock", countInStock);
+
+      // Append the image file if it exists
+      if (files) {
+        formData.append("image", files);
+      }
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/product/update_product/${editById}`,
+        {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+          method: "PUT",
+          body: formData,
+        }
       );
+      const responseData = await response.json();
 
-      // Handle the response as needed
-      // console.log(response.data);
       if (response.status === 200) {
-        // Handle a successful response here
-        toast.success("product deleted successfully", {
-          position: "top-right",
-          autoClose: 1500,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
-        setTimeout(() => {
-          window.location.reload();
-        }, 3000);
-        setIsLoading(false);
-      } else if (response.status === 401) {
-        // Handle unauthorized access
+        setSuccess("Product updated successfully");
+        _notifySuccess("Product updated successfully");
+        setShowRefreshButton(true);
+        // setTimeout(() => {
+        //     window.location.reload();
+        // }, 4000);
       } else {
-        // Handle other status codes or errors
+        setError(responseData.message);
       }
     } catch (error) {
-      setError("An error occurred while updating the order status.");
+      console.error("Error during edit product:", error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-      toast.error(error, {
-        position: "top-right",
-        autoClose: 1500,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+
+    // Set up the FileReader onload event handler
+    reader.onload = () => {
+      setSelectedImages(reader.result); // Set the selected image
+    };
+
+    // Read the file as a data URL
+    if (file) {
+      reader.readAsDataURL(file);
+    }
+
+    // Update the files state with the selected file
+    setFiles(file);
+  };
+
+  const config = useMemo(
+    () => ({
+      readonly: false,
+      placeholder: placeholder || "Start typing...",
+    }),
+    [placeholder]
+  );
+
+  const handleDeleteProduct = async () => {
+    setIsLoading(true);
+    try {
+      const userString = localStorage.getItem("user");
+
+      if (!userString) {
+        throw new Error("User token not found");
+      }
+
+      const user = JSON.parse(userString);
+
+      if (!user || !user.token || !user.userId) {
+        throw new Error("Invalid user data");
+      }
+      const editById = selectedEdit?.id;
+// console.log(editById);
+//       console.log(user.token);      
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/product/delete_product/${editById}`,
+        {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+          method: "DELETE",
+        }
+      );
+      const responseData = await response.json();
+
+      if (response.status === 200) {
+        _notifySuccess("Product deleted successfully");
+        setSuccess(responseData.message);
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      } else {
+        setError(responseData.message);
+      }
+    } catch (error) {
+      // console.error("Error during edit product:", error.message);
+    } finally {
       setIsLoading(false);
     }
   };
@@ -383,7 +357,7 @@ const ProductList = ({ title = "All Product" }) => {
       <Modal
         activeModal={edit_productModal}
         onClose={() => setEdit_productModal(false)}
-        title="Edit Product"
+        title={"Edit Product ID" + " " + selectedEdit?.id}
         footer={
           <Button
             text="Close"
@@ -393,22 +367,24 @@ const ProductList = ({ title = "All Product" }) => {
         }
       >
         <form className="space-y-4 ">
+          {success ? (
+            <Alert
+              label={success}
+              className="alert-success light-mode w-full "
+            />
+          ) : (
+            ""
+          )}
           <Textinput
-            name="title"
+            name="name"
             label="Product Name"
+            placeholder="Product Name"
             required
             onChange={(e) => {
-              setProduct_name(e.target.value);
+              setName(e.target.value);
             }}
-            // value={product_name}
-
-            defaultValue={
-              selectedEdit && selectedEdit.product
-                ? selectedEdit.product.product_name
-                : ""
-            }
+            defaultValue={selectedEdit?.name}
           />
-
           <div className="grid lg:grid-cols-2 gap-4 grid-cols-1">
             <Textinput
               name="price"
@@ -418,26 +394,17 @@ const ProductList = ({ title = "All Product" }) => {
               onChange={(e) => {
                 setPrice(e.target.value);
               }}
-              // value={price}
-              defaultValue={
-                selectedEdit && selectedEdit.product
-                  ? selectedEdit.product.price
-                  : ""
-              }
+              defaultValue={selectedEdit?.price}
             />
             <Textinput
               name="discount"
               label="Discounted Price (Optional)"
-              placeholder="Calculated in %"
+              placeholder="# 1,800"
               required
               onChange={(e) => {
                 setDiscount(e.target.value);
               }}
-              defaultValue={
-                selectedEdit && selectedEdit.product
-                  ? selectedEdit.product.discount
-                  : ""
-              }
+              defaultValue={selectedEdit?.discount}
             />
           </div>
           <div>
@@ -445,211 +412,166 @@ const ProductList = ({ title = "All Product" }) => {
               <Textinput
                 name="image"
                 label="Image URL"
-                placeholder="https://******.png"
+                type="file"
+                placeholder="Image"
                 required
-                onChange={(e) => {
-                  setImage(e.target.value);
-                }}
-                defaultValue={
-                  selectedEdit &&
-                  selectedEdit.product &&
-                  selectedEdit.product.image
-                    ? selectedEdit.product.image
-                    : ""
-                }
+                accept="image/*"
+                onChange={handleImageChange}
+                // defaultValue={selectedEdit?.image}
               />
               <div className="overlay absolute right-0 top-0 w-[30px] h-[30px] z-[-1]">
-                {selectedEdit &&
-                  selectedEdit.product &&
-                  selectedEdit.product.image && (
-                    <img
-                      src={selectedEdit.product.image}
-                      alt="User provided"
-                      className="ml-auto block"
-                    />
-                  )}
+                {selectedImages && (
+                  <img
+                    src={selectedImages}
+                    alt="Selected"
+                    className="ml-auto block"
+                  />
+                )}
               </div>
+
+              {selectedImages && (
+                <img
+                  src={selectedImages}
+                  alt="Selected"
+                  className="block mt-2 w-[full] h-[fit]"
+                />
+              )}
             </div>
           </div>
 
-          <div>
-            <div className="mt-[30px]">
-              <label
-                htmlFor="Package ID"
-                className="block capitalize form-label mr-6 md:w-[100px] w-[60px] break-words leading-[25px] mb-2"
-              >
-                Package ID
-              </label>
-
-              <select
-                id="package_id"
-                name="package_id"
-                required
-                onChange={(e) => {
-                  setPackage_id(e.target.value);
-                }}
-                // value={package_id}
-                defaultValue={
-                  selectedEdit && selectedEdit.product
-                    ? selectedEdit.product.package_id
-                    : ""
-                }
-                className="form-control py-2  appearance-none"
-              >
-                <option value="">Select Package</option>
-                {all_packages.map((option) => (
-                  <option key={option.details.id} value={option.details.id}>
-                    {option.details.package_name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-          <Textarea
-            label="Description"
-            placeholder="Product Description"
-            onChange={(e) => {
-              setProduct_desc(e.target.value);
-            }}
-            defaultValue={
-              selectedEdit &&
-              selectedEdit.product &&
-              selectedEdit.product.product_desc
-                ? selectedEdit.product.product_desc
-                : ""
-            }
+          <JoditEditor
+            ref={editor}
+            defaultValue={selectedEdit?.description}
+            config={config}
+            // tabIndex={1} // tabIndex of textarea
+            onBlur={(newContent) => setDescription(newContent)} // preferred to use only this option to update the content for performance reasons
+            onChange={(newContent) => setDescription(newContent)}
           />
 
-          <div className="mt-[30px]">
-            <label
-              htmlFor="Package ID"
-              className="block capitalize form-label mr-6 md:w-[100px] w-[60px] break-words leading-[25px] mb-2"
-            >
-              Product ID
-            </label>
-            <Textinput
-              name="product_id"
-              placeholder="id"
-              onChange={(e) => {
-                setProduct_id(e.target.value);
-              }}
-              defaultValue={
-                selectedEdit && selectedEdit.product
-                  ? selectedEdit.product.id
-                  : ""
-              }
-            />
-          </div>
-
-          <div className="flex ltr:text-right rtl:text-left space-x-2">
+          <Textinput
+            name="countInStock"
+            label="count In Stock"
+            placeholder="countInStock (20 product)"
+            required
+            onChange={(e) => {
+              setCountInStock(e.target.value);
+            }}
+            defaultValue={selectedEdit?.countInStock}
+          />
+          <div className="flex ltr:text-right rtl:text-left space-x-1">
             <Button
-              className="btn btn-dark  text-center"
+              className="btn btn-dark   text-center"
               onClick={handleEditProduct}
               disabled={isLoading}
             >
               {isLoading ? (
-                <center>
-                  <InfinitySpin width="40" color="#00b09b" />
-                </center>
+                <CircularProgress color="inherit" size={24} />
               ) : (
-                "Update Product"
+                "Add Product"
               )}
             </Button>
             {error ? (
-              <Alert label={error} className="alert-danger light-mode w-4/6 " />
+              <Alert label={error} className="alert-danger light-mode w-fit " />
             ) : (
               ""
+            )}
+
+            {success ? (
+              <Alert
+                label={success}
+                className="alert-success light-mode w-fit "
+              />
+            ) : (
+              ""
+            )}
+
+            {showRefreshButton && (
+              <Button
+                className="btn btn-dark  text-center"
+                onClick={() => window.location.reload()}
+              >
+                <div className="flex flex-auto gap-2 items-center">
+                  <p>Refresh</p>
+                  <Icon icon="material-symbols:refresh" />
+                </div>
+              </Button>
             )}
           </div>
         </form>
       </Modal>
 
       <Modal
-        activeModal={merge_productModal}
-        onClose={() => setMerge_productModal(false)}
-        title="Edit Product"
+        activeModal={delete_productModal}
+        onClose={() => setDelete_productModal(false)}
+        
+        centered
+        title={"Delete Product ID" + " " + selectedEdit?.id}
         footer={
           <Button
             text="Close"
-            btnClass="btn-primary"
-            onClick={() => setMerge_productModal(false)}
+            btnClass="btn-danger"
+            onClick={() => setDelete_productModal(false)}
           />
         }
       >
         <form className="space-y-4 ">
-          <div>
-            <div className="mt-[30px]">
-              <label
-                htmlFor="Package ID"
-                className="block capitalize form-label mr-6 md:w-[100px] w-[60px] break-words leading-[25px] mb-2"
-              >
-                Package ID
-              </label>
-              <select
-                id="package_id"
-                name="package_id"
-                required
-                onChange={(e) => {
-                  setPackage_id(e.target.value);
-                }}
-                // value={package_id}
-                defaultValue={
-                  selectedEdit && selectedEdit.product
-                    ? selectedEdit.product.package_id
-                    : ""
-                }
-                className="form-control py-2  appearance-none"
-              >
-                <option value="">Select Package</option>
-                {all_packages.map((option) => (
-                  <option key={option.details.id} value={option.details.id}>
-                    {option.details.package_name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-          <div className="mt-[30px]">
-            <label
-              htmlFor="Package ID"
-              className="block capitalize form-label mr-6 md:w-[100px] w-[60px] break-words leading-[25px] mb-2"
-            >
-              Product ID
-            </label>
-            <Textinput
-              name="product_id"
-              placeholder="id"
-              onChange={(e) => {
-                setProduct_id(e.target.value);
-              }}
-              defaultValue={
-                selectedEdit && selectedEdit.product
-                  ? selectedEdit.product.id
-                  : ""
-              }
-            />
-          </div>
+          <center>
 
-          <div className="flex ltr:text-right rtl:text-left space-x-2">
-            <Button
-              className="btn btn-dark  text-center"
-              onClick={handleMergeProduct}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <center>
-                  <InfinitySpin width="40" color="#00b09b" />
-                </center>
-              ) : (
-                "Merge Product"
-              )}
-            </Button>
+                  <img
+                    src={
+                      selectedEdit === null
+                        ? "https://www.pngkey.com/png/full/233-2332677_image-500580-placeholder-transparent.png"
+                        : selectedEdit?.image
+                    }
+                    alt="product_img"
+                    className="w-[150px] h-[150px] rounded-md "
+                  />
+                  
+                  <div className="text-slate-600 dark:text-slate-200 text-lg pt-4 pb-1">
+              <p className="font-bold">Are you sure you want to Delete ?</p>
+            </div>
+                  <div className="text-slate-600 dark:text-slate-200 text-lg pb-1">
+              {selectedEdit?.name}
+            </div>
             {error ? (
-              <Alert label={error} className="alert-danger light-mode w-4/6 " />
+              <Alert 
+              label={error}
+               className="alert-danger light-mode w-fit " />
             ) : (
               ""
             )}
-          </div>
+
+            {success ? (
+              <Alert
+                label={success}
+                className="alert-success light-mode w-full"
+              />
+            ) : (
+              ""
+            )}
+            <br/>
+
+            <div className="flex ltr:text-right rtl:text-left space-x-2 justify-center">
+              <Button
+                className="btn btn-dark  text-center"
+                onClick={() => setMerge_productModal(false)}
+              >
+                  Cancel
+              </Button>
+
+              <Button
+                className="btn btn-danger  text-center"
+                onClick={handleDeleteProduct}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <CircularProgress color="inherit" size={24} />
+                ) : (
+                  "Delete Product"
+                )}
+              </Button>
+            </div>
+          </center>
         </form>
       </Modal>
 
@@ -679,11 +601,18 @@ const ProductList = ({ title = "All Product" }) => {
                       Price
                     </th>
                     <th scope="col" className="table-th">
+                      Discount
+                    </th>
+                    <th scope="col" className="table-th">
+                      CountInStock
+                    </th>
+                    <th scope="col" className="table-th">
                       Package ID
                     </th>
                     <th scope="col" className="table-th">
                       Product Description
                     </th>
+
                     <th scope="col" className="table-th">
                       Date
                     </th>
@@ -693,35 +622,59 @@ const ProductList = ({ title = "All Product" }) => {
                   </tr>
                 </thead>
                 {paginatedHistory.map((item) => (
-                  <React.Fragment key={item.product.id}>
+                  <React.Fragment key={item?.id}>
                     <tbody className="bg-white divide-y divide-slate-100 dark:bg-slate-800 dark:divide-slate-700">
                       <tr>
-                        <td className="table-td">{item.product.id}</td>
+                        <td className="table-td">
+                          {" "}
+                          {item?.id.slice(0, 5)}...{item.id.slice(-10)}
+                        </td>
                         <td className="w-8 h-8 rounded-[100%] ltr:mr-2 rtl:ml-2">
                           <img
                             className="w-20 h-20 rounded"
                             src={
-                              item.product === null
+                              item === null
                                 ? "https://www.pngkey.com/png/full/233-2332677_image-500580-placeholder-transparent.png"
-                                : item.product.image
+                                : item?.image
                             }
                             width={70}
                             height={70}
                             alt=""
                           />
                         </td>
+                        <td className="table-td">{item?.name}</td>
                         <td className="table-td">
-                          {item.product.product_name}
+                          {naira.format(item?.price)}
+                        </td>
+
+                        <td className="table-td">
+                          {item.discount > 0 ? (
+                            <>
+                              <p className="text-green text-[30px] md:text-[16px] md:mt-2 font-bold">
+                                {naira.format(item.discount)}
+                              </p>
+                              <p className="text-danger-600 line-through text-[18px] mt-3 md:text-[12px] font-bold ">
+                                {naira.format(item.price)}
+                              </p>
+                            </>
+                          ) : (
+                            <p className="text-green text-[30px] md:text-[16px] md:mt-2 font-bold">
+                              {naira.format(item.price)}
+                            </p>
+                          )}
+                        </td>
+
+                        <td className="table-td">{item?.countInStock}</td>
+                        <td className="table-td">
+                          {" "}
+                          {item?.package_id.slice(0, 5)}...
+                          {item.package_id.slice(-10)}
                         </td>
                         <td className="table-td">
-                          {naira.format(item.product.price)}
-                        </td>
-                        <td className="table-td">{item.product.package_id}</td>
-                        <td className="table-td">
-                          {item.product.product_desc}
+                          {HTMLReactParser(item?.description)}
                         </td>
                         <td className="table-td">
-                          {formattedDate(item.product.created_at)}
+                          {formattedDate(item?.dateCreated)}
                         </td>
                         <td className="table-td">
                           <div className="flex space-x-3 rtl:space-x-reverse">
@@ -769,9 +722,10 @@ const ProductList = ({ title = "All Product" }) => {
                               <button
                                 className="action-btn"
                                 type="button"
-                                onClick={() =>
-                                  handleDeleteProduct(item.product.id)
-                                }
+                                onClick={() => {
+                                  setSelectedEdit(item);
+                                  setDelete_productModal(true);
+                                }}
                                 disabled={isLoading}
                               >
                                 <Icon icon="heroicons:trash" />

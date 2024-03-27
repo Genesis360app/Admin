@@ -42,7 +42,7 @@ const Textarea = ({
       <div className={`relative ${horizontal ? "flex-1" : ""}`}>
         {name && (
           <textarea
-            {...register(name)}
+            // {...register(name)}
             {...rest}
             className={`${
               error ? " has-error" : " "

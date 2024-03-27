@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useRef, useMemo  } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import useWidth from "@/hooks/useWidth";
 import Button from "@/components/ui/Button";
@@ -17,29 +17,37 @@ import Textinput from "@/components/ui/Textinput";
 import Textarea from "@/components/ui/Textarea";
 import Alert from "@/components/ui/Alert";
 import Select from "react-select";
+import { productService } from "@/services/product.services";
+import { _notifySuccess, _notifyError } from "@/utils/alart";
+import { CircularProgress } from "@mui/material";
+import JoditEditor from 'jodit-react';
 
-const ProductPostPage = () => {
+const ProductPostPage = ({ placeholder }) => {
   const [filler, setfiller] = useState("grid");
   const { width, breakpoints } = useWidth();
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState(null);
-  const [all_packages, setAll_packages] = useState([]);
+  const [success, setSuccess] = useState(null);
   const [productItems, setProductItems] = useState([]);
   const [globalFilter, setGlobalFilter] = useState(""); // Define global filter state
   const [add_productModal, setAdd_productModal] = useState(false);
   const [edit_productModal, setEdit_productModal] = useState(false);
-  const [product_name, setProduct_name] = useState("");
-  const [product_id, setProduct_id] = useState("");
   const [price, setPrice] = useState("");
-  const [product_desc, setProduct_desc] = useState("");
   const [discount, setDiscount] = useState("");
-  const [package_id, setPackage_id] = useState("");
   const [image, setImage] = useState("");
+  const [files, setFiles] = useState([]);
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [countInStock, setCountInStock] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedImages, setSelectedImages] = useState([]);
   const [statusCode, setStatusCode] = useState(null);
-
+  const editor = useRef(null);
   const { projects } = useSelector((state) => state.project);
   const dispatch = useDispatch();
+  const [showRefreshButton, setShowRefreshButton] = useState(false);
+
+
 
   useEffect(() => {
     setIsLoaded(true);
@@ -48,133 +56,84 @@ const ProductPostPage = () => {
     }, 1500);
   }, [filler]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/Products/Packages.php`
-        );
 
-        // Get the status code
-        const statusCode = response.status;
-        setStatusCode(statusCode);
-
-        if (statusCode === 200) {
-          const body = await response.json();
-
-          setAll_packages(body);
-          // console.log(body);
-        } else {
-          // Handle non-200 status codes here
-          console.error(`HTTP error! Status: ${statusCode}`);
-        }
-      } catch (error) {
-        // Handle network errors here
-        // console.error(error);
-        toast.info(error, {
-          position: "top-right",
-          autoClose: 1500,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
-      }
-    };
-
-    const fetchProduct = async () => {
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/Products/Products.php`
-        );
-
-        // Get the status code
-        const statusCode = response.status;
-        setStatusCode(statusCode);
-
-        if (statusCode === 200) {
-          const body = await response.json();
-
-          setProductItems(body);
-          // console.log(body);
-        } else {
-          // Handle non-200 status codes here
-          console.error(`HTTP error! Status: ${statusCode}`);
-        }
-      } catch (error) {
-        // Handle network errors here
-        // console.error(error);
-        toast.info(error, {
-          position: "top-right",
-          autoClose: 1500,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
-      }
-    };
-
-    fetchData();
-    fetchProduct();
-  }, []);
   const handleAddProduct = async () => {
-    var token = localStorage.getItem("token");
-    var payload = new FormData();
-    payload.append("product_name", product_name);
-    payload.append("price", price);
-    payload.append("product_desc", product_desc);
-    payload.append("discount", discount);
-    payload.append("package_id", package_id);
-    payload.append("image", image);
-
+    setIsLoading(true);
     try {
+      const userString = localStorage.getItem("user");
+
+      if (!userString) {
+        throw new Error("User token not found");
+      }
+
+      const user = JSON.parse(userString);
+
+      if (!user || !user.token || !user.userId) {
+        throw new Error("Invalid user data");
+      }
+      // console.log(user.userId);
+      // console.log(user.token);
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("description", description);
+      formData.append("price", price);
+      formData.append("discount", discount);
+      formData.append("countInStock", countInStock);
+
+      // Append the image file if it exists
+    if (files) {
+      formData.append("image", files);
+    }
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/Products/addProducts.php`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/product/add_products`,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${user.token}`,
           },
           method: "POST",
-          body: payload,
+          body: formData,
         }
       );
-
-      const data = await response.json();
-      toast.success(data.message, {
-        position: "top-right",
-        autoClose: 1500,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
-
-      setIsLoading(false);
-      setTimeout(() => {
-        window.location.reload();
-      }, 3000);
+      // console.log(name);
+      // console.log(description);
+      // console.log(price);
+      // console.log(discount);
+      // console.log(countInStock);
+      // console.log(files);
+      const responseData = await response.json();
+      if (response.status == 201) {
+        setSuccess("Product Added successfully");
+            _notifySuccess("Product Added successfully");
+          setTimeout(() => {
+            window.location.reload();
+          }, 4000);
+      }
+      setError(responseData.message);
     } catch (error) {
-      // Handle errors, maybe show an error message
-      setError("An error occurred while uploading product.");
-      toast.error("An error occurred while uploading product.", {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
-      setIsLoading(false);
+      // console.error("Error during onSuccess:", error.message);
+    } finally {
+      setIsLoading(false);;
     }
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+ 
+    
+  
+    // Set up the FileReader onload event handler
+    reader.onload = () => {
+      setSelectedImages(reader.result); // Set the selected image
+    };
+  
+    // Read the file as a data URL
+    if (file) {
+      reader.readAsDataURL(file);
+    }
+  
+    // Update the files state with the selected file
+    setFiles(file);
   };
 
   const handleEditProduct = async () => {
@@ -233,6 +192,12 @@ const ProductPostPage = () => {
     }
   };
 
+  const config = useMemo(() => ({
+    readonly: false,
+    placeholder: placeholder || 'Start typing...'
+  }), [placeholder]);
+  
+  
   return (
     <div>
       <ToastContainer />
@@ -250,19 +215,25 @@ const ProductPostPage = () => {
         }
       >
         <form className="space-y-4 ">
+        {success ? (
+              <Alert label={success} className="alert-success light-mode w-full " />
+            ) : (
+              ""
+            )}
           <Textinput
-            name="title"
+            name="name"
             label="Product Name"
             placeholder="Product Name"
             required
             onChange={(e) => {
-              setProduct_name(e.target.value);
+              setName(e.target.value);
             }}
-            value={product_name}
+            value={name}
           />
           <div className="grid lg:grid-cols-2 gap-4 grid-cols-1">
             <Textinput
               name="price"
+              
               label="Price"
               placeholder="# 2,000"
               required
@@ -274,7 +245,7 @@ const ProductPostPage = () => {
             <Textinput
               name="discount"
               label="Discounted Price (Optional)"
-              placeholder="Calculated in %"
+              placeholder="# 1,800"
               required
               onChange={(e) => {
                 setDiscount(e.target.value);
@@ -287,79 +258,56 @@ const ProductPostPage = () => {
               <Textinput
                 name="image"
                 label="Image URL"
-                placeholder="https://******.png"
+                type="file"
+                placeholder="Image"
                 required
-                onChange={(e) => {
-                  setImage(e.target.value);
-                }}
+                accept="image/*"
+                onChange={handleImageChange}
                 value={image}
               />
               <div className="overlay absolute right-0 top-0 w-[30px] h-[30px] z-[-1]">
-                {image && (
+                {selectedImages && (
                   <img
-                    src={image}
-                    alt="User provided"
+                    src={selectedImages}
+                    alt="Selected"
                     className="ml-auto block"
                   />
                 )}
               </div>
+
+              {selectedImages && (
+        <img src={selectedImages} alt="Selected" className="block mt-2 w-[full] h-[fit]" />
+      )}
             </div>
           </div>
 
-          <div>
-            <div className="mt-[30px]">
-              <label
-                htmlFor="Package ID"
-                className="block capitalize form-label mr-6 md:w-[100px] w-[60px] break-words leading-[25px] mb-2"
-              >
-                Package ID
-              </label>
-              <select
-                id="package_id"
-                name="package_id"
-                required
-                onChange={(e) => {
-                  setPackage_id(e.target.value);
-                }}
-                value={package_id}
-                className="form-control py-2  appearance-none"
-              >
-                <option value="">Select Package</option>
-                {all_packages.map((option) => (
-                  <option key={option.details.id} value={option.details.id}>
-                    {option.details.package_name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-          <Textarea
-            label="Description"
-            placeholder="Product Description"
-            onChange={(e) => {
-              setProduct_desc(e.target.value);
-            }}
-            value={product_desc}
+          <JoditEditor
+        ref={editor}
+			value={description}
+			config={config}
+			// tabIndex={1} // tabIndex of textarea
+      onBlur={(newContent) => setDescription(newContent)}// preferred to use only this option to update the content for performance reasons
+      onChange={(newContent) => setDescription(newContent)} 
           />
-
+            
+            <Textinput
+              name="countInStock"
+              label="count In Stock"
+              placeholder="countInStock (20 product)"
+              required
+              onChange={(e) => {
+                setCountInStock(e.target.value);
+              }}
+              value={countInStock}
+            />
           <div className="flex ltr:text-right rtl:text-left space-x-2">
             <Button
               className="btn btn-dark  text-center"
               onClick={handleAddProduct}
-              disabled={
-                !product_name ||
-                !product_desc ||
-                !price ||
-                !package_id ||
-                discount ||
-                !image ||
-                isLoading
-              }
+              disabled={isLoading}
             >
               {isLoading ? (
-                <center>
-                  <InfinitySpin width="40" color="#00b09b" />
-                </center>
+                <CircularProgress color="inherit" size={24} />
               ) : (
                 "Add Product"
               )}
@@ -369,11 +317,23 @@ const ProductPostPage = () => {
             ) : (
               ""
             )}
+
+            {showRefreshButton && (
+    <Button
+        className="btn btn-dark  text-center"
+        onClick={() => window.location.reload()}
+    >
+    <div className="flex flex-auto gap-2 items-center">
+      <p>Refresh</p>
+         <Icon icon="material-symbols:refresh" />
+    </div>
+    </Button>
+            )}
           </div>
         </form>
       </Modal>
 
-      <Modal
+      {/* <Modal
         activeModal={edit_productModal}
         onClose={() => setEdit_productModal(false)}
         title="Edit Product"
@@ -479,34 +439,7 @@ const ProductPostPage = () => {
             value={product_desc}
           />
 
-          {/* <div className="mt-[30px]">
-  <label
-    htmlFor="Package ID"
-    className="block capitalize form-label mr-6 md:w-[100px] w-[60px] break-words leading-[25px] mb-2"     
-  >
-Product ID
-  </label>
-  <select
-    id="product_id"
-    name="product_id"
-    required
-    onChange={(e) => {
-     setProduct_id(e.target.value);}}
-      value={product_id}
-    className="form-control py-2  appearance-none"
-  >
-    <option value="">Select Product</option>
-    {productItems.map((option) => (
-      <>
-      <option key={option.product.id} value={option.product.id}>
-        {option.product.product_name}
-      </option>
-      
-      </>
-    ))}
-  </select>
-  
-</div> */}
+ 
 
           <Textinput
             label="Product ID"
@@ -541,7 +474,7 @@ Product ID
             )}
           </div>
         </form>
-      </Modal>
+      </Modal> */}
 
       <div className="flex flex-wrap justify-between items-center mb-4">
         <h4 className="font-medium lg:text-2xl text-xl capitalize text-slate-900 inline-block ltr:pr-4 rtl:pl-4">
