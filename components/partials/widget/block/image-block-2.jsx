@@ -8,42 +8,6 @@ const ImageBlock2 = () => {
   const [username, setUsername] = useState("");
   const router = useRouter();
 
-  useEffect(() => {
-    var userid = localStorage.getItem("userid");
-    var token = localStorage.getItem("token");
-    fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/User/getUser.php?userid=${userid}`, {
-      headers: {
-        "Authorization": `Bearer ${token}`,
-      },
-    })
-      .then(response => response.json())
-      .then((res) => {
-        // console.log(res);
-        if (res.code === 200) {
-          setFirstname(res.user.first_name);
-          setLoggedIn(true);
-        } else if (res.code === 401) {
-          toast.error(res.message, {
-            position: "top-right",
-            autoClose: 1500,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "light",
-          });
-
-          setTimeout(() => {
-            router.push("/");
-          }, 1500);
-          // Handle unauthorized error...
-        }
-      });
-  }, []);
-
-
-
   
   useEffect(() => {
     const fetchData = async () => {
@@ -52,7 +16,7 @@ const ImageBlock2 = () => {
   
         if (response) {
           // console.log(response); // Use response.data
-          setFirstname(response.data.user.username);
+          setUsername(response.data.user.username);
         } else {
           // Handle case where response or response.data is undefined
         }

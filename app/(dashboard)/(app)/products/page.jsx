@@ -10,7 +10,7 @@ const Carousel = dynamic(() => import("@/components/ui/Carousel"), {
 import { SwiperSlide } from "swiper/react";
 import Card from "@/components/ui/Card";
 
-const All_orders = () => {
+const All_Product = () => {
   return (
     <div className="space-y-5 ">
       <Allproducts />
@@ -18,4 +18,4 @@ const All_orders = () => {
   );
 };
 
-export default All_orders;
+export default All_Product;

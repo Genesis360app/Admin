@@ -18,6 +18,7 @@ import Textarea from "@/components/ui/Textarea";
 import Alert from "@/components/ui/Alert";
 import Select from "react-select";
 import { productService } from "@/services/product.services";
+import { orderService } from "@/services/order.services";
 import { _notifySuccess, _notifyError } from "@/utils/alart";
 import { CircularProgress } from "@mui/material";
 import JoditEditor from 'jodit-react';
@@ -29,7 +30,8 @@ const ProductPostPage = ({ placeholder }) => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [productItems, setProductItems] = useState([]);
-  const [globalFilter, setGlobalFilter] = useState(""); // Define global filter state
+  const [globalFilter, setGlobalFilter] = useState(""); 
+  const [totalProduct, setTotalProduct] = useState(""); 
   const [add_productModal, setAdd_productModal] = useState(false);
   const [edit_productModal, setEdit_productModal] = useState(false);
   const [price, setPrice] = useState("");
@@ -191,6 +193,26 @@ const ProductPostPage = ({ placeholder }) => {
       setIsLoading(false);
     }
   };
+
+
+  useEffect(() => {
+ 
+    const productCountData = async () => {
+      try {
+        const response = await orderService.totalProduct(); // Call fetchUsers as a function
+
+        if (response) {
+          // console.log(response); // Use response.data
+          setTotalProduct(response.productCount);
+        } else {
+          // Handle case where response or response.data is undefined
+        }
+      } catch (err) {
+        // console.error("Error:", err);
+      }
+    };
+    productCountData();
+  }, []);
 
   const config = useMemo(() => ({
     readonly: false,
@@ -478,7 +500,7 @@ const ProductPostPage = ({ placeholder }) => {
 
       <div className="flex flex-wrap justify-between items-center mb-4">
         <h4 className="font-medium lg:text-2xl text-xl capitalize text-slate-900 inline-block ltr:pr-4 rtl:pl-4">
-          All Products Item
+          All Product Items ({totalProduct})
         </h4>
         <div
           className={`${

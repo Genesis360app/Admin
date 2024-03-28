@@ -18,6 +18,7 @@ import HTMLReactParser from "html-react-parser";
 import { _notifySuccess, _notifyError } from "@/utils/alart";
 import { CircularProgress } from "@mui/material";
 import JoditEditor from "jodit-react";
+import Fileinput from "@/components/ui/Fileinput";
 
 const ProductList = ({ title = "All Product", placeholder }) => {
   const [productItems, setProductItems] = useState([]);
@@ -45,7 +46,7 @@ const ProductList = ({ title = "All Product", placeholder }) => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [showRefreshButton, setShowRefreshButton] = useState(false);
-
+  const [selectedFiles2, setSelectedFiles2] = useState([]);
   // Function to format date value
   function formattedDate(rawDate) {
     const date = new Date(rawDate);
@@ -298,6 +299,12 @@ const ProductList = ({ title = "All Product", placeholder }) => {
     setFiles(file);
   };
 
+  const handleFileChangeMultiple2 = (e) => {
+    const files = e.target.files;
+    const filesArray = Array.from(files).map((file) => file);
+    setSelectedFiles2(filesArray);
+  };
+
   const config = useMemo(
     () => ({
       readonly: false,
@@ -321,8 +328,8 @@ const ProductList = ({ title = "All Product", placeholder }) => {
         throw new Error("Invalid user data");
       }
       const editById = selectedEdit?.id;
-// console.log(editById);
-//       console.log(user.token);      
+      // console.log(editById);
+      //       console.log(user.token);
 
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BASE_URL}/product/delete_product/${editById}`,
@@ -503,7 +510,6 @@ const ProductList = ({ title = "All Product", placeholder }) => {
       <Modal
         activeModal={delete_productModal}
         onClose={() => setDelete_productModal(false)}
-        
         centered
         title={"Delete Product ID" + " " + selectedEdit?.id}
         footer={
@@ -516,27 +522,24 @@ const ProductList = ({ title = "All Product", placeholder }) => {
       >
         <form className="space-y-4 ">
           <center>
+            <img
+              src={
+                selectedEdit === null
+                  ? "https://www.pngkey.com/png/full/233-2332677_image-500580-placeholder-transparent.png"
+                  : selectedEdit?.image
+              }
+              alt="product_img"
+              className="w-[150px] h-[150px] rounded-md "
+            />
 
-                  <img
-                    src={
-                      selectedEdit === null
-                        ? "https://www.pngkey.com/png/full/233-2332677_image-500580-placeholder-transparent.png"
-                        : selectedEdit?.image
-                    }
-                    alt="product_img"
-                    className="w-[150px] h-[150px] rounded-md "
-                  />
-                  
-                  <div className="text-slate-600 dark:text-slate-200 text-lg pt-4 pb-1">
+            <div className="text-slate-600 dark:text-slate-200 text-lg pt-4 pb-1">
               <p className="font-bold">Are you sure you want to Delete ?</p>
             </div>
-                  <div className="text-slate-600 dark:text-slate-200 text-lg pb-1">
+            <div className="text-slate-600 dark:text-slate-200 text-lg pb-1">
               {selectedEdit?.name}
             </div>
             {error ? (
-              <Alert 
-              label={error}
-               className="alert-danger light-mode w-fit " />
+              <Alert label={error} className="alert-danger light-mode w-fit " />
             ) : (
               ""
             )}
@@ -549,14 +552,14 @@ const ProductList = ({ title = "All Product", placeholder }) => {
             ) : (
               ""
             )}
-            <br/>
+            <br />
 
             <div className="flex ltr:text-right rtl:text-left space-x-2 justify-center">
               <Button
                 className="btn btn-dark  text-center"
                 onClick={() => setMerge_productModal(false)}
               >
-                  Cancel
+                Cancel
               </Button>
 
               <Button
@@ -572,6 +575,48 @@ const ProductList = ({ title = "All Product", placeholder }) => {
               </Button>
             </div>
           </center>
+        </form>
+      </Modal>
+      <Modal
+        activeModal={merge_productModal}
+        onClose={() => setMerge_productModal(false)}
+        centered
+        title={"Add Multiple Images"}
+        footer={
+          <Button
+            text="Close"
+            btnClass="btn-danger"
+            onClick={() => setMerge_productModal(false)}
+          />
+        }
+      >
+        <form className="space-y-4 ">
+          <Card title={selectedEdit?.name}>
+            <Fileinput
+              name="basic"
+              selectedFiles={selectedFiles2}
+              onChange={handleFileChangeMultiple2}
+              multiple
+              preview
+            />
+<br/>
+<center>
+ {selectedFiles2 ? (
+              <>
+                <Button
+                  className="btn btn-dark  text-center"
+                  // onClick={() => setMerge_productModal(false)}
+                >
+                  Cancel
+                </Button>
+              </>
+            ) : (
+              ""
+            )}
+
+</center>
+           
+          </Card>
         </form>
       </Modal>
 
