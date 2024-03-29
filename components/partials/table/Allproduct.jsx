@@ -138,61 +138,61 @@ const ProductPostPage = ({ placeholder }) => {
     setFiles(file);
   };
 
-  const handleEditProduct = async () => {
-    var token = localStorage.getItem("token");
-    var payload = new FormData();
-    payload.append("product_name", product_name);
-    payload.append("price", price);
-    payload.append("product_desc", product_desc);
-    payload.append("discount", discount);
-    payload.append("package_id", package_id);
-    payload.append("image", image);
-    payload.append("product_id", product_id);
+  // const handleEditProduct = async () => {
+  //   var token = localStorage.getItem("token");
+  //   var payload = new FormData();
+  //   payload.append("product_name", product_name);
+  //   payload.append("price", price);
+  //   payload.append("product_desc", product_desc);
+  //   payload.append("discount", discount);
+  //   payload.append("package_id", package_id);
+  //   payload.append("image", image);
+  //   payload.append("product_id", product_id);
 
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/Products/updateProduct.php`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          method: "POST",
-          body: payload,
-        }
-      );
+  //   try {
+  //     const response = await fetch(
+  //       `${process.env.NEXT_PUBLIC_BASE_URL}/Products/updateProduct.php`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //         method: "POST",
+  //         body: payload,
+  //       }
+  //     );
 
-      const data = await response.json();
-      toast.success(data.message, {
-        position: "top-right",
-        autoClose: 1500,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
+  //     const data = await response.json();
+  //     toast.success(data.message, {
+  //       position: "top-right",
+  //       autoClose: 1500,
+  //       hideProgressBar: false,
+  //       closeOnClick: true,
+  //       pauseOnHover: true,
+  //       draggable: true,
+  //       progress: undefined,
+  //       theme: "light",
+  //     });
 
-      setIsLoading(false);
-      setTimeout(() => {
-        window.location.reload();
-      }, 3000);
-    } catch (error) {
-      // Handle errors, maybe show an error message
-      setError("An error occurred while uploading product.");
-      toast.error("An error occurred while uploading product.", {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
-      setIsLoading(false);
-    }
-  };
+  //     setIsLoading(false);
+  //     setTimeout(() => {
+  //       window.location.reload();
+  //     }, 3000);
+  //   } catch (error) {
+  //     // Handle errors, maybe show an error message
+  //     setError("An error occurred while uploading product.");
+  //     toast.error("An error occurred while uploading product.", {
+  //       position: "top-right",
+  //       autoClose: 3000,
+  //       hideProgressBar: false,
+  //       closeOnClick: true,
+  //       pauseOnHover: true,
+  //       draggable: true,
+  //       progress: undefined,
+  //       theme: "light",
+  //     });
+  //     setIsLoading(false);
+  //   }
+  // };
 
 
   useEffect(() => {
@@ -541,9 +541,9 @@ const ProductPostPage = ({ placeholder }) => {
             text="Edit Product"
             className="bg-white dark:bg-slate-800 dark:text-slate-300 hover:bg-slate-900 hover:text-white btn-md  h-min text-sm font-normal"
             iconClass=" text-lg"
-            onClick={() => {
-              setEdit_productModal(true);
-            }}
+            // onClick={() => {
+            //   setEdit_productModal(true);
+            // }}
           />
 
           <Button
