@@ -7,10 +7,7 @@ import GlobalFilter from "../table/GlobalFilter";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Modal from "@/components/ui/Modal";
-import { InfinitySpin } from "react-loader-spinner";
-import Textarea from "@/components/ui/Textarea";
 import Alert from "@/components/ui/Alert";
-import Select from "react-select";
 import Button from "@/components/ui/Button";
 import axios from "axios";
 import { productService } from "@/services/product.services";
@@ -168,61 +165,6 @@ const ProductList = ({ title = "All Product", placeholder }) => {
     allProductData();
   }, []);
 
-  // const handleEditProduct = async () => {
-  //   var token = localStorage.getItem("token");
-  //   var payload = new FormData();
-  //   payload.append("product_name", product_name);
-  //   payload.append("price", price);
-  //   payload.append("product_desc", product_desc);
-  //   payload.append("discount", discount);
-  //   payload.append("package_id", package_id);
-  //   payload.append("image", image);
-  //   payload.append("product_id", product_id);
-
-  //   try {
-  //     const response = await fetch(
-  //       `${process.env.NEXT_PUBLIC_BASE_URL}/Products/updateProduct.php`,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //         method: "POST",
-  //         body: payload,
-  //       }
-  //     );
-
-  //     const data = await response.json();
-  //     toast.success(data.message, {
-  //       position: "top-right",
-  //       autoClose: 1500,
-  //       hideProgressBar: false,
-  //       closeOnClick: true,
-  //       pauseOnHover: true,
-  //       draggable: true,
-  //       progress: undefined,
-  //       theme: "light",
-  //     });
-
-  //     setIsLoading(false);
-  //     setTimeout(() => {
-  //       window.location.reload();
-  //     }, 3000);
-  //   } catch (error) {
-  //     // Handle errors, maybe show an error message
-  //     setError("An error occurred while uploading product.");
-  //     toast.error("An error occurred while uploading product.", {
-  //       position: "top-right",
-  //       autoClose: 3000,
-  //       hideProgressBar: false,
-  //       closeOnClick: true,
-  //       pauseOnHover: true,
-  //       draggable: true,
-  //       progress: undefined,
-  //       theme: "light",
-  //     });
-  //     setIsLoading(false);
-  //   }
-  // };
 
   const handleEditProduct = async () => {
     setIsLoading(true);
@@ -557,7 +499,7 @@ const ProductList = ({ title = "All Product", placeholder }) => {
             <div className="flex ltr:text-right rtl:text-left space-x-2 justify-center">
               <Button
                 className="btn btn-dark  text-center"
-                onClick={() => setMerge_productModal(false)}
+                onClick={() => setDelete_productModal(false)}
               >
                 Cancel
               </Button>
@@ -605,7 +547,7 @@ const ProductList = ({ title = "All Product", placeholder }) => {
               <>
                 <Button
                   className="btn btn-dark  text-center"
-                  // onClick={() => setMerge_productModal(false)}
+                  onClick={() => setMerge_productModal(false)}
                 >
                   Cancel
                 </Button>

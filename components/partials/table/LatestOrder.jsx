@@ -507,21 +507,21 @@ const handleItemClick = (item) => {
                         <img
                           className="w-20 h-20 rounded"
                           src={
-                            item.product.image === null
+                            item.product?.image === null
                               ? "https://www.pngkey.com/png/full/233-2332677_image-500580-placeholder-transparent.png"
                               : item.product?.image
                           }
                           width={70}
                           height={70}
-                          alt={item.product.name}
+                          alt={item.product?.name}
                         />
                       </td>
-                      <td className="table-td py-2">{item.product.name}</td>
+                      <td className="table-td py-2">{item.product?.name}</td>
                       <td className="table-td py-2">
-                        {item.product.description}
+                        {item.product?.description}
                       </td>
-                      <td className="table-td py-2">{item.product.price}</td>
-                      <td className="table-td py-2">{item.quantity}</td>
+                      <td className="table-td py-2">{item.product?.price}</td>
+                      <td className="table-td py-2">{item?.quantity}</td>
                     </tr>
                   ))}
                 </tbody>

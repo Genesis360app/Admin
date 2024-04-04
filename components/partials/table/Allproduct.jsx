@@ -12,11 +12,8 @@ import Modal from "@/components/ui/Modal";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import GlobalFilter from "./GlobalFilter";
-import { InfinitySpin } from "react-loader-spinner";
 import Textinput from "@/components/ui/Textinput";
-import Textarea from "@/components/ui/Textarea";
 import Alert from "@/components/ui/Alert";
-import Select from "react-select";
 import { productService } from "@/services/product.services";
 import { orderService } from "@/services/order.services";
 import { _notifySuccess, _notifyError } from "@/utils/alart";
@@ -143,7 +140,7 @@ const ProductPostPage = ({ placeholder }) => {
  
     const productCountData = async () => {
       try {
-        const response = await orderService.totalProduct(); // Call fetchUsers as a function
+        const response = await productService.totalProduct(); // Call fetchUsers as a function
 
         if (response) {
           // console.log(response); // Use response.data

@@ -4,12 +4,17 @@ import { useRouter } from "next/router";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Card from "@/components/ui/Card";
+import Tooltip from "@/components/ui/Tooltip";
 import Icon from "@/components/ui/Icon";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
+import Modal from "@/components/ui/Modal";
 import axios from 'axios';
 import BasicArea from "@/components/partials/chart/appex-chart/BasicArea";
 import { useParams } from 'react-router-dom';
+import { orderService } from "@/services/order.services";
+import HTMLReactParser from "html-react-parser";
+import { _notifyError } from "@/utils/alart";
 
 const OrderPage = () => {
     // const router = useRouter();
@@ -19,44 +24,49 @@ const OrderPage = () => {
     
   const getStatus = (status ) => {
     switch (status) {
-     case 1:
-       return "pending";
-     case 2:
+     case "Pending":
+       return "Pending";
+     case "Paid":
        return "Paid";
-     case 3:
+     case  "Processing":
        return "Processing";
-     case 4:
-       return "in-transit";
-     case 5:
-       return "delivering";
-     case 6:
-       return "complete";
+     case "In-Transit":
+       return "In-transit";
+     case "Delivered":
+       return "Delivering";
+     case "Closed":
+       return "Completed";
      default:
        return "";
     }
   
    }
 
-  const [status_, setStatus_] = useState(0);
+  const [status_, setStatus_] = useState("");
   const orderStatus = getStatus(status_);
-  const steps = ["pending", "Paid", "Processing", "in-transit", "delivering", "complete"];
+  const steps = ["Pending", "Paid", "Processing", "in-transit", "Delivering", "Complete"];
   const statusIndex = steps.indexOf(orderStatus);
   const [cartItems, setCartItems] = useState([]);
-  const [priceTotal, setPriceTotal] = useState(0);
   const [orderid, setOrderid ]= useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [houseNumber, setHouseNumber] = useState("");
-  const [streetAddress, setStreetAddress] = useState("");
+  const [city, setCity] = useState("");
+  const [zip, setZip] = useState("");
   const [contactPhone, setContactPhone] = useState("");
-  const [landmark, setLandmark] = useState("");
-  const [town, setTown] = useState("");
-  const [shippingState, setShippingState] = useState("");
-  const [date, setDate] = useState("");
-  const [latitude, setLatitude] = useState("");
-  const [longitude, setLongitude] = useState("");
-  const [address, setAddress] = useState("");
-  const [useridref, setUseridref] = useState("");
+  const [country, setCountry] = useState("");
+  const [dateOrdered, setDateOrdered] = useState("");
+  const [shippingAddress1, setShippingAddress1] = useState("");
+  const [shippingAddress2, setShippingAddress2] = useState("");
+  const [orderId, setOrderId] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [location, setLocation] = useState("");
+  const [totalPrice, setPrice] = useState("");
+  const [paymentMode, setPaymentMode] = useState("");
+  const [status, setStatus] = useState("");
+  const [actualDelivery, setActualDelivery] = useState("");
+  const [estimatedDelivery, setEstimatedDelivery] = useState("");
+  
 
   const getDatePlus = (date ) => {
     var now =  new Date(date);
@@ -87,15 +97,15 @@ function formattedDate(rawDate) {
   }
 }
 
-const last25Items = cartItems;
+// const last25Items = cartItems;
 
-// Sort the last 25 items by the 'id' property in ascending order
-last25Items.sort((a, b) => {
-  const idA = a.cart_info?.id || 0; // Use a default value if 'a.cart_info.id' is null
-  const idB = b.cart_info?.id || 0; // Use a default value if 'b.cart_info.id' is null
+// // Sort the last 25 items by the 'id' property in ascending order
+// last25Items.sort((a, b) => {
+//   const idA = a.cart_info?.id || 0; // Use a default value if 'a.cart_info.id' is null
+//   const idB = b.cart_info?.id || 0; // Use a default value if 'b.cart_info.id' is null
 
-  return idB - idA; // Sort in ascending order by 'id'
-});
+//   return idB - idA; // Sort in ascending order by 'id'
+// });
 
 const naira = new Intl.NumberFormat("en-NG", {
   style: "currency",
@@ -104,80 +114,120 @@ const naira = new Intl.NumberFormat("en-NG", {
   minimumFractionDigits: 0,
 });
 
-    useEffect(() => {
+    // useEffect(() => {
        
-        var userid = localStorage.getItem("userid");
-        var id = localStorage.getItem("id");
-        var token = localStorage.getItem("token");
+    //     var userid = localStorage.getItem("userid");
+    //     var id = localStorage.getItem("id");
+    //     var token = localStorage.getItem("token");
     
-        // fetch(`https://orangli.com/server/api/Products/orderById.php?orderid=${routerId}`, {
-        fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/Products/orderById.php?orderid=777`, {
-        headers: {
-            "Authorization": `Bearer ${token}`
-        }
-        })
-        .then(response => response.json())
-        .then((res) => {
-        // console.log(res);
-        if(res.code == 200){
-            // console.log("Orders");
-            // console.log(res)
-            setCartItems(res.cart)
-            setPriceTotal(res.total)
+    //     // fetch(`https://orangli.com/server/api/Products/orderById.php?orderid=${routerId}`, {
+    //     fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/Products/orderById.php?orderid=777`, {
+    //     headers: {
+    //         "Authorization": `Bearer ${token}`
+    //     }
+    //     })
+    //     .then(response => response.json())
+    //     .then((res) => {
+    //     // console.log(res);
+    //     if(res.code == 200){
+    //         // console.log("Orders");
+    //         // console.log(res)
+    //         setCartItems(res.cart)
+    //         setPriceTotal(res.total)
             
-            setStatus_(parseInt(res.cart[0].cart_info.status));
-            setOrderid((res.cart[0].cart_info.id));
-            setUseridref((res.cart[0].cart_info.userid));
-            const latitudeValue = res.cart[0].cart_info.current_lat;
-            const longitudeValue = res.cart[0].cart_info.current_long;
+    //         setStatus_(parseInt(res.cart[0].cart_info.status));
+    //         setOrderid((res.cart[0].cart_info.id));
+    //         setUseridref((res.cart[0].cart_info.userid));
+    //         const latitudeValue = res.cart[0].cart_info.current_lat;
+    //         const longitudeValue = res.cart[0].cart_info.current_long;
 
-         // Set latitude and longitude in state
-      setLatitude(latitudeValue);
-      setLongitude(longitudeValue);
-      convertToAddress(latitudeValue, longitudeValue);
+    //      // Set latitude and longitude in state
+    //   setLatitude(latitudeValue);
+    //   setLongitude(longitudeValue);
+    //   convertToAddress(latitudeValue, longitudeValue);
         
-            getDatePlus(res.created_at);
-          }else if(res.code == 401){
+    //         getDatePlus(res.created_at);
+    //       }else if(res.code == 401){
            
-          }
-        })
+    //       }
+    //     })
         
-        // Rest of your fetch code here
-        fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/User/getShippingAddress.php?userid=${useridref}`, {
-          headers: {
-              "Authorization": `Bearer ${token}`
-          }
-          })
-          .then(response => response.json())
-          .then((res) => {
-          // console.log(res);
-          if(res.code == 200){
-              setContactPhone(res.payload.phone);
-              setShippingState(res.payload.state);
-              setTown(res.payload.town);
-              setStreetAddress(res.payload.address);
-              setLandmark(res.payload.landmark);
-              setHouseNumber(res.payload.house_number)
-              setDate(res.payload.updated_at)
-            }else if(res.code == 401){
+    //     // Rest of your fetch code here
+    //     fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/User/getShippingAddress.php?userid=${useridref}`, {
+    //       headers: {
+    //           "Authorization": `Bearer ${token}`
+    //       }
+    //       })
+    //       .then(response => response.json())
+    //       .then((res) => {
+    //       // console.log(res);
+    //       if(res.code == 200){
+    //           setContactPhone(res.payload.phone);
+    //           setShippingState(res.payload.state);
+    //           setTown(res.payload.town);
+    //           setStreetAddress(res.payload.address);
+    //           setLandmark(res.payload.landmark);
+    //           setHouseNumber(res.payload.house_number)
+    //           setDate(res.payload.updated_at)
+    //         }else if(res.code == 401){
             
-              toast.error("An error occured, please login again", {
-                position: "top-right",
-                autoClose: 1500,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "light",
-              });
-              setTimeout(() => {
-                window.location.href = "/"
-              }, 2000)
-            }
-          })
+    //           toast.error("An error occured, please login again", {
+    //             position: "top-right",
+    //             autoClose: 1500,
+    //             hideProgressBar: false,
+    //             closeOnClick: true,
+    //             pauseOnHover: true,
+    //             draggable: true,
+    //             progress: undefined,
+    //             theme: "light",
+    //           });
+    //           setTimeout(() => {
+    //             window.location.href = "/"
+    //           }, 2000)
+    //         }
+    //       })
     
-    }, [])
+    // }, [])
+
+
+    useEffect(() => {
+      const fetchData = async () => {
+        try {
+          const response = await orderService.orderById(); // Call fetchUsers as a function
+  
+          if (response) {
+            // console.log(response); // Use response.data
+            setCartItems(response.orderItems);
+            setCity(response.city);
+            setZip(response.zip);
+            setContactPhone(response.phone);
+            setCountry(response.country);
+            setDateOrdered(response.dateOrdered);
+            setShippingAddress1(response.shippingAddress1);
+            setShippingAddress2(response.shippingAddress2);
+            setOrderId(response.id);
+            setFullName (response.user.fullName);
+            setPhone(response.phone);
+            setLocation(response.trackingId.location);
+            setPrice(response.totalPrice);
+            setPaymentMode(response.transaction.paymentMode);
+            setStatus_(response.transaction.status);
+            console.log("status",response.transaction.status);
+            setActualDelivery(response.trackingId.actualDelivery);
+            setEstimatedDelivery(response.trackingId.estimatedDelivery);
+
+          } else {
+            // Handle case where response or response.data is undefined
+          }
+        } catch (err) {
+          // console.error("Error:", err);
+          _notifyError(err.message);
+        }
+      };
+      fetchData();
+    }, []);
+
+
 
     const convertToAddress = async (latitudeValue, longitudeValue) => {
  
@@ -587,7 +637,7 @@ const naira = new Intl.NumberFormat("en-NG", {
     <div>
     <ToastContainer/>
 
-    <center> 
+    {/* <center> 
    
     <Card title=" Status Variation Badges ">
     {cartItems.map((item) => (
@@ -647,9 +697,9 @@ const naira = new Intl.NumberFormat("en-NG", {
         </div>
         </div>
         ))}
-        
+ 
       </Card>
-      </center>
+      </center> */}
 
     <Card title="Product Status">
       <div>
@@ -668,7 +718,7 @@ const naira = new Intl.NumberFormat("en-NG", {
                 >
                   {statusIndex <= i ? (
                     
-                    i === 0 ? (
+                    i === "Pending" ? (
                       <Icon icon="ic:twotone-pending-actions" />// Replace with your first icon
     
     ) : i === 1 ? (
@@ -730,112 +780,137 @@ const naira = new Intl.NumberFormat("en-NG", {
             <table className="min-w-full divide-y table-fixed divide-slate-100 dark:divide-slate-700">
                 <thead className="bg-slate-200 dark:bg-slate-700">
                 <tr>
-                      <th scope="col" className="table-th">
+                    <th scope="col" className="table-th">
                       ID
                     </th>
-                      <th scope="col" className="table-th">
-                     Customer ID
+                    <th scope="col" className="table-th">
+                      Customer Username
                     </th>
                     <th scope="col" className="table-th">
-                    Image
+                      Mobile Number
                     </th>
                     <th scope="col" className="table-th">
-                    Product Name
+                      Location
                     </th>
                     <th scope="col" className="table-th">
-                    Price
+                      Price
                     </th>
                     <th scope="col" className="table-th">
-                    Payment Channel
+                      Payment Channel
                     </th>
+
                     <th scope="col" className="table-th">
-                    Qty
+                      City
                     </th>
+
                     <th scope="col" className="table-th">
-                    Status
+                      Status
                     </th>
                     <th scope="col" className="table-th">
                       Date
                     </th>
+                    <th scope="col" className="table-th">
+                      Est-Delivery
+                    </th>
+
                     
-                    </tr>
+                  </tr>
                 </thead>
-                {last25Items.map((item) => (
-                  <React.Fragment key={item.cart_info?.id}>
-                <tbody  className="bg-white divide-y divide-slate-100 dark:bg-slate-800 dark:divide-slate-700" >
-                  
-                      <tr >
-                      <td className="table-td py-2"> <span>{item.cart_info?.id}</span></td>
-                      <td className="table-td py-2 "> <Button text="secondary" className=" btn-primary light" >{item.cart_info?.userid} </Button></td>
-                      <td className="w-8 h-8 rounded-[100%] ltr:mr-2 rtl:ml-2">
-                        <img
-                            className="w-20 h-20 rounded"
-                            src={
-                              item.product === null
-                                ? "https://www.pngkey.com/png/full/233-2332677_image-500580-placeholder-transparent.png"
-                                : item.product.image
-                            }
-                            width={70}
-                            height={70}
-                            alt=""
-                          />
-                          </td>
+               
+                  <React.Fragment >
+                  <tbody className="bg-white divide-y divide-slate-100 dark:bg-slate-800 dark:divide-slate-700">
+                      <tr>
+                        <td className="table-td py-2">
                         
-                        <td className="table-td py-2"> {item.product?.product_name} </td>
-                        <td className="table-td py-2">  {naira.format(item.product?.price || "0")}</td>
-                        <td className="table-td py-2"> BNPL </td>
-                        <td className="table-td py-2"> {item.cart_info?.qty || "0"} </td>
-                        <td className="table-td py-2"> 
-                        <span className="block w-full">
-            <span
-            className={` inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 ${
-              item.order_tracking?.current_status.name === "delivered"
-                ? "text-success-500 bg-success-500"
-                : ""
-            } 
+                          <span>
+                            {orderId.slice(0, 8)}...{orderId.slice(-10)}
+                          </span>
+                        </td>
+                        <td className="table-td py-2 ">
+                         
+                          {fullName}
+                        </td>
+                        <td className="table-td py-2 ">
+
+                          {"+234" + phone}
+                        </td>
+
+                       
+
+                        <td className="table-td py-2 ">
+                          {location || "No Location"}
+                        </td>
+                        <td className="table-td py-2">
+                          
+                          {naira.format(totalPrice || "0")}
+                        </td>
+                        <td className="table-td py-2">
+                         
+                          {paymentMode}
+                        </td>
+
+                        <td className="table-td py-2"> {city} </td>
+                        <td className="table-td py-2">
+                          <span className="block w-full">
+                            <span
+                              className={` inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 ${
+                                status_ === "Delivered"
+                                  ? "text-success-500 bg-success-500"
+                                  : ""
+                              } 
             ${
-              item.order_tracking?.current_status.name === "closed"
+             status_ === "Closed"
                 ? "text-warning-500 bg-warning-500"
                 : ""
             }
             ${
-              item.order_tracking?.current_status.name === "paid"
+              status_ === "Paid"
                 ? "text-info-500 bg-info-500"
                 : ""
             }
             ${
-              item.order_tracking?.current_status.name === "processing"
+              status_ === "Processing"
                 ? "text-processing-400 bg-processing-400"
                 : ""
             }
             ${
-              item.order_tracking?.current_status.name === "delivered"
+            status_ === "Closed"
                 ? "text-danger-500 bg-danger-500"
                 : ""
             }
                 ${
-                  item.order_tracking?.current_status.name=== "pending"
+                  status_ === "Pending"
                     ? "text-pending-500 bg-pending-500"
                     : ""
                 } ${
-                  item.order_tracking?.current_status.name === "in-transit"
-                ? "text-primary-500 bg-primary-500"
-                : ""
-            }
+                               status_ === "In-transit"
+                                  ? "text-primary-500 bg-primary-500"
+                                  : ""
+                              }
             
              `}
-          >
-            {item.order_tracking?.current_status.name}
-          </span>
-          </span>
-              </td>
+                            >
+                              {status_}
+                            </span>
+                          </span>
+                        </td>
 
-                        <td className="table-td py-2">  {formattedDate(item.cart_info?.created_at)} </td>
+                        <td className="table-td py-2">
+                          
+                          {formattedDate(actualDelivery)}
+                        </td>
+                        <td className="table-td py-2">
+                          
+                          {formattedDate(
+                            estimatedDelivery
+                          )}
+                        </td>
 
-                      </tr> 
-                      </tbody>
+                       
+                      </tr>
+                    </tbody>
                       </React.Fragment>
-                      ))}
+                    
                 </table>
                 </div>
                 </div>
@@ -846,6 +921,7 @@ const naira = new Intl.NumberFormat("en-NG", {
           <br/>
           <br/>
          
+        
               <div className="grid grid-cols-12 gap-6">
           <div className="lg:col-span-4 col-span-12">
             <Card title="Shipping information">
@@ -862,7 +938,8 @@ const naira = new Intl.NumberFormat("en-NG", {
                     
                       className="text-base text-slate-600 dark:text-slate-50"
                     >
-                      {landmark}
+                   {shippingAddress1}
+                   {shippingAddress2}
                     </a>
                   </div>
                 </li>
@@ -894,7 +971,7 @@ const naira = new Intl.NumberFormat("en-NG", {
                       LOCATION
                     </div>
                     <div className="text-base text-slate-600 dark:text-slate-50">
-                    {houseNumber + " " + streetAddress },{town + " " + shippingState}
+                    {city },{country}
                     </div>
                   </div>
                 </li>
@@ -907,7 +984,7 @@ const naira = new Intl.NumberFormat("en-NG", {
                       Date
                     </div>
                     <div className="text-base text-slate-600 dark:text-slate-50">
-                    {formattedDate(date)}
+                    {formattedDate(dateOrdered)}
                     </div>
                   </div>
                 </li>
@@ -918,10 +995,10 @@ const naira = new Intl.NumberFormat("en-NG", {
                   </div>
                   <div className="flex-1">
                     <div className="uppercase text-xs text-slate-500 dark:text-slate-300 mb-1 leading-[12px]">
-                      Location status
+                      Zip Code
                     </div>
                     <div className="text-base text-slate-600 dark:text-slate-50">
-                    {address ? <span>{address}</span> : "No address available"}
+                    {zip ? <span>{zip}</span> : "No zipcode available"}
                     </div>
                   </div>
                 </li>
@@ -929,11 +1006,64 @@ const naira = new Intl.NumberFormat("en-NG", {
             </Card>
           </div>
           <div className="lg:col-span-8 col-span-12">
-            <Card title="User Overview">
-              <BasicArea height={190} />
-              {/* <div className="text-base text-slate-600 dark:text-slate-50">
-                      Total : { priceTotal}
-                    </div>   */}
+            <Card title="Status Variation Badges">
+           
+
+           <div >
+       <div className="space-xy-5">
+
+         <Button className="bg-secondary-500 text-white"
+         //  onClick={() => handlePendingStatus('pending', item.cart_info.id)} disabled={isLoading}
+         >
+           <div className="space-x-1 rtl:space-x-reverse">
+             <span>{isLoading ? 'Updating...' : 'Pending'}</span>
+             <Badge  icon="material-symbols:pending-actions-rounded" className="bg-white text-slate-900 " />
+           </div>
+         </Button>
+         
+         <Button className="btn-info"
+           // onClick={() => handlePaidStatus('Paid', item.cart_info.id)} disabled={isLoading}
+         >
+           <div className="space-x-1 rtl:space-x-reverse">
+             <span>{isLoading ? 'Updating...' : 'Paid'}</span>
+             <Badge  icon="uiw:pay" className="bg-white text-slate-900 " />
+           </div>
+         </Button>
+         <Button className="btn-warning"
+         //  onClick={() => handleProcessingStatus('Processing', item.cart_info.id)} disabled={isLoading}
+         >
+           <div className="space-x-1 rtl:space-x-reverse">
+             <span>{isLoading ? 'Updating...' : 'Processing'}</span>
+             <Badge  icon="uis:process" className="bg-white text-slate-900 " />
+           </div>
+         </Button>
+         <Button className="btn-dark"
+         //  onClick={() => handleTransitStatus('In-Transit', item.cart_info.id)} disabled={isLoading}
+         >
+           <div className="space-x-1 rtl:space-x-reverse">
+             <span>{isLoading ? 'Updating...' : 'In-Transit '}</span>
+             <Badge  icon="wpf:in-transit" className="bg-white text-slate-900" />
+           </div>
+         </Button>
+         <Button className="btn-success"
+         //  onClick={() => handleDeliveredStatus('Delivered', item.cart_info.id)} disabled={isLoading}
+         >
+           <div className="space-x-1 rtl:space-x-reverse">
+             <span> {isLoading ? 'Updating...' : 'Delivered '}</span>
+             <Badge  icon="mdi:package-delivered" className="bg-white text-slate-900" />
+           </div>
+         </Button>
+         <Button className="btn-danger"
+         //  onClick={() => handleClosedStatus('Closed', item.cart_info.id)} disabled={isLoading}
+         >
+           <div className="space-x-1 rtl:space-x-reverse">
+             <span> {isLoading ? 'Updating...' : 'Closed '}</span>
+             <Badge  icon="ooui:eye-closed" className="bg-white text-slate-900" />
+           </div>
+         </Button>
+       </div>
+       </div>
+   
             </Card>
           </div>
         </div>

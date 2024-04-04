@@ -8,6 +8,11 @@ import Tooltip from "@/components/ui/Tooltip";
 import axios from 'axios'; 
 import { useRouter } from "next/navigation";
 import { userService } from "@/services/users.service";
+import Modal from "@/components/ui/Modal";
+import Button from "@/components/ui/Button";
+import Alert from "@/components/ui/Alert";
+import { _notifySuccess, _notifyError } from "@/utils/alart";
+import { CircularProgress } from "@mui/material";
 // import { useRouter } from 'next/router';
 
 const TransactionsTable = () => {
@@ -38,9 +43,11 @@ const handleTnx = (item) => {
   const itemsPerPage = pageSize; // Use pageSize for itemsPerPage
   const maxPageButtons = 5; // Number of page buttons to display
   const [globalFilter, setGlobalFilter] = useState(""); // Global filter
-
-
-
+  const [delete_productModal, setDelete_productModal] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
   // Function to format date value
 function formattedDate(rawDate) {
   const date = new Date(rawDate);
@@ -173,6 +180,50 @@ useEffect(() => {
 }, []);
 
 
+const handleDeleteProduct = async () => {
+  setIsLoading(true);
+  try {
+    const userString = localStorage.getItem("user");
+
+    if (!userString) {
+      throw new Error("User token not found");
+    }
+
+    const user = JSON.parse(userString);
+
+    if (!user || !user.token || !user.userId) {
+      throw new Error("Invalid user data");
+    }
+    const userById = selectedCustomer?.id;
+    // console.log(userById);
+    //       console.log(user.token);
+
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/users/delete_user/${userById}`,
+      {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+        method: "DELETE",
+      }
+    );
+    const responseData = await response.json();
+
+    if (response.status === 200) {
+      _notifySuccess(`${selectedCustomer?.first_name + " " + selectedCustomer?.last_name}`);
+      setSuccess(responseData.message);
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+    } else {
+      setError(responseData.message);
+    }
+  } catch (error) {
+    console.error("Error during user deletion:", error.message);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
 
   return (
@@ -301,6 +352,24 @@ useEffect(() => {
                                 <Icon icon="tdesign:undertake-transaction" />
                               </button>
                             </Tooltip>
+                            <Tooltip
+                              content="Delete"
+                              placement="top"
+                              arrow
+                              animation="shift-away"
+                              theme="danger"
+                            >
+                              <button
+                                className="action-btn"
+                                type="button"
+                                onClick={() => {
+                                  setSelectedCustomer(item);
+                                  setDelete_productModal(true);
+                                }}
+                              >
+                                <Icon icon="heroicons:trash" />
+                              </button>
+                            </Tooltip>
                             </div>
                 
                 
@@ -403,6 +472,82 @@ useEffect(() => {
           </ul>
         </div>
       </Card>
+
+
+      <Modal
+        activeModal={delete_productModal}
+        onClose={() => setDelete_productModal(false)}
+        centered
+        title= {"Delete" + " " + selectedCustomer?.first_name + " " + selectedCustomer?.last_name }
+        footer={
+          <Button
+            text="Close"
+            btnClass="btn-danger"
+            onClick={() => setDelete_productModal(false)}
+          />
+        }
+      >
+        <form className="space-y-4 ">
+          <center>
+            <img
+              src={
+                selectedCustomer === null
+                  ? "https://cdnb.artstation.com/p/assets/images/images/034/457/389/large/shin-min-jeong-.jpg?1612345145"
+                  : selectedCustomer?.image
+              }
+                alt="avatar"
+              
+              className="w-[150px] h-[150px] rounded-md "
+            />
+
+            <div className="text-slate-600 dark:text-slate-200 text-lg pt-4 pb-1">
+              <p className="font-bold">Are you sure you want to delete this User ?</p>
+            </div>
+            <div className="text-slate-600 dark:text-slate-200 text-lg rounded-lg pb-1">
+              {selectedCustomer?.first_name + " " + selectedCustomer?.last_name }
+            </div>
+            <div className="text-slate-600 dark:text-slate-200 text-lg pb-1">
+              {selectedCustomer?.phone}
+            </div>
+            {error ? (
+              <Alert label={error} className="alert-danger light-mode w-fit " />
+            ) : (
+              ""
+            )}
+
+            {success ? (
+              <Alert
+                label={success}
+                className="alert-success light-mode w-full"
+              />
+            ) : (
+              ""
+            )}
+            <br />
+
+            <div className="flex ltr:text-right rtl:text-left space-x-2 justify-center">
+              <Button
+                className="btn btn-dark  text-center"
+                onClick={() => setDelete_productModal(false)}
+              >
+                Cancel
+              </Button>
+
+              <Button
+                className="btn btn-danger  text-center"
+                onClick={handleDeleteProduct}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <CircularProgress color="inherit" size={24} />
+                ) : (
+                  "Delete User"
+                )}
+              </Button>
+            </div>
+          </center>
+        </form>
+      </Modal>
     </>
   );
 };

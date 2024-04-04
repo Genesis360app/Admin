@@ -6,6 +6,8 @@ import Card from "@/components/ui/Card";
 import Icon from "@/components/ui/Icon";
 import Tooltip from "@/components/ui/Tooltip";
 import { orderService } from "@/services/order.services";
+import HTMLReactParser from "html-react-parser";
+
 import {
   useTable,
   useRowSelect,
@@ -21,6 +23,9 @@ import Button from "@/components/ui/Button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useNavigate } from "react-router-dom";
+import Alert from "@/components/ui/Alert";
+import { _notifySuccess, _notifyError } from "@/utils/alart";
+import { CircularProgress } from "@mui/material";
 
 // find current step schema
 
@@ -58,16 +63,13 @@ const AllOrders = ({ title = "All Orders", item }) => {
   const maxPageButtons = 5; // Number of page buttons to display
   const [globalFilter, setGlobalFilter] = useState(""); // Global filter
   const [activeModal, setActiveModal] = useState(false);
-  const [stepNumber, setStepNumber] = useState(0);
-  const [houseNumber, setHouseNumber] = useState("");
-  const [streetAddress, setStreetAddress] = useState("");
-  const [contactPhone, setContactPhone] = useState("");
-  const [landmark, setLandmark] = useState("");
-  const [town, setTown] = useState("");
-  const [priceTotal, setPriceTotal] = useState("");
-  const [shippingState, setShippingState] = useState("");
-  const [status_, setStatus_] = useState(0);
+  const [status_, setStatus_] = useState("");
   const orderStatus = getStatus(status_);
+  const [delete_orderModal, setDelete_orderModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
+  
   const steps = [
     "Pending",
     "Paid",
@@ -199,8 +201,10 @@ const AllOrders = ({ title = "All Orders", item }) => {
         const response = await orderService.fetchOrders(); // Call fetchUsers as a function
 
         if (response) {
-          // console.log(response); // Use response.data
+          // console.log(response.trackingId.status); // Use response.data
           setOrderItems(response);
+          // setStatus_(response.transaction.status);
+          // console.log(response.transaction.status);
         } else {
           // Handle case where response or response.data is undefined
         }
@@ -216,8 +220,54 @@ const AllOrders = ({ title = "All Orders", item }) => {
     setActiveModal(true);
 
     // Navigate to another page and pass the selected item as a state
-    history.push("/anotherPage", { selectedItem: item });
+    history.push("/anotheroPage", { selectedItem: item });
   };
+
+  const handleDeleteOrder = async () => {
+    setIsLoading(true);
+    try {
+      const userString = localStorage.getItem("user");
+  
+      if (!userString) {
+        throw new Error("User token not found");
+      }
+  
+      const user = JSON.parse(userString);
+  
+      if (!user || !user.token || !user.userId) {
+        throw new Error("Invalid user data");
+      }
+      const userById = selectedOrder?.id;
+      console.log(userById);
+            console.log(user.token);
+  
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/order/${userById}`,
+        {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+          method: "DELETE",
+        }
+      );
+      const responseData = await response.json();
+  
+      if (response.status === 200) {
+        _notifySuccess(`${selectedOrder?.id}`);
+        setSuccess(responseData.message);
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      } else {
+        setError(responseData.message);
+      }
+    } catch (error) {
+      console.error("Error during oder deletion:", error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
 
   return (
     <>
@@ -343,31 +393,27 @@ const AllOrders = ({ title = "All Orders", item }) => {
                 <tbody className="bg-white divide-y divide-slate-100 dark:bg-slate-800 dark:divide-slate-700">
                   <tr>
                     <td className="table-td py-2">
-                      {" "}
+                      
                       <span>
-                        {" "}
                         {selectedOrder?.id.slice(0, 8)}...
                         {selectedOrder?.id.slice(-10)}
                       </span>
                     </td>
                     <td className="table-td py-2">
-                      {" "}
-                      {selectedOrder?.user.username}{" "}
+                      {selectedOrder?.user?.username}
                     </td>
                     <td className="table-td py-2">
-                      {" "}
                       {"+234" + "" + selectedOrder?.phone}
                     </td>
                     <td className="table-td py-2 ">
-                      {selectedOrder?.trackingId.location || "No Location"}
+                    {selectedOrder?.trackingId?.location || "No Location"}
                     </td>
                     <td className="table-td py-2">
-                      {" "}
+                      
                       {naira.format(selectedOrder?.totalPrice || "0")}
                     </td>
                     <td className="table-td py-2">
-                      {" "}
-                      {selectedOrder?.transaction.paymentMode}{" "}
+                    {selectedOrder?.transaction?.paymentMode || "Unknown Payment Mode"}
                     </td>
                     <td className="table-td py-2"> {selectedOrder?.city} </td>
                     <td className="table-td py-2">
@@ -415,14 +461,12 @@ const AllOrders = ({ title = "All Orders", item }) => {
                       </span>
                     </td>
                     <td className="table-td py-2">
-                      {" "}
-                      {formattedDate(selectedOrder?.dateOrdered)}{" "}
+                      {formattedDate(selectedOrder?.dateOrdered)}
                     </td>
                     <td className="table-td py-2">
-                      {" "}
                       {formattedDate(
-                        selectedOrder?.trackingId.estimatedDelivery
-                      )}{" "}
+                        selectedOrder?.trackingId?.estimatedDelivery
+                      )}
                     </td>
                   </tr>
                 </tbody>
@@ -472,21 +516,22 @@ const AllOrders = ({ title = "All Orders", item }) => {
                         <img
                           className="w-20 h-20 rounded"
                           src={
-                            item.product.image === null
+                            item.product?.image === null
                               ? "https://www.pngkey.com/png/full/233-2332677_image-500580-placeholder-transparent.png"
                               : item.product?.image
                           }
                           width={70}
                           height={70}
-                          alt={item.product.name}
+                          alt={item.product?.name}
                         />
                       </td>
-                      <td className="table-td py-2">{item.product.name}</td>
+                      <td className="table-td py-2">{item.product?.name}</td>
                       <td className="table-td py-2">
-                        {item.product.description}
+                      {item.product?.description ? HTMLReactParser(item.product.description) : null}
+                       
                       </td>
-                      <td className="table-td py-2">{item.product.price}</td>
-                      <td className="table-td py-2">{item.quantity}</td>
+                      <td className="table-td py-2">{item.product?.price}</td>
+                      <td className="table-td py-2">{item?.quantity}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -553,6 +598,83 @@ const AllOrders = ({ title = "All Orders", item }) => {
           </div>
         </div>
       </Modal>
+
+      <Modal
+        activeModal={delete_orderModal}
+        onClose={() => setDelete_orderModal(false)}
+        centered
+        title= {selectedOrder?.id}
+        footer={
+          <Button
+            text="Close"
+            btnClass="btn-danger"
+            onClick={() => setDelete_orderModal(false)}
+          />
+        }
+      >
+        <form className="space-y-4 ">
+          <center>
+            <img
+              src={ "https://p.turbosquid.com/ts-thumb/Kc/2Qw5vF/rQ/searchimagetransparentalternative_whitebg/png/1680707751/300x300/sharp_fit_q85/cdff1a28155c195262452dd977d32caa67becfc8/searchimagetransparentalternative_whitebg.jpg"
+                 
+              }
+                alt="order"
+              
+              className="w-[150px] h-[150px] rounded-md "
+            />
+
+            <div className="text-slate-600 dark:text-slate-200 text-lg pt-4 pb-1">
+              <p className="font-bold">Are you sure you want to delete this Oder ?</p>
+            </div>
+            <div className="text-slate-600 dark:text-slate-200 text-lg rounded-lg pb-1">
+            {selectedOrder?.id}
+            </div>
+            <div className="text-slate-600 dark:text-slate-200 text-lg pb-1">
+            {naira.format(selectedOrder?.totalPrice)}
+            </div>
+            <div className="text-slate-600 dark:text-slate-200 text-lg pb-1">
+            {"+234" + "" + selectedOrder?.phone}
+            </div>
+            {error ? (
+              <Alert label={error} className="alert-danger light-mode w-fit " />
+            ) : (
+              ""
+            )}
+
+            {success ? (
+              <Alert
+                label={success}
+                className="alert-success light-mode w-full"
+              />
+            ) : (
+              ""
+            )}
+            <br />
+
+            <div className="flex ltr:text-right rtl:text-left space-x-2 justify-center">
+              <Button
+                className="btn btn-dark  text-center"
+                onClick={() => setDelete_orderModal(false)}
+              >
+                Cancel
+              </Button>
+
+              <Button
+                className="btn btn-danger  text-center"
+                onClick={handleDeleteOrder}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <CircularProgress color="inherit" size={24} />
+                ) : (
+                  "Delete Order"
+                )}
+              </Button>
+            </div>
+          </center>
+        </form>
+      </Modal>
+
 
       <Card>
         <div className="items-center justify-between mb-6 md:flex">
@@ -621,7 +743,7 @@ const AllOrders = ({ title = "All Orders", item }) => {
                         </td>
                         <td className="table-td py-2 ">
                           {" "}
-                          {"+234" + "" + item.phone}{" "}
+                          {"+234" + "" + item?.phone}{" "}
                         </td>
 
                        
@@ -729,6 +851,24 @@ const AllOrders = ({ title = "All Orders", item }) => {
                                 type="button"
                               >
                                 <Icon icon="heroicons:pencil-square" />
+                              </button>
+                            </Tooltip>
+                            <Tooltip
+                              content="Delete"
+                              placement="top"
+                              arrow
+                              animation="shift-away"
+                              theme="danger"
+                            >
+                              <button
+                                className="action-btn"
+                                type="button"
+                                onClick={() => {
+                                  setSelectedOrder(item);
+                                  setDelete_orderModal(true);
+                                }}
+                              >
+                                <Icon icon="heroicons:trash" />
                               </button>
                             </Tooltip>
                           </div>
