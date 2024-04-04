@@ -253,7 +253,7 @@ const AllOrders = ({ title = "All Orders", item }) => {
       const responseData = await response.json();
   
       if (response.status === 200) {
-        _notifySuccess(`${selectedOrder?.id}`);
+        _notifySuccess(responseData.message);
         setSuccess(responseData.message);
         setTimeout(() => {
           window.location.reload();
