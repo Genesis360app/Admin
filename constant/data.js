@@ -83,12 +83,12 @@ export const menuItems = [
     link: "subscriptions",
     badge: "All",
   },
-  {
-    title: "Packages",
-    isHide: true,
-    icon: "emojione-monotone:package",
-    link: "packages",
-  },
+  // {
+  //   title: "Packages",
+  //   isHide: true,
+  //   icon: "emojione-monotone:package",
+  //   link: "packages",
+  // },
 
   {
     isHeadr: true,
@@ -103,7 +103,7 @@ export const menuItems = [
   },
 
   {
-    title: "Orders",
+    title: "Customer Orders",
     isHide: true,
     icon: "solar:cart-2-bold",
     link: "orders",
@@ -116,13 +116,6 @@ export const menuItems = [
     icon: "tdesign:undertake-transaction",
     link: "transactions",
     badge: "All",
-  },
-
-  {
-    title: "orderid",
-    isHide: true,
-    icon: "heroicons-outline:calendar",
-    link: "order",
   },
   {
     title: "Subscriptionbyid",

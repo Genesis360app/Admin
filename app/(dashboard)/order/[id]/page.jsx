@@ -12,15 +12,14 @@ import Modal from "@/components/ui/Modal";
 import axios from 'axios';
 import BasicArea from "@/components/partials/chart/appex-chart/BasicArea";
 import { useParams } from 'react-router-dom';
-import { orderService } from "@/services/order.services";
 import HTMLReactParser from "html-react-parser";
-import { _notifyError } from "@/utils/alart";
+import { _notifyError,_notifySuccess } from "@/utils/alart";
 
-const OrderPage = () => {
+const OrderPage = ({params}) => {
     // const router = useRouter();
     // const routerId = router.query.id; 
      
-    const { id } = useParams();
+    const { id } = params;
     
   const getStatus = (status ) => {
     switch (status) {
@@ -64,6 +63,7 @@ const OrderPage = () => {
   const [totalPrice, setPrice] = useState("");
   const [paymentMode, setPaymentMode] = useState("");
   const [status, setStatus] = useState("");
+  const [tracking, setTracking] = useState("");
   const [actualDelivery, setActualDelivery] = useState("");
   const [estimatedDelivery, setEstimatedDelivery] = useState("");
   
@@ -114,116 +114,59 @@ const naira = new Intl.NumberFormat("en-NG", {
   minimumFractionDigits: 0,
 });
 
-    // useEffect(() => {
-       
-    //     var userid = localStorage.getItem("userid");
-    //     var id = localStorage.getItem("id");
-    //     var token = localStorage.getItem("token");
-    
-    //     // fetch(`https://orangli.com/server/api/Products/orderById.php?orderid=${routerId}`, {
-    //     fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/Products/orderById.php?orderid=777`, {
-    //     headers: {
-    //         "Authorization": `Bearer ${token}`
-    //     }
-    //     })
-    //     .then(response => response.json())
-    //     .then((res) => {
-    //     // console.log(res);
-    //     if(res.code == 200){
-    //         // console.log("Orders");
-    //         // console.log(res)
-    //         setCartItems(res.cart)
-    //         setPriceTotal(res.total)
-            
-    //         setStatus_(parseInt(res.cart[0].cart_info.status));
-    //         setOrderid((res.cart[0].cart_info.id));
-    //         setUseridref((res.cart[0].cart_info.userid));
-    //         const latitudeValue = res.cart[0].cart_info.current_lat;
-    //         const longitudeValue = res.cart[0].cart_info.current_long;
-
-    //      // Set latitude and longitude in state
-    //   setLatitude(latitudeValue);
-    //   setLongitude(longitudeValue);
-    //   convertToAddress(latitudeValue, longitudeValue);
-        
-    //         getDatePlus(res.created_at);
-    //       }else if(res.code == 401){
-           
-    //       }
-    //     })
-        
-    //     // Rest of your fetch code here
-    //     fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/User/getShippingAddress.php?userid=${useridref}`, {
-    //       headers: {
-    //           "Authorization": `Bearer ${token}`
-    //       }
-    //       })
-    //       .then(response => response.json())
-    //       .then((res) => {
-    //       // console.log(res);
-    //       if(res.code == 200){
-    //           setContactPhone(res.payload.phone);
-    //           setShippingState(res.payload.state);
-    //           setTown(res.payload.town);
-    //           setStreetAddress(res.payload.address);
-    //           setLandmark(res.payload.landmark);
-    //           setHouseNumber(res.payload.house_number)
-    //           setDate(res.payload.updated_at)
-    //         }else if(res.code == 401){
-            
-    //           toast.error("An error occured, please login again", {
-    //             position: "top-right",
-    //             autoClose: 1500,
-    //             hideProgressBar: false,
-    //             closeOnClick: true,
-    //             pauseOnHover: true,
-    //             draggable: true,
-    //             progress: undefined,
-    //             theme: "light",
-    //           });
-    //           setTimeout(() => {
-    //             window.location.href = "/"
-    //           }, 2000)
-    //         }
-    //       })
-    
-    // }, [])
-
-
     useEffect(() => {
       const fetchData = async () => {
         try {
-          const response = await orderService.orderById(); // Call fetchUsers as a function
+          const userString = localStorage.getItem("user");
+          if (!userString) {
+            throw new Error("User token not found");
+          }
+  
+          const user = JSON.parse(userString);
+  
+          if (!user || !user.token || !user.userId) {
+            throw new Error("Invalid user data");
+          }
+          const response = await axios.get(
+            `${process.env.NEXT_PUBLIC_BASE_URL}/order/${id}`,
+            {
+              headers: {
+                Authorization: `Bearer ${user.token}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
   
           if (response) {
-            // console.log(response); // Use response.data
-            setCartItems(response.orderItems);
-            setCity(response.city);
-            setZip(response.zip);
-            setContactPhone(response.phone);
-            setCountry(response.country);
-            setDateOrdered(response.dateOrdered);
-            setShippingAddress1(response.shippingAddress1);
-            setShippingAddress2(response.shippingAddress2);
-            setOrderId(response.id);
-            setFullName (response.user.fullName);
-            setPhone(response.phone);
-            setLocation(response.trackingId.location);
-            setPrice(response.totalPrice);
-            setPaymentMode(response.transaction.paymentMode);
-            setStatus_(response.transaction.status);
-            console.log("status",response.transaction.status);
-            setActualDelivery(response.trackingId.actualDelivery);
-            setEstimatedDelivery(response.trackingId.estimatedDelivery);
-
-          } else {
-            // Handle case where response or response.data is undefined
-          }
+                  console.log(response.data.data); // Use response.data
+                  setCartItems(response?.data.data.orderItems);
+                  setCity(response?.data.data.city);
+                  setZip(response?.data.data.zip);
+                  setContactPhone(response?.data.data.phone);
+                  setCountry(response.country);
+                  setDateOrdered(response?.data.data.dateOrdered);
+                  setShippingAddress1(response?.data.data.shippingAddress1);
+                  setShippingAddress2(response?.data.data.shippingAddress2);
+                  setOrderId(response?.data.data.id);
+                  setFullName (response?.data.data.user.fullName);
+                  setPhone(response?.data.data.phone);
+                  setLocation(response?.data.data.trackingId.location);
+                  setTracking(response?.data.data.trackingId.id);
+                  setPrice(response?.data.data.totalPrice);
+                  setPaymentMode(response?.data.data.transaction.paymentMode);
+                  setStatus_(response?.data.data.transaction?.status);
+                  setActualDelivery(response?.data.data.trackingId.actualDelivery);
+                  setEstimatedDelivery(response?.data.data.trackingId.estimatedDelivery);
+      
+                } else {
+                  // Handle case where response or response.data is undefined
+                }
         } catch (err) {
-          // console.error("Error:", err);
-          _notifyError(err.message);
-        }
+              // console.error("Error:", err);
+              _notifyError(err.message);
+            }
       };
+      
       fetchData();
     }, []);
 
@@ -249,390 +192,313 @@ const naira = new Intl.NumberFormat("en-NG", {
       }
     };
 
-    const handlePendingStatus = async (status, itemId) => {
+  
+    const handlePendingStatus = async () => {
       setIsLoading(true);
       try {
-        const token = localStorage.getItem('token'); // Replace with your authentication method
-        const headers = {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data',
-        };
-  
-        const body = {
-          orderid: orderid,
-          status: '1',
-        };
-  
-        const response = await axios.post(
-          'https://orangli.com/server/api/Products/updateOrder.php',
-          
-          body,
-          { headers, cache: 'no-store' }
+        const userString = localStorage.getItem("user");
+    
+        if (!userString) {
+          throw new Error("User token not found");
+        }
+    
+        const user = JSON.parse(userString);
+    
+        if (!user || !user.token || !user.userId) {
+          throw new Error("Invalid user data");
+        }
+    
+        const body = JSON.stringify({
+          status: "Pending", // Use the correct status for processing
+        });
+    
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/order/${tracking}`,
+          {
+            method: "PUT",
+            headers: {
+              Authorization: `Bearer ${user.token}`,
+              "Content-Type": "application/json",
+              cache: 'no-store',
+            },
+            body: body,
+          }
         );
-  
-        // Handle the response as needed
-        // console.log(response.data);
-  
-        if (response.status === 200) {
-          // Handle a successful response here
-          toast.info(
-            'Order is awaiting payment',
-            {
-              position: 'top-right',
-              autoClose: 1500,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-              progress: undefined,
-              theme: 'light',
-            }
-          );
+    
+        if (response.ok) {
+          const responseData = await response.json();
+          // console.log(responseData);
+          _notifySuccess("Order is awaiting payment'");
           setTimeout(() => {
             window.location.reload();
-          }, 3000);
-          setIsLoading(false);
-        } else if (response.status === 401) {
-          // Handle unauthorized access
+          }, 2000);
         } else {
-          // Handle other status codes or errors
+          throw new Error(`Failed to update status: ${response.statusText}`);
+          _notifyError("Failed to update status");
         }
       } catch (error) {
-        setError('An error occurred while updating the order status.');
-       
-        toast.error(error, {
-          position: "top-right",
-          autoClose: 1500,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
+        console.error("Error during status update:", error.message);
+        setError(error.message);
+      } finally {
         setIsLoading(false);
       }
     };
 
-    const handlePaidStatus = async (status, itemId) => {
+    const handlePaidStatus = async () => {
       setIsLoading(true);
       try {
-        const token = localStorage.getItem('token'); // Replace with your authentication method
-        const headers = {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data',
-        };
-  
-        const body = {
-          orderid: orderid,
-          status: '2',
-        };
-  
-        const response = await axios.post(
-          'https://orangli.com/server/api/Products/updateOrder.php',
-          
-          body,
-          { headers, cache: 'no-store' }
+        const userString = localStorage.getItem("user");
+    
+        if (!userString) {
+          throw new Error("User token not found");
+        }
+    
+        const user = JSON.parse(userString);
+    
+        if (!user || !user.token || !user.userId) {
+          throw new Error("Invalid user data");
+        }
+    
+        const body = JSON.stringify({
+          status: "Paid", // Use the correct status for processing
+        });
+    
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/order/${tracking}`,
+          {
+            method: "PUT",
+            headers: {
+              Authorization: `Bearer ${user.token}`,
+              "Content-Type": "application/json",
+              cache: 'no-store',
+            },
+            body: body,
+          }
         );
-  
-        // Handle the response as needed
-        // console.log(response.data);
-        if (response.status === 200) {
-          // Handle a successful response here
-          toast.success(
-            'Ordered Product Mark as Paid, Ready for Processing',
-            {
-              position: 'top-right',
-              autoClose: 1500,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-              progress: undefined,
-              theme: 'light',
-            }
-          );
+    
+        if (response.ok) {
+          const responseData = await response.json();
+          // console.log(responseData);
+          _notifySuccess("Ordered Product Mark as Paid, Ready for Processing");
           setTimeout(() => {
             window.location.reload();
-          }, 3000);
-          setIsLoading(false);
-        } else if (response.status === 401) {
-          // Handle unauthorized access
+          }, 2000);
         } else {
-          // Handle other status codes or errors
+          throw new Error(`Failed to update status: ${response.statusText}`);
+          _notifyError("Failed to update status");
         }
       } catch (error) {
-        setError('An error occurred while updating the order status.');
-       
-        toast.error(error, {
-          position: "top-right",
-          autoClose: 1500,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
+        console.error("Error during status update:", error.message);
+        setError(error.message);
+      } finally {
         setIsLoading(false);
       }
     };
 
-    const handleProcessingStatus = async (status, itemId) => {
+    const handleProcessingStatus = async () => {
       setIsLoading(true);
       try {
-        const token = localStorage.getItem('token'); // Replace with your authentication method
-        const headers = {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data',
-        };
-  
-        const body = {
-          orderid: orderid,
-          status: '3',
-        };
-  
-        const response = await axios.post(
-          'https://orangli.com/server/api/Products/updateOrder.php',
-          
-          body,
-          { headers, cache: 'no-store' }
+        const userString = localStorage.getItem("user");
+    
+        if (!userString) {
+          throw new Error("User token not found");
+        }
+    
+        const user = JSON.parse(userString);
+    
+        if (!user || !user.token || !user.userId) {
+          throw new Error("Invalid user data");
+        }
+    
+        const body = JSON.stringify({
+          status: "Proccessing", // Use the correct status for processing
+        });
+    
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/order/${tracking}`,
+          {
+            method: "PUT",
+            headers: {
+              Authorization: `Bearer ${user.token}`,
+              "Content-Type": "application/json",
+              cache: 'no-store',
+            },
+            body: body,
+          }
         );
-  
-        // Handle the response as needed
-        // console.log(response.data);
-        if (response.status === 200) {
-          // Handle a successful response here
-          toast.success(
-            'We are currently processing your order with care',
-            {
-              position: 'top-right',
-              autoClose: 1500,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-              progress: undefined,
-              theme: 'light',
-            }
-          );
+    
+        if (response.ok) {
+          const responseData = await response.json();
+          // console.log(responseData);
+          _notifySuccess("Order Status Updated successfully");
           setTimeout(() => {
             window.location.reload();
-          }, 3000);
-          setIsLoading(false);
-        } else if (response.status === 401) {
-          // Handle unauthorized access
+          }, 2000);
         } else {
-          // Handle other status codes or errors
+          throw new Error(`Failed to update status: ${response.statusText}`);
+          _notifyError("Failed to update status");
         }
       } catch (error) {
-        setError('An error occurred while updating the order status.');
-       
-        toast.error(error, {
-          position: "top-right",
-          autoClose: 1500,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
+        console.error("Error during status update:", error.message);
+        setError(error.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    const handleTransitStatus = async () => {
+      setIsLoading(true);
+      try {
+        const userString = localStorage.getItem("user");
+    
+        if (!userString) {
+          throw new Error("User token not found");
+        }
+    
+        const user = JSON.parse(userString);
+    
+        if (!user || !user.token || !user.userId) {
+          throw new Error("Invalid user data");
+        }
+    
+        const body = JSON.stringify({
+          status: "In-Transit", // Use the correct status for processing
         });
+    
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/order/${tracking}`,
+          {
+            method: "PUT",
+            headers: {
+              Authorization: `Bearer ${user.token}`,
+              "Content-Type": "application/json",
+              cache: 'no-store',
+            },
+            body: body,
+          }
+        );
+    
+        if (response.ok) {
+          const responseData = await response.json();
+          // console.log(responseData);
+          _notifySuccess("Order is now in transit and on its way to your location");
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000);
+        } else {
+          throw new Error(`Failed to update status: ${response.statusText}`);
+          _notifyError("Failed to update status");
+        }
+      } catch (error) {
+        console.error("Error during status update:", error.message);
+        setError(error.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    const handleDeliveredStatus = async () => {
+      setIsLoading(true);
+      try {
+        const userString = localStorage.getItem("user");
+    
+        if (!userString) {
+          throw new Error("User token not found");
+        }
+    
+        const user = JSON.parse(userString);
+    
+        if (!user || !user.token || !user.userId) {
+          throw new Error("Invalid user data");
+        }
+    
+        const body = JSON.stringify({
+          status: "Delivered", // Use the correct status for processing
+        });
+    
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/order/${tracking}`,
+          {
+            method: "PUT",
+            headers: {
+              Authorization: `Bearer ${user.token}`,
+              "Content-Type": "application/json",
+              cache: 'no-store',
+            },
+            body: body,
+          }
+        );
+    
+        if (response.ok) {
+          const responseData = await response.json();
+          // console.log(responseData);
+          _notifySuccess("Order has been successfully delivered. Enjoy your purchase!");
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000);
+        } else {
+          throw new Error(`Failed to update status: ${response.statusText}`);
+          _notifyError("Failed to update status");
+        }
+      } catch (error) {
+        console.error("Error during status update:", error.message);
+        setError(error.message);
+      } finally {
         setIsLoading(false);
       }
     };
 
-    const handleTransitStatus = async (status, itemId) => {
+
+    const handleClosedStatus = async () => {
       setIsLoading(true);
       try {
-        const token = localStorage.getItem('token'); // Replace with your authentication method
-        const headers = {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data',
-        };
-  
-        const body = {
-          orderid: orderid,
-          status: '4',
-        };
-  
-        const response = await axios.post(
-          'https://orangli.com/server/api/Products/updateOrder.php',
-          
-          body,
-          { headers, cache: 'no-store' }
+        const userString = localStorage.getItem("user");
+    
+        if (!userString) {
+          throw new Error("User token not found");
+        }
+    
+        const user = JSON.parse(userString);
+    
+        if (!user || !user.token || !user.userId) {
+          throw new Error("Invalid user data");
+        }
+    
+        const body = JSON.stringify({
+          status: "Closed", // Use the correct status for processing
+        });
+    
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/order/${tracking}`,
+          {
+            method: "PUT",
+            headers: {
+              Authorization: `Bearer ${user.token}`,
+              "Content-Type": "application/json",
+              cache: 'no-store',
+            },
+            body: body,
+          }
         );
-  
-        // Handle the response as needed
-        // console.log(response.data);
-        if (response.status === 200) {
-          // Handle a successful response here
-          toast.success(
-            'Order is now in transit and on its way to your location',
-            {
-              position: 'top-right',
-              autoClose: 1500,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-              progress: undefined,
-              theme: 'light',
-            }
-          );
+    
+        if (response.ok) {
+          const responseData = await response.json();
+          // console.log(responseData);
+          _notifySuccess("Item as been Delivered and Closed Out!");
           setTimeout(() => {
             window.location.reload();
-          }, 3000);
-          setIsLoading(false);
-        } else if (response.status === 401) {
-          // Handle unauthorized access
+          }, 2000);
         } else {
-          // Handle other status codes or errors
+          throw new Error(`Failed to update status: ${response.statusText}`);
+          _notifyError("Failed to update status");
         }
       } catch (error) {
-        setError('An error occurred while updating the order status.');
-       
-        toast.error(error, {
-          position: "top-right",
-          autoClose: 1500,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
+        console.error("Error during status update:", error.message);
+        setError(error.message);
+      } finally {
         setIsLoading(false);
       }
     };
 
-    const handleDeliveredStatus = async (status, itemId) => {
-      setIsLoading(true);
-      try {
-        const token = localStorage.getItem('token'); // Replace with your authentication method
-        const headers = {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data',
-        };
-  
-        const body = {
-          orderid: orderid,
-          status: '5',
-        };
-  
-        const response = await axios.post(
-          'https://orangli.com/server/api/Products/updateOrder.php',
-          
-          body,
-          { headers, cache: 'no-store' }
-        );
-  
-        // Handle the response as needed
-        // console.log(response.data);
-        if (response.status === 200) {
-          // Handle a successful response here
-          toast.success(
-            'Order has been successfully delivered. Enjoy your purchase!',
-            {
-              position: 'top-right',
-              autoClose: 1500,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-              progress: undefined,
-              theme: 'light',
-            }
-          );
-          setTimeout(() => {
-            window.location.reload();
-          }, 3000);
-          setIsLoading(false);
-        } else if (response.status === 401) {
-          // Handle unauthorized access
-        } else {
-          // Handle other status codes or errors
-        }
-      } catch (error) {
-        setError('An error occurred while updating the order status.');
-       
-        toast.error(error, {
-          position: "top-right",
-          autoClose: 1500,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
-        setIsLoading(false);
-      }
-    };
-    const handleClosedStatus = async (status, itemId) => {
-      setIsLoading(true);
-      try {
-        const token = localStorage.getItem('token'); // Replace with your authentication method
-        const headers = {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data',
-        };
-  
-        const body = {
-          orderid: orderid,
-          status: '6',
-        };
-  
-        const response = await axios.post(
-          'https://orangli.com/server/api/Products/updateOrder.php',
-          
-          body,
-          { headers, cache: 'no-store' }
-        );
-  
-        // // Handle the response as needed
-        // console.log(response.data);
-
-        if (response.status === 200) {
-          // Handle a successful response here
-          toast.success(
-            'Item as been Delivered and Closed Out',
-            {
-              position: 'top-right',
-              autoClose: 1500,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-              progress: undefined,
-              theme: 'light',
-            }
-          );
-          setTimeout(() => {
-            window.location.reload();
-          }, 3000);
-          setIsLoading(false);
-        } else if (response.status === 401) {
-          // Handle unauthorized access
-        } else {
-          // Handle other status codes or errors
-        }
-      } catch (error) {
-        setError('An error occurred while updating the order status.');
-       
-        toast.error(error, {
-          position: "top-right",
-          autoClose: 1500,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
-        setIsLoading(false);
-      }
-    };
+   
   return (
     <div>
     <ToastContainer/>
@@ -1013,7 +879,7 @@ const naira = new Intl.NumberFormat("en-NG", {
        <div className="space-xy-5">
 
          <Button className="bg-secondary-500 text-white"
-         //  onClick={() => handlePendingStatus('pending', item.cart_info.id)} disabled={isLoading}
+          onClick={() => handlePendingStatus()} disabled={isLoading}
          >
            <div className="space-x-1 rtl:space-x-reverse">
              <span>{isLoading ? 'Updating...' : 'Pending'}</span>
@@ -1022,7 +888,7 @@ const naira = new Intl.NumberFormat("en-NG", {
          </Button>
          
          <Button className="btn-info"
-           // onClick={() => handlePaidStatus('Paid', item.cart_info.id)} disabled={isLoading}
+           onClick={() => handlePaidStatus()} disabled={isLoading}
          >
            <div className="space-x-1 rtl:space-x-reverse">
              <span>{isLoading ? 'Updating...' : 'Paid'}</span>
@@ -1030,7 +896,7 @@ const naira = new Intl.NumberFormat("en-NG", {
            </div>
          </Button>
          <Button className="btn-warning"
-         //  onClick={() => handleProcessingStatus('Processing', item.cart_info.id)} disabled={isLoading}
+          onClick={() => handleProcessingStatus()} disabled={isLoading}
          >
            <div className="space-x-1 rtl:space-x-reverse">
              <span>{isLoading ? 'Updating...' : 'Processing'}</span>
@@ -1038,7 +904,7 @@ const naira = new Intl.NumberFormat("en-NG", {
            </div>
          </Button>
          <Button className="btn-dark"
-         //  onClick={() => handleTransitStatus('In-Transit', item.cart_info.id)} disabled={isLoading}
+          onClick={() => handleTransitStatus()} disabled={isLoading}
          >
            <div className="space-x-1 rtl:space-x-reverse">
              <span>{isLoading ? 'Updating...' : 'In-Transit '}</span>
@@ -1046,7 +912,7 @@ const naira = new Intl.NumberFormat("en-NG", {
            </div>
          </Button>
          <Button className="btn-success"
-         //  onClick={() => handleDeliveredStatus('Delivered', item.cart_info.id)} disabled={isLoading}
+          onClick={() => handleDeliveredStatus()} disabled={isLoading}
          >
            <div className="space-x-1 rtl:space-x-reverse">
              <span> {isLoading ? 'Updating...' : 'Delivered '}</span>
@@ -1054,7 +920,7 @@ const naira = new Intl.NumberFormat("en-NG", {
            </div>
          </Button>
          <Button className="btn-danger"
-         //  onClick={() => handleClosedStatus('Closed', item.cart_info.id)} disabled={isLoading}
+          onClick={() => handleClosedStatus()} disabled={isLoading}
          >
            <div className="space-x-1 rtl:space-x-reverse">
              <span> {isLoading ? 'Updating...' : 'Closed '}</span>

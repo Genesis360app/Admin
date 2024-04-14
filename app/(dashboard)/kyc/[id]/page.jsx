@@ -1,14 +1,15 @@
 "use client";
 
 import React, { useEffect, useState, useMemo, Fragment, useRef } from "react";
-import { advancedTable } from "../../../constant/table-data";
+import { advancedTable } from "../../../../constant/table-data";
 import Card from "@/components/ui/Card";
 import Icon from "@/components/ui/Icon";
 import Tooltip from "@/components/ui/Tooltip";
+import Textinput from "@/components/ui/Textinput";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Modal from "@/components/ui/Modal";
-import GlobalFilter from "../table/GlobalFilter";
+import GlobalFilter from "@/components/partials/table/GlobalFilter";
 import Button from "@/components/ui/Button";
 import { useRouter } from "next/navigation";
 import Badge from "@/components/ui/Badge";
@@ -16,7 +17,7 @@ import Dropdown from "@/components/ui/Dropdown";
 import { Menu } from "@headlessui/react";
 import { useSelector, useDispatch } from "react-redux";
 import Link from "next/link";
-import Map from "../table/Map";
+import Map from "@/components/partials/table/Map";
 import BasicArea from "@/components/partials/chart/appex-chart/BasicArea";
 import axios from "axios"; // Import Axios at the top of your file
 import dynamic from "next/dynamic";
@@ -24,6 +25,12 @@ const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 import useDarkMode from "@/hooks/useDarkMode";
 import { Tab, Disclosure, Transition } from "@headlessui/react";
 import Accordion from "@/components/ui/Accordion";
+import { InfinitySpin } from "react-loader-spinner";
+import { userService } from "@/services/users.service";
+import { useParams } from "react-router-dom";
+import Alert from "@/components/ui/Alert";
+import { _notifySuccess, _notifyError } from "@/utils/alart";
+import { CircularProgress } from "@mui/material";
 import {
   GoogleMap,
   Marker,
@@ -33,7 +40,6 @@ import {
   useJsApiLoader,
 } from "@react-google-maps/api";
 // import { TfiLocationArrow, TfiTime } from 'react-icons/tfi';
-import { InfinitySpin } from "react-loader-spinner";
 
 const backgrounds = [
   "https://img.pikbest.com/origin/09/05/42/54gpIkbEsT8SV.jpg!w700wp",
@@ -45,14 +51,31 @@ const backgrounds = [
   "https://img.pikbest.com/origin/09/05/42/95XpIkbEsTGaW.jpg!sw800",
 ];
 
-const AllSubcriptions = ({ title = "Subscriptions", item }) => {
+const AllSubcriptions = ({ title = "Loans", item, params }) => {
+  const getStatus = (status) => {
+    switch (status) {
+      case "Pending":
+        return "pending-100";
+      case "Paid":
+        return "primary-100";
+      case "Processing":
+        return "processing-100";
+      case "In-Transit":
+        return "gray-100";
+      case "Delivered":
+        return "success-100";
+      case "Closed":
+        return "danger-200";
+      default:
+        return "";
+    }
+  };
+
   const dispatch = useDispatch();
   const router = useRouter();
-
+  const { id } = params;
   // handleClick to view project single page
-  const handleClick = (item) => {
-    router.push(`/order/${item.cart_info.id}`);
-  };
+
   const [currentBackground, setCurrentBackground] = useState(0);
   const [orderItems, setOrderItems] = useState([]);
   const [subByID, setSubByID] = useState([]);
@@ -68,22 +91,18 @@ const AllSubcriptions = ({ title = "Subscriptions", item }) => {
   const [firstname, setFirstname] = useState("");
   const [lastname, setLastname] = useState("");
   const [businessIsPartner, setBusinessIsPartner] = useState("");
+  const [isVerified, setIsVerified] = useState(null);
   const [income, setIncome] = useState("");
   const [wallet, setWallet] = useState("");
   const [spending_limit, setSpending_limit] = useState("");
   const [outstanding, setOutstanding] = useState("");
   const [avatar, setAvatar] = useState("");
   const [isBusiness, setIsbusiness] = useState(null);
-  const [status, setStatus] = useState(null);
   const [gender, setGender] = useState("");
   const [remita, setRemita] = useState("");
-  const [employment, setEmployment] = useState("");
   const [num, setNum] = useState("");
-  const [step, setStep] = useState(0);
-  const [pdfpassword, setPdfpassword] = useState("");
   const [bvn, setBvn] = useState("");
   const [dob, setDOB] = useState("");
-  const [id, setId] = useState("");
   const [kycdate, setKycdate] = useState("");
   const [CustomerID, setCustomerID] = useState("");
   const [marital, setMarital] = useState("");
@@ -92,24 +111,26 @@ const AllSubcriptions = ({ title = "Subscriptions", item }) => {
   const [proof_id, setProof_id] = useState("");
   const [bank_statement, setBank_statement] = useState("");
   const [street, setStreet] = useState("");
-  const [userToken, setUserToken] = useState("");
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [rcNumber, setRcNumber] = useState("");
+  const [idNumber, setIdNumber] = useState("");
   const [account_number, setAccount_number] = useState("");
   const [bank_name, setBank_name] = useState("");
+  const [accountName, setAccountName] = useState("");
   const [isRegistered, setIsRegistered] = useState(null);
-  const [disabled_, setDisabled] = useState(false);
-  const [user_id, setUser_id] = useState(null);
-  const [businessAddress, setBusinessAddress] = useState(null);
-  const [businessCategory, setBusinessCategory] = useState(null);
-  const [businessName, setBusinessName] = useState(null);
   const [created_at, setCreated_at] = useState(null);
   const [houseNumber, setHouseNumber] = useState("");
   const [streetAddress, setStreetAddress] = useState("");
   const [contactPhone, setContactPhone] = useState("");
   const [landmark, setLandmark] = useState("");
   const [town, setTown] = useState("");
+  const [isCreated, setIsCreated] = useState("");
+  const [expiryDate, setExpiryDate] = useState("");
+  const [issueDate, setIssueDate] = useState("");
+  const [nationality, setNationality] = useState("");
+  const [images, setImages] = useState();
+  const [businessinfo, Setbusinessinfo] = useState("");
   const [referralcode, setReferralcode] = useState("");
   const [refby, setRefby] = useState("");
   const [priceTotal, setPriceTotal] = useState("");
@@ -125,10 +146,25 @@ const AllSubcriptions = ({ title = "Subscriptions", item }) => {
   const [long, setLong] = useState("");
   const [activeModal, setActiveModal] = useState(false);
   const [history, setHistory] = useState([]);
+  const [loan, setLoan] = useState([]);
   const [history_activeModal, setHistory_activeModal] = useState(false);
   const [selectedHistory, setSelectedHistory] = useState(null);
+  const [step, setStep] = useState(0);
+  const [delete_orderModal, setDelete_orderModal] = useState(false);
+  const [profileModal, setProfileModal] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [status_, setStatus_] = useState("");
+  const orderStatus = getStatus(status_);
+  const [isChecked, setIsChecked] = useState(false);
+  const [isBusinessDefault, setBusinessDefault] = useState(false);
+  const [password, setPassword] = useState("");
 
-  const userid = "40650345-79253277-720443759";
+  const handleToggleChange = () => {
+    setIsChecked(!isChecked);
+    setBusinessDefault(!isChecked);
+  };
 
   // Function to format date value
   function formattedDate(rawDate) {
@@ -151,6 +187,20 @@ const AllSubcriptions = ({ title = "Subscriptions", item }) => {
       return <span>Invalid Date</span>;
     }
   }
+
+  const steps = [
+    "Pending",
+    "Paid",
+    "Processing",
+    "In-transit",
+    "Delivering",
+    "Complete",
+  ];
+  const statusIndex = steps.indexOf(orderStatus);
+
+  const handlePrint = () => {
+    window.print();
+  };
 
   const last25Items = subByID;
 
@@ -183,8 +233,8 @@ const AllSubcriptions = ({ title = "Subscriptions", item }) => {
 
   const filteredhistory = useMemo(() => {
     return (history || []).filter((item) => {
-      const transaction_ref = (item?.transaction_ref || "").toString(); // Access product_name safely and convert to lowercase
-      const txn_Id = (item?.id || "").toString(); // Access package_id safely and convert to string
+      const transaction_ref = (item?.description || "").toString(); // Access product_name safely and convert to lowercase
+      const amount = (item?.amount || "").toString(); // Access package_id safely and convert to string
       const date = (formattedDate(item?.created_at) || "").toString(); // Access package_id safely and convert to string
 
       // Check if globalFilter is defined and not null before using trim
@@ -193,7 +243,7 @@ const AllSubcriptions = ({ title = "Subscriptions", item }) => {
       // Customize this logic to filter based on your specific requirements
       return (
         transaction_ref.includes(filterText.toLowerCase()) ||
-        txn_Id.includes(filterText) ||
+        amount.includes(filterText) ||
         date.includes(filterText)
       );
     });
@@ -201,21 +251,42 @@ const AllSubcriptions = ({ title = "Subscriptions", item }) => {
 
   const filteredOrder = useMemo(() => {
     return (orderItems || []).filter((item) => {
-      const transaction_ref = (item?.transaction_ref || "").toString(); // Access product_name safely and convert to lowercase
-      const txn_Id = (item?.id || "").toString(); // Access package_id safely and convert to string
-      const date = (formattedDate(item?.created_at) || "").toString(); // Access package_id safely and convert to string
+      const cart_id = (item?.id || "").toString(); // Access product_name safely and convert to lowercase
+      const username = (item.user?.username || "").toString(); // Access package_id safely and convert to string
+      const mobile_number = (item?.phone || "").toString(); // Access package_id safely and convert to string
 
       // Check if globalFilter is defined and not null before using trim
       const filterText = globalFilter ? globalFilter.trim() : "";
 
       // Customize this logic to filter based on your specific requirements
       return (
-        transaction_ref.includes(filterText.toLowerCase()) ||
-        txn_Id.includes(filterText) ||
-        date.includes(filterText)
+        cart_id.includes(filterText.toLowerCase()) ||
+        username.includes(filterText) ||
+        mobile_number.includes(filterText)
       );
     });
   }, [orderItems, globalFilter]);
+
+  const filteredLoan = useMemo(() => {
+    return (loan || []).filter((item) => {
+      const amount = (item?.amount || "").toString(); // Access product_name safely and convert to lowercase
+      const status = (item?.status || "").toString(); // Access package_id safely and convert to string
+      const outstanding = (item?.outstanding || "").toString(); // Access package_id safely and convert to string
+      const user = (item?.user || "").toString(); // Access package_id safely and convert to string
+
+      // Check if globalFilter is defined and not null before using trim
+      const filterText = globalFilter ? globalFilter.trim() : "";
+
+      // Customize this logic to filter based on your specific requirements
+      return (
+        user.includes(filterText.toLowerCase()) ||
+        outstanding.includes(filterText) ||
+        status.includes(filterText) ||
+        status.includes(filterText) ||
+        amount.includes(filterText)
+      );
+    });
+  }, [loan, globalFilter]);
 
   const naira = new Intl.NumberFormat("en-NG", {
     style: "currency",
@@ -225,7 +296,7 @@ const AllSubcriptions = ({ title = "Subscriptions", item }) => {
   });
 
   const handleNextPage = () => {
-    if (currentPage < Math.ceil(filteredData.length / itemsPerPage)) {
+    if (currentPage < Math.ceil(filteredhistory.length / itemsPerPage)) {
       setCurrentPage((prevPage) => prevPage + 1);
     }
   };
@@ -238,15 +309,16 @@ const AllSubcriptions = ({ title = "Subscriptions", item }) => {
 
   // Calculate the index range for the current page
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = Math.min(startIndex + itemsPerPage, filteredData.length);
+  const endIndex = Math.min(startIndex + itemsPerPage, filteredhistory.length);
 
   // Get the paginated history data for the current page
-  const paginatedSubscription = filteredData.slice(startIndex, endIndex);
+  const paginatedSubscription = filteredOrder.slice(startIndex, endIndex);
   const paginatedHistory = filteredhistory.slice(startIndex, endIndex);
   const paginatedOrder = filteredOrder.slice(startIndex, endIndex);
+  const paginatedLoan = filteredLoan.slice(startIndex, endIndex);
 
   // Calculate the total number of pages
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredhistory.length / itemsPerPage);
 
   const getPageNumbers = () => {
     const totalPages = Math.ceil(filteredData.length / itemsPerPage);
@@ -273,301 +345,596 @@ const AllSubcriptions = ({ title = "Subscriptions", item }) => {
 
     return pageNumbers;
   };
-
   const isOrderEmpty = orderItems.length === 0;
   const isSubEmpty = subByID.length === 0;
   const isHistoryEmpty = history.length === 0;
+  const isLoanEmpty = loan.length === 0;
 
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "", // Provide a default value if the environment variable is not defined
     libraries: ["places"],
   });
 
+  // useEffect(() => {
+  //   const fetchUserShippingAddress = async () => {
+  //     try {
+  //       const userid = localStorage.getItem("userid");
+  //       const token = localStorage.getItem("token");
+  //       const response = await fetch(
+  //         `${process.env.NEXT_PUBLIC_BASE_URL}/User/getShippingAddress.php?userid=${userid}`,
+  //         {
+  //           cache: "no-cache",
+  //           headers: {
+  //             Authorization: `Bearer ${token}`,
+  //           },
+  //         }
+  //       );
+
+  //       if (!response.ok) {
+  //         throw new Error("Network response was not ok");
+  //       }
+
+  //       const res = await response.json();
+  //       // console.log(res);
+  //       if (res.code === 200) {
+  //         setLatitude(res.payload.latitude);
+  //         setLongitude(res.payload.longitude);
+  //         setLandmark(res.payload.landmark);
+  //         setMapCenter({
+  //           lat: parseFloat(res.payload.latitude),
+  //           lng: parseFloat(res.payload.longitude),
+  //         });
+  //       } else if (res.code === 401) {
+  //         setTimeout(() => {
+  //           window.location.href = "/";
+  //         }, 2000);
+  //       }
+  //     } catch (error) {
+  //       toast.error(`Error fetching user shipping address: ${error}`, {
+  //         position: "top-right",
+  //         autoClose: 1500,
+  //         hideProgressBar: false,
+  //         closeOnClick: true,
+  //         pauseOnHover: true,
+  //         draggable: true,
+  //         progress: undefined,
+  //         theme: "light",
+  //       });
+  //       // Handle the error as needed (e.g., show an error message)
+  //     }
+  //   };
+
+  //   const fetchData = async () => {
+  //     try {
+  //       var token = localStorage.getItem("token");
+  //       // var userid = localStorage.getItem("userid");
+
+  //       const response = await fetch(
+  //         `${process.env.NEXT_PUBLIC_BASE_URL}/Products/getSubscription.php?userid=${userid}`,
+  //         {
+  //           cache: "no-store",
+  //           headers: {
+  //             Authorization: `Bearer ${token}`,
+  //           },
+  //         }
+  //       );
+
+  //       if (!response.ok) {
+  //         // Handle error if the response is not OK
+  //         toast.warning("Network response was not ok", {
+  //           position: "top-right",
+  //           autoClose: 1500,
+  //           hideProgressBar: false,
+  //           closeOnClick: true,
+  //           pauseOnHover: true,
+  //           draggable: true,
+  //           progress: undefined,
+  //           theme: "light",
+  //         });
+  //         throw new Error(`HTTP error! Status: ${response.status}`);
+  //       }
+
+  //       const res = await response.json();
+
+  //       // console.log(res);
+
+  //       if (res.code === 200) {
+  //         setSubByID(res.sub);
+  //         setUser_id(res.sub[1].sub_info.userid);
+  //       } else if (res.code === 401) {
+  //         setTimeout(() => {
+  //           router.push("/");
+  //         }, 1500);
+  //       }
+  //     } catch (error) {
+  //       // Handle errors here
+  //       toast.error(error, {
+  //         position: "top-right",
+  //         autoClose: 1500,
+  //         hideProgressBar: false,
+  //         closeOnClick: true,
+  //         pauseOnHover: true,
+  //         draggable: true,
+  //         progress: undefined,
+  //         theme: "light",
+  //       });
+  //     }
+  //   };
+
+  //   const fetchDatas = async () => {
+  //     try {
+  //       const token = localStorage.getItem("token");
+
+  //       const response = await axios.get(
+  //         `${process.env.NEXT_PUBLIC_BASE_URL}/User/getKYC.php?userid=${userid}`,
+  //         {
+  //           headers: {
+  //             Authorization: `Bearer ${token}`,
+  //           },
+  //         }
+  //       );
+
+  //       if (!response.data) {
+  //         // Handle error if the response data is not available
+  //         toast.warning("Network response was not ok", {
+  //           position: "top-right",
+  //           autoClose: 1500,
+  //           hideProgressBar: false,
+  //           closeOnClick: true,
+  //           pauseOnHover: true,
+  //           draggable: true,
+  //           progress: undefined,
+  //           theme: "light",
+  //         });
+  //         throw new Error(`HTTP error! Status: ${response.status}`);
+  //       }
+
+  //       if (response.data.code === 200) {
+  //         // console.log(response.data);
+  //         // Handle successful response
+  //         setBank_statement(response.data.bank_statement_pdf);
+  //         setStatus(response.data.kyc.status);
+  //         setIncome(response.data.kyc.income);
+  //         setGender(response.data.kyc.gender);
+  //         setIncome(response.data.kyc.income);
+  //         setRemita(response.data.kyc.remita);
+  //         setMarital(response.data.kyc.marital);
+  //         setMaiden(response.data.kyc.maiden);
+  //         setDOB(response.data.kyc.dob);
+  //         setKycdate(response.data.kyc.created_at);
+  //         setEmployment(response.data.kyc.employment);
+  //         setNum(response.data.kyc.family_num);
+  //         setProof(response.data.kyc.proof);
+  //         setPdfpassword(response.data.kyc.statment_of_account_passcode);
+  //         setEmployment(response.data.kyc.employment);
+  //         setState(response.data.kyc.state);
+  //         setCity(response.data.kyc.city);
+  //         setStep(response.data.kyc.step);
+  //         setStreet(response.data.kyc.street);
+  //         setState(response.data.kyc.state);
+  //       } else if (response.data.code === 401) {
+  //         setTimeout(() => {
+  //           router.push("/");
+  //         }, 1500);
+  //       }
+  //     } catch (error) {
+  //       // Handle errors here
+  //       toast.error(error.message, {
+  //         position: "top-right",
+  //         autoClose: 1500,
+  //         hideProgressBar: false,
+  //         closeOnClick: true,
+  //         pauseOnHover: true,
+  //         draggable: true,
+  //         progress: undefined,
+  //         theme: "light",
+  //       });
+  //     }
+  //   };
+
+  //   var token = localStorage.getItem("token");
+  //   // Use the orderId prop directly
+  //   fetch(
+  //     `${process.env.NEXT_PUBLIC_BASE_URL}/User/getUser.php?userid=${userid}`,
+  //     {
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //     }
+  //   )
+  //     .then((response) => response.json())
+  //     .then((res) => {
+  //       console.log(res);
+  //       if (res.code === 200) {
+  //         setFirstname(res.user.first_name);
+  //         setEmail(res.user.email);
+  //         setId(res.user.id);
+  //         setCustomerID(res.user.user_id);
+  //         setUsername(res.user.username);
+  //         setLastname(res.user.last_name);
+  //         setPhone(res.user.phone);
+  //         setIsbusiness(res.user.isBusiness);
+  //         setWallet(res.user.wallet);
+  //         setOutstanding(res.outstanding);
+  //         setSpending_limit(res.user.spending_limit);
+  //         setBusinessIsPartner(res.user.businessIsPartner);
+  //         setAvatar(res.user.avatar);
+  //         setBusinessCategory(res.user.businessCategory);
+  //         setBusinessName(res.user.businessName);
+  //         setBusinessAddress(res.user.businessAddress);
+  //         setReferralcode(res.user.user_ref_id);
+  //         setRefby(res.user.referral_id);
+  //         setRcNumber(res.user.rcNumber);
+  //         setBank_name(res.user.bank_name);
+  //         setAccount_number(res.user.account_number);
+  //       } else if (res.code === 401) {
+  //       }
+  //     });
+
+  //   fetch(
+  //     `${process.env.NEXT_PUBLIC_BASE_URL}/User/getProof?userid=${userid}`,
+  //     {
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //     }
+  //   )
+  //     .then((response) => response.json())
+  //     .then((res) => {
+  //       // console.log(res);
+  //       if (res.code == 200) {
+  //         setProof_id(res.temp_url);
+  //       } else if (res.code == 401) {
+  //       }
+  //     });
+
+  //   var token = localStorage.getItem("token");
+  //   fetch(
+  //     `${process.env.NEXT_PUBLIC_BASE_URL}/Wallet/History.php?user_id=${userid}`,
+  //     {
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //     }
+  //   )
+  //     .then((response) => response.json())
+  //     .then((res) => {
+  //       // console.log(res);
+  //       if (res.code == 200) {
+  //         setHistory(res.history);
+  //       } else if (res.code == 401) {
+  //         toast.info(`An error occurred, please login again`, {
+  //           position: "top-right",
+  //           autoClose: 1500,
+  //           hideProgressBar: false,
+  //           closeOnClick: true,
+  //           pauseOnHover: true,
+  //           draggable: true,
+  //           progress: undefined,
+  //           theme: "light",
+  //         });
+  //       }
+  //     });
+
+  //   fetch(
+  //     `${process.env.NEXT_PUBLIC_BASE_URL}/Products/getOrders.php?userid=${userid}`,
+  //     {
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //     }
+  //   )
+  //     .then((response) => response.json())
+  //     .then((res) => {
+  //       // console.log(res);
+  //       if (res.code == 200) {
+  //         // console.log("Orders");
+  //         // console.log(res)
+  //         setOrderItems(res.cart);
+  //         setPriceTotal(res.total);
+  //       } else if (res.code == 401) {
+  //       }
+  //     });
+
+  //   fetchData(); // Call the asynchronous function
+  //   fetchDatas();
+  //   fetchUserShippingAddress();
+  // }, []);
+
   useEffect(() => {
-    const fetchUserShippingAddress = async () => {
+    const userById = async () => {
       try {
-        const userid = localStorage.getItem("userid");
-        const token = localStorage.getItem("token");
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/User/getShippingAddress.php?userid=${userid}`,
+        const userString = localStorage.getItem("user");
+        if (!userString) {
+          throw new Error("User token not found");
+        }
+
+        const user = JSON.parse(userString);
+
+        if (!user || !user.token || !user.userId) {
+          throw new Error("Invalid user data");
+        }
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/users/${id}`,
           {
-            cache: "no-cache",
             headers: {
-              Authorization: `Bearer ${token}`,
+              Authorization: `Bearer ${user.token}`,
+              "Content-Type": "application/json",
             },
           }
         );
 
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
+        if (response.data) {
+          const userinfo = response.data.data.user;
+          const userwallet = response.data.data.wallet;
+          Setbusinessinfo(response.data.data.business);
+          // console.log(response);
+          // console.log(id);
+          setFirstname(userinfo.first_name);
+          setLastname(userinfo.last_name);
+          setEmail(userinfo.email);
+          setUsername(userinfo.username);
+          setPhone(userinfo.phone);
+          setAvatar(userinfo.image);
+          setReferralcode(userinfo.ref_id);
+          setIsbusiness(userinfo.isBusiness);
+          setIsVerified(userinfo.isVerified);
+          setIsCreated(userinfo.updatedAt);
+          setIsCreated(userinfo.updatedAt);
+          setAccount_number(userwallet.accountNo);
+          setBank_name(userwallet.bankName);
+          setAccountName(userwallet.accountName);
+          setWallet(userwallet.balance);
+        } else {
+          // Handle case where response or response.data is undefined
         }
-
-        const res = await response.json();
-        // console.log(res);
-        if (res.code === 200) {
-          setLatitude(res.payload.latitude);
-          setLongitude(res.payload.longitude);
-          setLandmark(res.payload.landmark);
-          setMapCenter({
-            lat: parseFloat(res.payload.latitude),
-            lng: parseFloat(res.payload.longitude),
-          });
-        } else if (res.code === 401) {
-          setTimeout(() => {
-            window.location.href = "/";
-          }, 2000);
-        }
-      } catch (error) {
-        toast.error(`Error fetching user shipping address: ${error}`, {
-          position: "top-right",
-          autoClose: 1500,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
-        // Handle the error as needed (e.g., show an error message)
+      } catch (err) {
+        // console.error("Error:", err);
       }
     };
 
-    const fetchData = async () => {
+    const userKyc = async (id) => {
       try {
-        var token = localStorage.getItem("token");
-        // var userid = localStorage.getItem("userid");
-
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/Products/getSubscription.php?userid=${userid}`,
-          {
-            cache: "no-store",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        if (!response.ok) {
-          // Handle error if the response is not OK
-          toast.warning("Network response was not ok", {
-            position: "top-right",
-            autoClose: 1500,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "light",
-          });
-          throw new Error(`HTTP error! Status: ${response.status}`);
+        const userString = localStorage.getItem("user");
+        if (!userString) {
+          throw new Error("User token not found");
         }
 
-        const res = await response.json();
+        const user = JSON.parse(userString);
 
-        // console.log(res);
-
-        if (res.code === 200) {
-          setSubByID(res.sub);
-          setUser_id(res.sub[1].sub_info.userid);
-        } else if (res.code === 401) {
-          setTimeout(() => {
-            router.push("/");
-          }, 1500);
+        if (!user || !user.token || !user.userId) {
+          throw new Error("Invalid user data");
         }
-      } catch (error) {
-        // Handle errors here
-        toast.error(error, {
-          position: "top-right",
-          autoClose: 1500,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
-      }
-    };
-
-    const fetchDatas = async () => {
-      try {
-        const token = localStorage.getItem("token");
 
         const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/User/getKYC.php?userid=${userid}`,
+          `${process.env.NEXT_PUBLIC_BASE_URL}/kyc/${id}`,
           {
             headers: {
-              Authorization: `Bearer ${token}`,
+              Authorization: `Bearer ${user.token}`,
+              "Content-Type": "application/json",
+              "ngrok-skip-browser-warning": "true",
             },
           }
         );
-
-        if (!response.data) {
-          // Handle error if the response data is not available
-          toast.warning("Network response was not ok", {
-            position: "top-right",
-            autoClose: 1500,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "light",
-          });
-          throw new Error(`HTTP error! Status: ${response.status}`);
+        if (response.data) {
+          // Handle response data
+          const userKyc = response.data.data;
+          const userinfo2 = response.data.data.user;
+          setGender(userKyc.gender);
+          setIncome(userKyc.monthlyIncome);
+          setMarital(userKyc.maritalStatus);
+          setMaiden(userKyc.motherMaidenName);
+          setDOB(userKyc.dateOfBirth);
+          setOutstanding(userinfo2.loanOutstanding);
+          setSpending_limit(userinfo2.loanLimit);
+          setProof(userKyc.idType);
+          setIdNumber(userKyc.idNumber);
+          setIssueDate(userKyc.issueDate);
+          setExpiryDate(userKyc.expiryDate);
+          setNum(userKyc.householdNo);
+          setRefby(userinfo2.ref_code);
+          setBvn(userKyc.bvn);
+          setState(userKyc.state);
+          setCity(userKyc.city);
+          setNationality(userKyc.nationality);
+          setImages(userKyc.images);
+          setStreet(userKyc.address);
+          setStep(response.status);
+          // console.log('Test Data', response);
+        } else {
+          // Handle case where response or response.data is undefined
+        }
+      } catch (err) {
+        // console.error("Error:", err);
+        // Handle error
+      }
+    };
+    const userOrder = async () => {
+      try {
+        const userString = localStorage.getItem("user");
+        if (!userString) {
+          throw new Error("User token not found");
         }
 
-        if (response.data.code === 200) {
-          // console.log(response.data);
-          // Handle successful response
-          setBank_statement(response.data.bank_statement_pdf);
-          setStatus(response.data.kyc.status);
-          setIncome(response.data.kyc.income);
-          setGender(response.data.kyc.gender);
-          setIncome(response.data.kyc.income);
-          setRemita(response.data.kyc.remita);
-          setMarital(response.data.kyc.marital);
-          setMaiden(response.data.kyc.maiden);
-          setDOB(response.data.kyc.dob);
-          setKycdate(response.data.kyc.created_at);
-          setEmployment(response.data.kyc.employment);
-          setNum(response.data.kyc.family_num);
-          setProof(response.data.kyc.proof);
-          setPdfpassword(response.data.kyc.statment_of_account_passcode);
-          setEmployment(response.data.kyc.employment);
-          setState(response.data.kyc.state);
-          setCity(response.data.kyc.city);
-          setStep(response.data.kyc.step);
-          setStreet(response.data.kyc.street);
-          setState(response.data.kyc.state);
-        } else if (response.data.code === 401) {
-          setTimeout(() => {
-            router.push("/");
-          }, 1500);
+        const user = JSON.parse(userString);
+
+        if (!user || !user.token || !user.userId) {
+          throw new Error("Invalid user data");
         }
-      } catch (error) {
-        // Handle errors here
-        toast.error(error.message, {
-          position: "top-right",
-          autoClose: 1500,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/order/get/usersorders/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${user.token}`,
+              "Content-Type": "application/json",
+              "ngrok-skip-browser-warning": "true",
+            },
+          }
+        );
+        if (response.data) {
+          // Handle response data
+          // console.log(response.data.data);
+          setOrderItems(response.data.data);
+        } else {
+          // Handle case where response or response.data is undefined
+        }
+      } catch (err) {
+        // console.error("Error:", err);
+        // Handle error
       }
     };
 
-    var token = localStorage.getItem("token");
-    // Use the orderId prop directly
-    fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/User/getUser.php?userid=${userid}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    )
-      .then((response) => response.json())
-      .then((res) => {
-        console.log(res);
-        if (res.code === 200) {
-          setFirstname(res.user.first_name);
-          setEmail(res.user.email);
-          setId(res.user.id);
-          setCustomerID(res.user.user_id);
-          setUsername(res.user.username);
-          setLastname(res.user.last_name);
-          setPhone(res.user.phone);
-          setIsbusiness(res.user.isBusiness);
-          setWallet(res.user.wallet);
-          setOutstanding(res.outstanding);
-          setSpending_limit(res.user.spending_limit);
-          setBusinessIsPartner(res.user.businessIsPartner);
-          setAvatar(res.user.avatar);
-          setBusinessCategory(res.user.businessCategory);
-          setBusinessName(res.user.businessName);
-          setBusinessAddress(res.user.businessAddress);
-          setReferralcode(res.user.user_ref_id);
-          setRefby(res.user.referral_id);
-          setRcNumber(res.user.rcNumber);
-          setBank_name(res.user.bank_name);
-          setAccount_number(res.user.account_number);
-        } else if (res.code === 401) {
+    const userTransaction = async () => {
+      try {
+        const userString = localStorage.getItem("user");
+        if (!userString) {
+          throw new Error("User token not found");
         }
-      });
 
-    fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/User/getProof?userid=${userid}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    )
-      .then((response) => response.json())
-      .then((res) => {
-        // console.log(res);
-        if (res.code == 200) {
-          setProof_id(res.temp_url);
-        } else if (res.code == 401) {
+        const user = JSON.parse(userString);
+
+        if (!user || !user.token || !user.userId) {
+          throw new Error("Invalid user data");
         }
-      });
 
-    var token = localStorage.getItem("token");
-    fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/Wallet/History.php?user_id=${userid}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    )
-      .then((response) => response.json())
-      .then((res) => {
-        // console.log(res);
-        if (res.code == 200) {
-          setHistory(res.history);
-        } else if (res.code == 401) {
-          toast.info(`An error occurred, please login again`, {
-            position: "top-right",
-            autoClose: 1500,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "light",
-          });
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/transaction/user/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${user.token}`,
+              "Content-Type": "application/json",
+              "ngrok-skip-browser-warning": "true",
+            },
+          }
+        );
+        if (response.data) {
+          // Handle response data
+          // console.log(response.data.transactions);
+          setHistory(response.data.transactions);
+        } else {
+          // Handle case where response or response.data is undefined
         }
-      });
-
-    fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/Products/getOrders.php?userid=${userid}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      } catch (err) {
+        // console.error("Error:", err);
+        // Handle error
       }
-    )
-      .then((response) => response.json())
-      .then((res) => {
-        // console.log(res);
-        if (res.code == 200) {
-          // console.log("Orders");
-          // console.log(res)
-          setOrderItems(res.cart);
-          setPriceTotal(res.total);
-        } else if (res.code == 401) {
+    };
+    const userLoan = async () => {
+      try {
+        const userString = localStorage.getItem("user");
+        if (!userString) {
+          throw new Error("User token not found");
         }
-      });
 
-    fetchData(); // Call the asynchronous function
-    fetchDatas();
-    fetchUserShippingAddress();
-  }, []);
+        const user = JSON.parse(userString);
+
+        if (!user || !user.token || !user.userId) {
+          throw new Error("Invalid user data");
+        }
+
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/loan/user/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${user.token}`,
+              "Content-Type": "application/json",
+              "ngrok-skip-browser-warning": "true",
+            },
+          }
+        );
+        if (response.data) {
+          // Handle response data
+          // console.log(response.data);
+          setLoan(response.data);
+        } else {
+          // Handle case where response or response.data is undefined
+        }
+      } catch (err) {
+        // console.error("Error:", err);
+        // Handle error
+      }
+    };
+
+    // Assuming `id` is defined somewhere
+    userKyc(id);
+    userLoan();
+    userById();
+    userOrder();
+    userTransaction();
+  }, []); // Make sure to include userId in the dependency array
+
+  function formattedDate(rawDate) {
+    const date = new Date(rawDate);
+
+    if (!isNaN(date.getTime())) {
+      const options = {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        // second: '2-digit',
+        hour12: true, // Use 24-hour format
+      };
+
+      const formattedDate = date.toLocaleString(undefined, options);
+      return <span>{formattedDate}</span>;
+    } else {
+      return <span>Invalid Date</span>;
+    }
+  }
+
+
+
+  const UpdateProfile = async () => {
+    setIsLoading(true);
+    try {
+      const userString = localStorage.getItem("user");
+
+      if (!userString) {
+        throw new Error("User token not found");
+      }
+
+      const user = JSON.parse(userString);
+
+      if (!user || !user.token || !user.userId) {
+        throw new Error("Invalid user data");
+      }
+      // console.log(user.userId);
+      // console.log(user.token);
+      const formData = new FormData();
+      formData.append("username", username);
+      formData.append("first_name", firstname);
+      formData.append("last_name", lastname);
+      formData.append("email", email);
+      formData.append("phone", phone);
+      formData.append("password", password);
+      formData.append("isBusiness", isBusinessDefault);
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/users/update_user/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+          method: "PUT",
+          body: formData,
+        }
+      );
+      const responseData = await response.json();
+      console.log(responseData);
+      if (response.status === 200) {
+        setSuccess("Profile updated successfully");
+        _notifySuccess("Profile updated successfully");
+      } else {
+        setError(responseData.message);
+      }
+    } catch (error) {
+      console.error("Error during onSuccess:", error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -661,126 +1028,229 @@ const AllSubcriptions = ({ title = "Subscriptions", item }) => {
   };
 
   // kyc approval
-  const handleApprovekyc = async (status, CustomerID) => {
+  // const handleApprovekyc = async (status, CustomerID) => {
+  //   setIsLoading(true);
+
+  //     try {
+  //       const userString = localStorage.getItem("user");
+  //       if (!userString) {
+  //         throw new Error("User token not found");
+  //       }
+  
+  //       const user = JSON.parse(userString);
+  
+  //       if (!user || !user.token || !user.userId) {
+  //         throw new Error("Invalid user data");
+  //       }
+  //     const headers = {
+  //       Authorization: `Bearer ${token}`,
+  //       "Content-Type": "multipart/form-data",
+  //     };
+
+  //     const body = {
+  //       status: "Approved", // Use the status parameter here
+  //     };
+
+  //     const response = await axios.post(
+  //       `${process.env.NEXT_PUBLIC_BASE_URL}/kyc/update-status/${id}`,
+
+  //       body,
+  //       { headers, cache: "no-store" }
+  //     );
+
+  //     // Handle the response as needed
+  //     // console.log(response.data);
+  //     if (response.status === 200) {
+  //       // Handle a successful response here
+  //       _notifySuccess("updated");
+  //       console.log(response);
+  //       setTimeout(() => {
+  //         window.location.reload();
+  //       }, 3000);
+  //       setIsLoading(false);
+  //     } else if (response.status === 401) {
+  //       // Handle unauthorized access
+  //     } else {
+  //       // Handle other status codes or errors
+  //     }
+  //   } catch (error) {
+  //     setError("An error occurred while updating the order status.");
+
+  //     toast.error(error, {
+  //       position: "top-right",
+  //       autoClose: 1500,
+  //       hideProgressBar: false,
+  //       closeOnClick: true,
+  //       pauseOnHover: true,
+  //       draggable: true,
+  //       progress: undefined,
+  //       theme: "light",
+  //     });
+  //     setIsLoading(false);
+  //   }
+  // };
+
+
+  const handleApprovekyc = async () => {
     setIsLoading(true);
     try {
-      const token = localStorage.getItem("token"); // Replace with your authentication method
-      const headers = {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data",
-      };
-
-      const body = {
-        userid: CustomerID, // Use the itemId parameter here
-        action: status, // Use the status parameter here
-      };
-
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/User/kyc.php`,
-
-        body,
-        { headers, cache: "no-store" }
+      const userString = localStorage.getItem("user");
+  
+      if (!userString) {
+        throw new Error("User token not found");
+      }
+  
+      const user = JSON.parse(userString);
+  
+      if (!user || !user.token || !user.userId) {
+        throw new Error("Invalid user data");
+      }
+  
+      const body = JSON.stringify({
+        status: "Approved", // Use the correct status for approval
+      });
+  
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/kyc/update-status/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+            "Content-Type": "application/json", // Specify JSON content type
+          },
+          body: body,
+        }
       );
-
-      // Handle the response as needed
-      // console.log(response.data);
-      if (response.status === 200) {
-        // Handle a successful response here
-        toast.success("User KYC approved successfully", {
-          position: "top-right",
-          autoClose: 1500,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
-        setTimeout(() => {
-          window.location.reload();
-        }, 3000);
-        setIsLoading(false);
-      } else if (response.status === 401) {
-        // Handle unauthorized access
+  
+      if (response.ok) {
+        const responseData = await response.json();
+        console.log(responseData);
+        // setTimeout(() => {
+        //   window.location.reload();
+        // }, 2000);
       } else {
-        // Handle other status codes or errors
+        throw new Error(`Failed to approve KYC: ${response}`);
       }
     } catch (error) {
-      setError("An error occurred while updating the order status.");
-
-      toast.error(error, {
-        position: "top-right",
-        autoClose: 1500,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
+      console.error("Error during KYC approval:", error);
+      setError(error.message);
+    } finally {
       setIsLoading(false);
     }
   };
-  const handleDisapprovekyc = async (status, CustomerID) => {
+  
+  const handleDisapprovekyc = async () => {
     setIsLoading(true);
     try {
-      const token = localStorage.getItem("token"); // Replace with your authentication method
-      const headers = {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data",
-      };
-
-      const body = {
-        userid: CustomerID, // Use the itemId parameter here
-        action: status, // Use the status parameter here
-      };
-
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/User/kyc.php`,
-
-        body,
-        { headers, cache: "no-store" }
+      const userString = localStorage.getItem("user");
+  
+      if (!userString) {
+        throw new Error("User token not found");
+      }
+  
+      const user = JSON.parse(userString);
+  
+      if (!user || !user.token || !user.userId) {
+        throw new Error("Invalid user data");
+      }
+  
+      const body = JSON.stringify({
+        status: "Rejected", // Use the correct status for approval
+      });
+  
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/kyc/update-status/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+            "Content-Type": "application/json", // Specify JSON content type
+          },
+          body: body,
+        }
       );
-
-      // Handle the response as needed
-      // console.log(response.data);
-      if (response.status === 200) {
-        // Handle a successful response here
-        toast.error("User KYC has been Disapproved successfully", {
-          position: "top-right",
-          autoClose: 1500,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
-        setTimeout(() => {
-          window.location.reload();
-        }, 3000);
-        setIsLoading(false);
-      } else if (response.status === 401) {
-        // Handle unauthorized access
+  
+      if (response.ok) {
+        const responseData = await response.json();
+        console.log(responseData);
+        // setTimeout(() => {
+        //   window.location.reload();
+        // }, 2000);
       } else {
-        // Handle other status codes or errors
+        throw new Error(`Failed to approve KYC: ${response.statusText}`);
       }
     } catch (error) {
-      setError("An error occurred while updating the order status.");
-
-      toast.error(error, {
-        position: "top-right",
-        autoClose: 1500,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
+      console.error("Error during KYC approval:", error);
+      setError(error.message);
+    } finally {
       setIsLoading(false);
     }
   };
+  
+
+
+
+
+  // const handleDisapprovekyc = async (status, CustomerID) => {
+  //   setIsLoading(true);
+  //   try {
+  //     const token = localStorage.getItem("token"); // Replace with your authentication method
+  //     const headers = {
+  //       Authorization: `Bearer ${token}`,
+  //       "Content-Type": "multipart/form-data",
+  //     };
+
+  //     const body = {
+  //       userid: CustomerID, // Use the itemId parameter here
+  //       action: status, // Use the status parameter here
+  //     };
+
+  //     const response = await axios.post(
+  //       `${process.env.NEXT_PUBLIC_BASE_URL}/User/kyc.php`,
+
+  //       body,
+  //       { headers, cache: "no-store" }
+  //     );
+
+  //     // Handle the response as needed
+  //     // console.log(response.data);
+  //     if (response.status === 200) {
+  //       // Handle a successful response here
+  //       toast.error("User KYC has been Disapproved successfully", {
+  //         position: "top-right",
+  //         autoClose: 1500,
+  //         hideProgressBar: false,
+  //         closeOnClick: true,
+  //         pauseOnHover: true,
+  //         draggable: true,
+  //         progress: undefined,
+  //         theme: "light",
+  //       });
+  //       setTimeout(() => {
+  //         window.location.reload();
+  //       }, 3000);
+  //       setIsLoading(false);
+  //     } else if (response.status === 401) {
+  //       // Handle unauthorized access
+  //     } else {
+  //       // Handle other status codes or errors
+  //     }
+  //   } catch (error) {
+  //     setError("An error occurred while updating the order status.");
+
+  //     toast.error(error, {
+  //       position: "top-right",
+  //       autoClose: 1500,
+  //       hideProgressBar: false,
+  //       closeOnClick: true,
+  //       pauseOnHover: true,
+  //       draggable: true,
+  //       progress: undefined,
+  //       theme: "light",
+  //     });
+  //     setIsLoading(false);
+  //   }
+  // };
 
   // end of kyc
 
@@ -1215,39 +1685,165 @@ const AllSubcriptions = ({ title = "Subscriptions", item }) => {
     );
   };
 
-  const files = [
-    {
-      img: "/assets/images/icon/pdf-1.svg",
-      title: "Account Statement.pdf",
-      date: formattedDate(created_at),
-      link: bank_statement,
-    },
-    {
-      img: "/assets/images/icon/pdf-2.svg",
-      title: "Remita Mandate Form.pdf",
-      date: formattedDate(created_at),
-      link: remita,
-    },
+  // const files = [
+  //   {
+  //     img: "/assets/images/icon/pdf-1.svg",
+  //     title: "Account Statement.pdf",
+  //     date: formattedDate(created_at),
+  //     link: bank_statement,
+  //   },
+  //   {
+  //     img: "/assets/images/icon/pdf-2.svg",
+  //     title: "Remita Mandate Form.pdf",
+  //     date: formattedDate(created_at),
+  //     link: remita,
+  //   },
 
-    {
-      img: "/assets/images/icon/scr-1.svg",
-      title: "Proof of Identity.jpg",
-      date: formattedDate(created_at),
-      link: proof_id,
-    },
+  //   {
+  //     img: "/assets/images/icon/scr-1.svg",
+  //     title: "Proof of Identity.jpg",
+  //     date: formattedDate(created_at),
+  //     link: proof_id,
+  //   },
 
-    // {
-    //   img: "/assets/images/icon/pdf-2.svg",
-    //   title: "Proof of Identity.pdf",
-    //   date: (formattedDate(created_at)),
-    //   link:"go",
-    // },
-  ];
+  //   // {
+  //   //   img: "/assets/images/icon/pdf-2.svg",
+  //   //   title: "Proof of Identity.pdf",
+  //   //   date: (formattedDate(created_at)),
+  //   //   link:"go",
+  //   // },
+  // ];
   // background changes
 
   return (
     <>
       <ToastContainer />
+
+      <Modal
+        activeModal={profileModal}
+        onClose={() => setProfileModal(false)}
+        title={isLoading ? "Updating..." : "Update Profile "}
+        className="max-w-[48%]"
+        footerContent={
+          <div className="flex ltr:text-right rtl:text-left space-x-1">
+            <Button
+              className="btn btn-dark   text-center"
+              onClick={UpdateProfile}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <CircularProgress color="inherit" size={24} />
+              ) : (
+                "Update Profile"
+              )}
+            </Button>
+          </div>
+        }
+      >
+        <div className="text-base text-slate-600 dark:text-slate-300">
+          <Card title="Update Profile Details">
+            <form>
+              <div className="space-y-3">
+                <Textinput
+                  label="Username"
+                  id="username"
+                  name="username"
+                  type="text"
+                  placeholder="First Name"
+                  onChange={(e) => {
+                    setFirstname(e.target.value);
+                  }}
+                  defaultValue={username}
+                />
+                <Textinput
+                  label="First Name*"
+                  id="first_name"
+                  name="first_name"
+                  type="text"
+                  placeholder="First Name"
+                  onChange={(e) => {
+                    setFirstname(e.target.value);
+                  }}
+                  defaultValue={firstname}
+                />
+                <Textinput
+                  label="Last Name*"
+                  placeholder="Last Name"
+                  type="text"
+                  id="last_name"
+                  name="last_name"
+                  onChange={(e) => {
+                    setLastname(e.target.value);
+                  }}
+                  defaultValue={lastname}
+                />
+                <Textinput
+                  label="Phone Number"
+                  type="tel"
+                  id="phone"
+                  name="phone"
+                  placeholder="8122233345"
+                  onChange={(e) => {
+                    setPhone(e.target.value);
+                  }}
+                  defaultValue={phone}
+                />
+                <Textinput
+                  label="Email Address "
+                  placeholder="Email Address *"
+                  type="email"
+                  id="email"
+                  name="email"
+                  defaultValue={email}
+                  readonly
+                />
+                <Textinput
+                  label="Password "
+                  placeholder="Password *"
+                  type="password"
+                  id="password"
+                  name="password"
+                  defaultValue={password}
+                  readonly
+                />
+
+                <label className="relative mt-4 inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    value={isBusinessDefault}
+                    className="sr-only peer"
+                    checked={isChecked}
+                    onChange={handleToggleChange}
+                  />
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-gray-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-800"></div>
+                  <span className="ms-3 ml-4 text-sm font-medium text-success-900 dark:text-success-900">
+                    Mark as Business Account
+                  </span>
+                </label>
+              </div>
+            </form>
+            <br />
+            {error ? (
+              <Alert
+                label={error}
+                className="alert-danger light-mode w-full "
+              />
+            ) : (
+              ""
+            )}
+
+            {success ? (
+              <Alert
+                label={success}
+                className="alert-success light-mode w-full "
+              />
+            ) : (
+              ""
+            )}
+          </Card>
+        </div>
+      </Modal>
+
       <Modal
         activeModal={history_activeModal}
         onClose={() => setHistory_activeModal(false)}
@@ -1267,7 +1863,7 @@ const AllSubcriptions = ({ title = "Subscriptions", item }) => {
                 Transaction ID
               </h2>
               <p className="text-[20px] leading-[20px] font-medium mt-[5px] ">
-                # {selectedHistory?.id}
+                {selectedHistory?.id}
               </p>
             </div>
             <div>
@@ -1276,7 +1872,7 @@ const AllSubcriptions = ({ title = "Subscriptions", item }) => {
               </h2>
               <p className="text-[20px] leading-[20px] text-right font-medium mt-[5px]">
                 {(() => {
-                  const rawDate = selectedHistory?.created_at;
+                  const rawDate = selectedHistory?.date;
                   const date = new Date(rawDate);
                   return !isNaN(date.getTime()) ? (
                     <>
@@ -1300,10 +1896,10 @@ const AllSubcriptions = ({ title = "Subscriptions", item }) => {
           <div className="flex justify-between mt-[30px]">
             <div>
               <h2 className="text-[20px] leading-[25px] font-bold">
-                Transaction Ref
+                Payment Mode
               </h2>
               <p className="text-[20px] leading-[20px] font-medium mt-[5px] ">
-                {selectedHistory?.transaction_ref}
+                {selectedHistory?.paymentMode}
               </p>
             </div>
             <div>
@@ -1322,7 +1918,7 @@ const AllSubcriptions = ({ title = "Subscriptions", item }) => {
                 Description
               </h2>
               <p className="text-[20px] leading-[20px] font-medium mt-[5px] ">
-                {selectedHistory?.remark}
+                {selectedHistory?.description}
               </p>
             </div>
             <div>
@@ -1330,7 +1926,7 @@ const AllSubcriptions = ({ title = "Subscriptions", item }) => {
                 Transaction Type
               </h2>
               <p className="text-[20px] leading-[20px] text-right font-medium mt-[5px]">
-                {selectedHistory?.txn_type}
+                {selectedHistory?.type}
               </p>
             </div>
           </div>
@@ -1349,7 +1945,7 @@ const AllSubcriptions = ({ title = "Subscriptions", item }) => {
                 User ID
               </h2>
               <p className="text-[20px] leading-[20px] text-right font-medium mt-[5px]">
-                {selectedHistory?.userid}
+                {selectedHistory?.user}
               </p>
             </div>
           </div>
@@ -1439,6 +2035,409 @@ const AllSubcriptions = ({ title = "Subscriptions", item }) => {
         </div>
       </Modal>
 
+      <Modal
+        className="w-[60%]"
+        activeModal={activeModal}
+        onClose={() => setActiveModal(false)}
+        title={selectedOrder?.id}
+        footer={
+          <Button
+            text="Close"
+            btnClass="btn-primary"
+            onClick={() => setActiveModal(false)}
+            router={router}
+          />
+        }
+      >
+        <div>
+          <Card>
+            <div>
+              <div className="flex z-[5] items-center relative justify-center md:mx-8">
+                {steps.map((item, i) => (
+                  <div
+                    className="relative z-[1] items-center item flex flex-start flex-1 last:flex-none group"
+                    key={i}
+                  >
+                    <div
+                      className={`${
+                        statusIndex >= i
+                          ? "bg-slate-900 text-white ring-slate-900 ring-offset-2 dark:ring-offset-slate-500 dark:bg-slate-900 dark:ring-slate-900"
+                          : "bg-white ring-slate-900 ring-opacity-70  text-slate-900 dark:text-slate-300 dark:bg-slate-600 dark:ring-slate-600 text-opacity-70"
+                      }  transition duration-150 icon-box md:h-12 md:w-12 h-7 w-7 rounded-full flex flex-col items-center justify-center relative z-[66] ring-1 md:text-lg text-base font-medium`}
+                    >
+                      {statusIndex <= i ? (
+                        i === 0 ? (
+                          <Icon icon="ic:twotone-pending-actions" /> // Replace with your first icon
+                        ) : i === 1 ? (
+                          <Icon icon="flat-color-icons:paid" /> // Replace with your third icon
+                        ) : i === 2 ? (
+                          <Icon icon="uis:process" /> // Replace with your second icon
+                        ) : i === 3 ? (
+                          <Icon icon="wpf:in-transit" /> // Replace with your third icon
+                        ) : i === 4 ? (
+                          <Icon icon="solar:delivery-bold" /> // Replace with your third icon
+                        ) : i === 5 ? (
+                          <Icon icon="fluent-mdl2:completed-solid" /> // Replace with your third icon
+                        ) : (
+                          <span>{i + 1}</span>
+                        )
+                      ) : (
+                        <span className="text-3xl">
+                          <Icon icon="bx:check-double" />
+                        </span>
+                      )}
+                    </div>
+
+                    <div
+                      className={`${
+                        statusIndex >= i
+                          ? "bg-slate-900 dark:bg-slate-900"
+                          : "bg-[#E0EAFF] dark:bg-slate-700"
+                      } absolute top-1/2 h-[2px] w-full`}
+                    ></div>
+                    <div
+                      className={` ${
+                        statusIndex >= i
+                          ? " text-slate-900 dark:text-slate-300"
+                          : "text-slate-500 dark:text-slate-300 dark:text-opacity-40"
+                      } absolute top-full text-base md:leading-6 mt-3 transition duration-150 md:opacity-100 opacity-0 group-hover:opacity-100`}
+                    >
+                      <span className="w-max">{item}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Card>
+        </div>
+        <br />
+
+        <div className="-mx-6 overflow-x-auto">
+          <div className="inline-block min-w-full align-middle">
+            <div className="overflow-hidden ">
+              <table className="min-w-full divide-y table-fixed divide-slate-100 dark:divide-slate-700">
+                <thead className="bg-slate-200 dark:bg-slate-700">
+                  <tr>
+                    <th scope="col" className="table-th">
+                      ID
+                    </th>
+                    <th scope="col" className="table-th">
+                      Customer Username
+                    </th>
+                    <th scope="col" className="table-th">
+                      Mobile Number
+                    </th>
+                    <th scope="col" className="table-th">
+                      Location
+                    </th>
+                    <th scope="col" className="table-th">
+                      Price
+                    </th>
+                    <th scope="col" className="table-th">
+                      Payment Channel
+                    </th>
+
+                    <th scope="col" className="table-th">
+                      City
+                    </th>
+
+                    <th scope="col" className="table-th">
+                      Status
+                    </th>
+                    <th scope="col" className="table-th">
+                      Date
+                    </th>
+                    <th scope="col" className="table-th">
+                      Est-Delivery
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-slate-100 dark:bg-slate-800 dark:divide-slate-700">
+                  <tr>
+                    <td className="table-td py-2">
+                      <span>
+                        {selectedOrder?.id.slice(0, 8)}...
+                        {selectedOrder?.id.slice(-10)}
+                      </span>
+                    </td>
+                    <td className="table-td py-2">
+                      {selectedOrder?.user?.username}
+                    </td>
+                    <td className="table-td py-2">
+                      {"+234" + "" + selectedOrder?.phone}
+                    </td>
+                    <td className="table-td py-2 ">
+                      {selectedOrder?.trackingId?.location || "No Location"}
+                    </td>
+                    <td className="table-td py-2">
+                      {naira.format(selectedOrder?.totalPrice || "0")}
+                    </td>
+                    <td className="table-td py-2">
+                      {selectedOrder?.transaction?.paymentMode ||
+                        "Unknown Payment Mode"}
+                    </td>
+                    <td className="table-td py-2"> {selectedOrder?.city} </td>
+                    <td className="table-td py-2">
+                      <span className="block w-full">
+                        <span
+                          className={` inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 ${
+                            selectedOrder?.trackingId?.status === "Delivered"
+                              ? "text-success-500 bg-success-500"
+                              : ""
+                          } 
+            ${
+              selectedOrder?.trackingId?.status === "Closed"
+                ? "text-warning-500 bg-warning-500"
+                : ""
+            }
+            ${
+              selectedOrder?.trackingId?.status === "Paid"
+                ? "text-info-500 bg-info-500"
+                : ""
+            }
+            ${
+              selectedOrder?.trackingId?.status === "Processing"
+                ? "text-processing-400 bg-processing-400"
+                : ""
+            }
+            ${
+              selectedOrder?.trackingId?.status === "Closed"
+                ? "text-danger-500 bg-danger-500"
+                : ""
+            }
+                ${
+                  selectedOrder?.trackingId?.status === "Pending"
+                    ? "text-pending-500 bg-pending-500"
+                    : ""
+                } ${
+                            selectedOrder?.trackingId?.status === "In-transit"
+                              ? "text-primary-500 bg-primary-500"
+                              : ""
+                          }
+            
+             `}
+                        >
+                          {selectedOrder?.trackingId?.status}
+                        </span>
+                      </span>
+                    </td>
+                    <td className="table-td py-2">
+                      {formattedDate(selectedOrder?.dateOrdered)}
+                    </td>
+                    <td className="table-td py-2">
+                      {formattedDate(
+                        selectedOrder?.trackingId?.estimatedDelivery
+                      )}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <br />
+
+        <div className="-mx-6 overflow-x-auto">
+          <div className="inline-block min-w-full align-middle">
+            <div className="overflow-hidden ">
+              <table className="min-w-full divide-y table-fixed divide-slate-100 dark:divide-slate-700">
+                <thead className="bg-slate-200 dark:bg-slate-700">
+                  <tr>
+                    <th scope="col" className="table-th">
+                      ID
+                    </th>
+                    <th scope="col" className="table-th">
+                      Image
+                    </th>
+                    <th scope="col" className="table-th">
+                      Product Name
+                    </th>
+                    <th scope="col" className="table-th">
+                      Description
+                    </th>
+                    <th scope="col" className="table-th">
+                      Price
+                    </th>
+                    <th scope="col" className="table-th">
+                      Qty
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-slate-100 dark:bg-slate-800 dark:divide-slate-700">
+                  {selectedOrder?.orderItems?.map((item) => (
+                    <tr key={item.id}>
+                      <td className="table-td py-2">
+                        {" "}
+                        {item.product?.id.slice(0, 8)}...
+                        {item.product?.id.slice(-10)}
+                      </td>
+
+                      <td className="w-8 h-8 rounded-[100%] ltr:mr-2 rtl:ml-2">
+                        <img
+                          className="w-20 h-20 rounded"
+                          src={
+                            item.product?.image === null
+                              ? "https://www.pngkey.com/png/full/233-2332677_image-500580-placeholder-transparent.png"
+                              : item.product?.image
+                          }
+                          width={70}
+                          height={70}
+                          alt={item.product?.name}
+                        />
+                      </td>
+                      <td className="table-td py-2">{item.product?.name}</td>
+                      <td className="table-td py-2">
+                        {item.product?.description
+                          ? HTMLReactParser(item.product.description)
+                          : null}
+                      </td>
+                      <td className="table-td py-2">{item.product?.price}</td>
+                      <td className="table-td py-2">{item?.quantity}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <br />
+        <div className="w-full px-2 ml-auto">
+          <div className="bg-[#ffffe6] rounded-lg shadow-[0px_0px_2px_#0000004D] px-4 py-4 flex items-start justify-start">
+            <div className="flex-1">
+              <p className="text-[32px] font-bold leading-[40px] mt-[5px] text-[#585820]">
+                Shipping Information
+              </p>
+              <br />
+              <h2 className="text-[16px] leading-[20.16px] font-medium text-[#585820]">
+                <b>Logistics : </b> {selectedOrder?.logistics}
+              </h2>
+              <br />
+              <h2 className="text-[16px] leading-[20.16px] font-medium text-[#585820]">
+                <b>Email Address : </b> {selectedOrder?.user.email}
+              </h2>
+              <br />
+              <h2 className="text-[16px] leading-[20.16px] font-medium text-[#585820]">
+                <b>Shipping Address 1 :</b>{" "}
+                {selectedOrder?.shippingAddress1 || "No Location"}
+              </h2>
+              <h2 className="text-[16px] leading-[20.16px] font-medium text-[#585820]">
+                <b>Shipping Address 2 :</b>{" "}
+                {selectedOrder?.shippingAddress2 || "No Location"}
+              </h2>
+              <br />
+              <h2 className="text-[16px] leading-[20.16px] font-medium text-[#585820]">
+                <b>Location :</b>
+                {selectedOrder?.trackingId?.location || "No Location"}
+              </h2>
+              <br />
+              <h2 className="text-[16px] leading-[20.16px] font-medium text-[#585820]">
+                <b>Contact Number :</b>
+                {"+234" + "" + selectedOrder?.phone}
+              </h2>
+              <h2 className="text-[16px] leading-[20.16px] font-medium text-[#585820]">
+                <b>City :</b> {selectedOrder?.city}
+              </h2>
+              <h2 className="text-[16px] leading-[20.16px] font-medium text-[#585820]">
+                <b>State :</b> {selectedOrder?.country}
+              </h2>
+              <h2 className="text-[16px] leading-[20.16px] font-medium text-[#585820]">
+                <b>Country :</b> {selectedOrder?.country}
+              </h2>
+              <h2 className="text-[16px] leading-[20.16px] font-medium text-[#585820]">
+                <b>Zip :</b> {selectedOrder?.zip}
+              </h2>
+              <br />
+            </div>
+            <div className="text-4xl text-blue-400">
+              <Icon
+                icon="heroicons:pencil-square"
+                className="text-[#1c404d] w-7 h-8 cursor-pointer"
+                onClick={handlePrint}
+              />
+            </div>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal
+        activeModal={delete_orderModal}
+        onClose={() => setDelete_orderModal(false)}
+        centered
+        title={selectedOrder?.id}
+        footer={
+          <Button
+            text="Close"
+            btnClass="btn-danger"
+            onClick={() => setDelete_orderModal(false)}
+          />
+        }
+      >
+        <form className="space-y-4 ">
+          <center>
+            <img
+              src={
+                "https://p.turbosquid.com/ts-thumb/Kc/2Qw5vF/rQ/searchimagetransparentalternative_whitebg/png/1680707751/300x300/sharp_fit_q85/cdff1a28155c195262452dd977d32caa67becfc8/searchimagetransparentalternative_whitebg.jpg"
+              }
+              alt="order"
+              className="w-[150px] h-[150px] rounded-md "
+            />
+
+            <div className="text-slate-600 dark:text-slate-200 text-lg pt-4 pb-1">
+              <p className="font-bold">
+                Are you sure you want to delete this Oder ?
+              </p>
+            </div>
+            <div className="text-slate-600 dark:text-slate-200 text-lg rounded-lg pb-1">
+              {selectedOrder?.id}
+            </div>
+            <div className="text-slate-600 dark:text-slate-200 text-lg pb-1">
+              {naira.format(selectedOrder?.totalPrice)}
+            </div>
+            <div className="text-slate-600 dark:text-slate-200 text-lg pb-1">
+              {"+234" + "" + selectedOrder?.phone}
+            </div>
+            {error ? (
+              <Alert label={error} className="alert-danger light-mode w-fit " />
+            ) : (
+              ""
+            )}
+
+            {success ? (
+              <Alert
+                label={success}
+                className="alert-success light-mode w-full"
+              />
+            ) : (
+              ""
+            )}
+            <br />
+
+            <div className="flex ltr:text-right rtl:text-left space-x-2 justify-center">
+              <Button
+                className="btn btn-dark  text-center"
+                onClick={() => setDelete_orderModal(false)}
+              >
+                Cancel
+              </Button>
+
+              <Button
+                className="btn btn-danger  text-center"
+                onClick={handleDeleteOrder}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <CircularProgress color="inherit" size={24} />
+                ) : (
+                  "Delete Order"
+                )}
+              </Button>
+            </div>
+          </center>
+        </form>
+      </Modal>
+
       <div className="profiel-wrap px-[35px] pb-10 md:pt-[84px] pt-10 rounded-lg bg-white dark:bg-[#000000] lg:flex lg:space-y-0 space-y-6 justify-between items-end relative z-[1]">
         <div
           className="bg-slate-900 dark:bg-slate-700 absolute left-0 top-0 md:h-1/2 h-[150px] w-full z-[-1] rounded-t-lg"
@@ -1486,19 +2485,26 @@ const AllSubcriptions = ({ title = "Subscriptions", item }) => {
                   }
                   className="w-full h-full object-cover rounded-full"
                 />
-                <div className="absolute right-2 h-8 w-8 bg-slate-50 text-slate-600 rounded-full shadow-sm flex flex-col items-center justify-center md:top-[140px] top-[100px]">
-                  {id}
+                <div
+                  className="absolute right-2 h-8 w-8 bg-slate-50 text-slate-600 rounded-full shadow-sm flex flex-col items-center justify-center md:top-[140px] top-[100px]"
+                  onClick={() => {
+                    setProfileModal(true);
+                  }}
+                >
+                  <Icon icon="heroicons:pencil-square" />
                 </div>
+              
               </div>
             </div>
 
             <div className="flex-1">
               <div className="text-2xl font-medium text-slate-900 dark:text-slate-200 mb-[3px]">
-                {firstname + " " + lastname}
+                {`${firstname} ${lastname}`.toUpperCase()}
                 <br />
               </div>
+
               <div className="text-sm font-light text-slate-600 dark:text-slate-400">
-                {isBusiness == 1 ? (
+                {isBusiness == true ? (
                   <div className="inline-block bg-slate-900 text-white px-[10px] py-[6px] text-xs font-medium rounded-full min-w-[60px]">
                     Business Account
                   </div>
@@ -1520,6 +2526,9 @@ const AllSubcriptions = ({ title = "Subscriptions", item }) => {
             <div className="text-sm text-slate-600 font-light dark:text-slate-300">
               Account Number
             </div>
+            <div className="text-sm text-slate-600 font-light dark:text-slate-300">
+              {accountName}
+            </div>
           </div>
           &nbsp; &nbsp; &nbsp;
           <div className="flex-1">
@@ -1533,7 +2542,7 @@ const AllSubcriptions = ({ title = "Subscriptions", item }) => {
           &nbsp;&nbsp; &nbsp;
           <div className="flex-1">
             <div className="text-base text-slate-900 dark:text-slate-300 font-medium mb-1 pr-3">
-              {status == 1 ? (
+              {isVerified == true ? (
                 <div className=" text-success-500 bg-success-500 px-3 inline-block  min-w-[60px] text-xs font-medium text-center mx-auto py-1 rounded-[999px] bg-opacity-25">
                   Approve
                 </div>
@@ -1549,46 +2558,38 @@ const AllSubcriptions = ({ title = "Subscriptions", item }) => {
             </div>
           </div>
           <div className="flex-1">
-            {isBusiness == 1 ? (
-              <>
-                <div className="text-base text-slate-900 dark:text-slate-300 font-medium mb-1">
-                  {businessIsPartner == 1 ? (
-                    <div className="inline-block bg-success-500 text-white px-[10px] py-[6px] text-xs font-medium rounded-full min-w-[60px]">
-                      Verified
-                    </div>
-                  ) : (
-                    <div className="inline-block bg-danger-500 text-white px-[10px] py-[6px] text-xs font-medium rounded-full min-w-[60px]">
-                      Unverified
-                    </div>
-                  )}
+            <>
+              <div className="text-base text-slate-900 dark:text-slate-300 font-medium mb-1">
+                <div className="inline-block  text-white px-[10px] py-[6px] text-xs font-medium rounded-full min-w-[60px]">
+                  {formattedDate(isCreated)}
                 </div>
-                <div className="text-sm text-slate-600 font-light dark:text-slate-300">
-                  Partnership
-                </div>
-              </>
-            ) : (
-              ""
-            )}
+              </div>
+              <div className="text-sm text-slate-600 font-light dark:text-slate-300">
+                Date Created
+              </div>
+            </>
           </div>
         </div>
       </div>
+      <br />
       <center>
         <Button
           icon="mdi:approve"
-          text="Approve Kyc"
-          onClick={() => handleApprovekyc("approve", CustomerID)}
+          text="Approve Business"
+          className="btn-outline-success "
+          onClick={() => handleApprovekyc()}
           disabled={isLoading}
-          className="btn-success "
         />
         &nbsp;&nbsp;&nbsp;
         <Button
           icon="subway:error"
-          text="Disapprove Kyc"
-          onClick={() => handleDisapprovekyc("0", CustomerID)}
+          text="Disapprove Business"
+          className="btn-outline-danger "
+          onClick={() => handleDisapprovekyc()}
           disabled={isLoading}
-          className="btn-danger "
         />
       </center>
+      <br />
       <div className="grid grid-cols-12 gap-6">
         <div className="lg:col-span-4 col-span-12">
           <Card title="Info">
@@ -1602,7 +2603,7 @@ const AllSubcriptions = ({ title = "Subscriptions", item }) => {
                     EMAIL
                   </div>
                   <a
-                    href="mailto:someone@example.com"
+                    href={`mailto:${email}`}
                     className="text-base text-slate-600 dark:text-slate-50"
                   >
                     {email}
@@ -1645,10 +2646,23 @@ const AllSubcriptions = ({ title = "Subscriptions", item }) => {
                 </div>
                 <div className="flex-1">
                   <div className="uppercase text-xs text-slate-500 dark:text-slate-300 mb-1 leading-[12px]">
+                    ADDRESS
+                  </div>
+                  <div className="text-base text-slate-600 dark:text-slate-50">
+                    {street}
+                  </div>
+                </div>
+              </li>
+              <li className="flex space-x-3 rtl:space-x-reverse">
+                <div className="flex-none text-2xl text-slate-600 dark:text-slate-300">
+                  <Icon icon="heroicons:map" />
+                </div>
+                <div className="flex-1">
+                  <div className="uppercase text-xs text-slate-500 dark:text-slate-300 mb-1 leading-[12px]">
                     LOCATION
                   </div>
                   <div className="text-base text-slate-600 dark:text-slate-50">
-                    {street + "," + city + "," + state}
+                    {city + "," + state + "," + nationality}
                   </div>
                 </div>
               </li>
@@ -1658,47 +2672,51 @@ const AllSubcriptions = ({ title = "Subscriptions", item }) => {
 
         <div className="xl:col-span-4 lg:col-span-5 col-span-12 ">
           <Card title="Files" className="h-[394px]">
-            <ul className="divide-y divide-slate-100 dark:divide-slate-700">
-              {files.map((item, i) => (
-                <li key={i} className="block py-[8px]">
-                  <div className="flex space-x-2 rtl:space-x-reverse">
-                    <div className="flex-1 flex space-x-2 rtl:space-x-reverse">
-                      <div className="flex-none">
-                        <div className="h-8 w-8">
-                          <img
-                            src={item.img}
-                            alt=""
-                            className="block w-full h-full object-cover rounded-full border hover:border-white border-transparent"
-                          />
+            {step === 200 ? (
+              <ul className="divide-y divide-slate-100 dark:divide-slate-700">
+                {images.map((item, i) => (
+                  <li key={i} className="block py-[8px]">
+                    <div className="flex space-x-2 rtl:space-x-reverse">
+                      <div className="flex-1 flex space-x-2 rtl:space-x-reverse">
+                        <div className="flex-none">
+                          <div className="h-8 w-8">
+                            <img
+                              src={"/assets/images/icon/scr-1.svg"}
+                              alt=""
+                              className="block w-full h-full object-cover rounded-full border hover:border-white border-transparent"
+                            />
+                          </div>
+                        </div>
+                        <div className="flex-1">
+                          <span className="block text-slate-600 text-sm dark:text-slate-300">
+                            {"Files"}
+                          </span>
+                          <span className="block font-normal text-xs text-slate-500 mt-1">
+                            {formattedDate(isCreated)}
+                          </span>
                         </div>
                       </div>
-                      <div className="flex-1">
-                        <span className="block text-slate-600 text-sm dark:text-slate-300">
-                          {item.title}
-                        </span>
-                        <span className="block font-normal text-xs text-slate-500 mt-1">
-                          {item.date}
-                        </span>
+                      <div className="flex-none">
+                        <Link
+                          href={item}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <button
+                            type="button"
+                            className="text-xs text-slate-900 dark:text-white"
+                          >
+                            View
+                          </button>
+                        </Link>
                       </div>
                     </div>
-                    <div className="flex-none">
-                      <Link
-                        href={item.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <button
-                          type="button"
-                          className="text-xs text-slate-900 dark:text-white"
-                        >
-                          Download
-                        </button>
-                      </Link>
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <span>No Kyc Information yet</span>
+            )}
           </Card>
         </div>
         <div className="lg:col-span-4 col-span-12">
@@ -1731,7 +2749,7 @@ const AllSubcriptions = ({ title = "Subscriptions", item }) => {
                   Spending Limit
                 </h4>
                 <div className="text-sm font-medium text-slate-900 dark:text-white">
-                  {spending_limit} %
+                  {naira.format(spending_limit)}
                 </div>
               </div>
             </div>
@@ -1740,81 +2758,110 @@ const AllSubcriptions = ({ title = "Subscriptions", item }) => {
         <div className="lg:col-span-4 col-span-12 space-y-5">
           <div className="lg:col-span-4 col-span-12 space-y-5">
             <Card title="Kyc information">
-              <ul className="divide-y divide-slate-100 dark:divide-slate-700">
-                <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
-                  <div className="flex justify-between">
-                    <span>Name</span>
-                    <span>Details</span>
-                  </div>
-                </li>
+              {step === 200 ? (
+                <ul className="divide-y divide-slate-100 dark:divide-slate-700">
+                  <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
+                    <div className="flex justify-between">
+                      <span>Update KYC</span>
+                      <span
+                        onClick={() => {
+                          setProfileModal(true);
+                        }}
+                      >
+                        {" "}
+                        <Icon icon="heroicons:pencil-square" />
+                      </span>
+                    </div>
+                  </li>
+                  <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
+                    <div className="flex justify-between">
+                      <span>Name</span>
+                      <span>Details</span>
+                    </div>
+                  </li>
 
-                <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
-                  <div className="flex justify-between">
-                    <span>Employment</span>
-                    <span>{employment}</span>
-                  </div>
-                </li>
-                <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
-                  <div className="flex justify-between">
-                    <span>Date of Birth</span>
-                    <span>{formattedDate(dob)}</span>
-                  </div>
-                </li>
-                <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
-                  <div className="flex justify-between">
-                    <span>Marital Status</span>
-                    <span>{marital}</span>
-                  </div>
-                </li>
-                <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
-                  <div className="flex justify-between">
-                    <span>Maidens Name</span>
-                    <span>{maiden}</span>
-                  </div>
-                </li>
-                <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
-                  <div className="flex justify-between">
-                    <span>Family Number</span>
-                    <span>{num}</span>
-                  </div>
-                </li>
-                <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
-                  <div className="flex justify-between">
-                    <span>Gender</span>
-                    <span>{gender}</span>
-                  </div>
-                </li>
-                <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
-                  <div className="flex justify-between">
-                    <span>Proof of Identity</span>
-                    <span>{proof}</span>
-                  </div>
-                </li>
-                <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
-                  <div className="flex justify-between">
-                    <span>Pdf Password</span>
-                    <span>{pdfpassword}</span>
-                  </div>
-                </li>
-                <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
-                  <div className="flex justify-between">
-                    <span>Rc Number</span>
-                    <span>{rcNumber}</span>
-                  </div>
-                </li>
-                <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
-                  <div className="flex justify-between">
-                    <span>Referral Code</span>
-                    <span>{referralcode}</span>
-                  </div>
-                </li>
-                <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
-                  <div className="flex justify-between">
-                    <span>Referred By</span>
-                    <span>{refby}</span>
-                  </div>
-                </li>
-              </ul>
+                  <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
+                    <div className="flex justify-between">
+                      <span>BVN</span>
+                      <span>{bvn}</span>
+                    </div>
+                  </li>
+                  <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
+                    <div className="flex justify-between">
+                      <span>Date of Birth</span>
+                      <span>{formattedDate(dob)}</span>
+                    </div>
+                  </li>
+                  <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
+                    <div className="flex justify-between">
+                      <span>Marital Status</span>
+                      <span>{marital}</span>
+                    </div>
+                  </li>
+                  <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
+                    <div className="flex justify-between">
+                      <span>Maidens Name</span>
+                      <span>{maiden}</span>
+                    </div>
+                  </li>
+                  <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
+                    <div className="flex justify-between">
+                      <span>Family Number</span>
+                      <span>{num}</span>
+                    </div>
+                  </li>
+                  <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
+                    <div className="flex justify-between">
+                      <span>Gender</span>
+                      <span>{gender}</span>
+                    </div>
+                  </li>
+                  <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
+                    <div className="flex justify-between">
+                      <span>Proof of Identity</span>
+                      <span>{proof}</span>
+                    </div>
+                  </li>
+                  <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
+                    <div className="flex justify-between">
+                      <span>Identity Number</span>
+                      <span>{idNumber}</span>
+                    </div>
+                  </li>
+                  <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
+                    <div className="flex justify-between">
+                      <span>Issue Date</span>
+                      <span>{formattedDate(issueDate)}</span>
+                    </div>
+                  </li>
+                  <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
+                    <div className="flex justify-between">
+                      <span>Expiry Date</span>
+                      <span>{formattedDate(expiryDate)}</span>
+                    </div>
+                  </li>
+                  <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
+                    <div className="flex justify-between">
+                      <span>Rc Number</span>
+                      <span>{rcNumber}</span>
+                    </div>
+                  </li>
+                  <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
+                    <div className="flex justify-between">
+                      <span>Referral Code</span>
+                      <span>{referralcode}</span>
+                    </div>
+                  </li>
+                  <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
+                    <div className="flex justify-between">
+                      <span>Referred By</span>
+                      <span>{refby}</span>
+                    </div>
+                  </li>
+                </ul>
+              ) : (
+                <span>No Kyc Information yet</span>
+              )}
             </Card>
           </div>
         </div>
@@ -1885,13 +2932,13 @@ const AllSubcriptions = ({ title = "Subscriptions", item }) => {
                                       Amount
                                     </th>
                                     <th scope="col" className="table-th">
-                                      Txn Type
+                                      Payment Mode
                                     </th>
                                     <th scope="col" className="table-th">
-                                      Remark
+                                      Description
                                     </th>
                                     <th scope="col" className="table-th">
-                                      Reference Id
+                                      Type
                                     </th>
                                     <th scope="col" className="table-th">
                                       Status
@@ -1908,35 +2955,33 @@ const AllSubcriptions = ({ title = "Subscriptions", item }) => {
                                   <React.Fragment key={item.id}>
                                     <tbody className="bg-white divide-y divide-slate-100 dark:bg-slate-800 dark:divide-slate-700">
                                       <tr>
-                                        <td className="table-td py-2">
-                                          {" "}
-                                          <span>{item.id}</span>
+                                        <td className="table-td">
+                                          <span>
+                                            {item.id.slice(0, 8)}...
+                                            {item.id.slice(-10)}
+                                          </span>
                                         </td>
-                                        <td className="table-td py-2">
-                                          {" "}
-                                          {item.amount}
+                                        <td className="table-td">
+                                          {naira.format(item.amount)}
                                         </td>
-                                        <td className="table-td py-2">
-                                          {" "}
-                                          {item.txn_type}{" "}
+                                        <td className="table-td">
+                                          {item.paymentMode}
                                         </td>
-
-                                        <td className="table-td py-2">
+                                        <td className="table-td">
                                           <span className="text-slate-500 dark:text-slate-400">
                                             <span className="block text-slate-600 dark:text-slate-300">
-                                              {item.remark}
+                                              {item.description}
                                             </span>
                                           </span>
                                         </td>
-                                        <td className="table-td py-2">
+                                        <td className="table-td">
                                           <span className="text-slate-500 dark:text-slate-400">
                                             <span className="block text-xs text-slate-500">
-                                              Trans ID: {item.transaction_ref}
+                                              {item.type}
                                             </span>
                                           </span>
                                         </td>
-                                        <td className="table-td py-2">
-                                          {" "}
+                                        <td className="table-td">
                                           <span className="block w-full">
                                             <span
                                               className={`${
@@ -1953,11 +2998,10 @@ const AllSubcriptions = ({ title = "Subscriptions", item }) => {
                                             </span>
                                           </span>
                                         </td>
-                                        <td className="table-td py-2">
-                                          {" "}
-                                          {formattedDate(item.created_at)}
+                                        <td className="table-td">
+                                          {formattedDate(item.date)}
                                         </td>
-                                        <td className="table-td py-2">
+                                        <td className="table-td">
                                           <div className="flex space-x-3 rtl:space-x-reverse">
                                             <Tooltip
                                               content="View"
@@ -2091,13 +3135,12 @@ const AllSubcriptions = ({ title = "Subscriptions", item }) => {
                     </Card>
                   </div>
                 </Tab.Panel>
+
                 <Tab.Panel>
                   <div className="text-slate-600 dark:text-slate-400 text-sm font-normal">
                     <Card>
                       <div className="items-center justify-between mb-6 md:flex">
-                        <h4 className="card-title">
-                          {firstname + " " + title}
-                        </h4>
+                        <h4 className="card-title">{title}</h4>
                         <div>
                           <GlobalFilter
                             filter={globalFilter}
@@ -2108,10 +3151,10 @@ const AllSubcriptions = ({ title = "Subscriptions", item }) => {
                       <div className="-mx-6 overflow-x-auto">
                         <div className="inline-block min-w-full align-middle">
                           <div className="overflow-hidden ">
-                            {isSubEmpty ? ( // Conditionally rendering based on cart items
+                            {isLoanEmpty ? ( // Conditionally rendering based on cart items
                               <center>
                                 <h4 className="mt-10 text-2xl font-bold text-primary">
-                                  No Available Subscription Data
+                                  No Available Loan
                                 </h4>
                               </center>
                             ) : (
@@ -2121,23 +3164,23 @@ const AllSubcriptions = ({ title = "Subscriptions", item }) => {
                                     <th scope="col" className="table-th">
                                       ID
                                     </th>
-                                    {/* <th scope="col" className="table-th">
-                     Customer ID
-                    </th> */}
                                     <th scope="col" className="table-th">
-                                      Package
+                                      Amount
                                     </th>
                                     <th scope="col" className="table-th">
-                                      Price
+                                      Interest Rate
                                     </th>
                                     <th scope="col" className="table-th">
-                                      Package Name
+                                      Overdue
                                     </th>
                                     <th scope="col" className="table-th">
-                                      Duration
+                                      Loan Limit
                                     </th>
                                     <th scope="col" className="table-th">
-                                      Interest (%)
+                                      Outstanding
+                                    </th>
+                                    <th scope="col" className="table-th">
+                                      Total Loan
                                     </th>
                                     <th scope="col" className="table-th">
                                       Status
@@ -2145,90 +3188,91 @@ const AllSubcriptions = ({ title = "Subscriptions", item }) => {
                                     <th scope="col" className="table-th">
                                       Due Date
                                     </th>
-                                    <th scope="col" className="table-th">
-                                      Date
-                                    </th>
-                                    <th scope="col" className="table-th">
-                                      Action
-                                    </th>
                                   </tr>
                                 </thead>
-                                {paginatedSubscription.map((item) => (
-                                  <React.Fragment key={item.sub_info?.id}>
+                                {paginatedLoan.map((item) => (
+                                  <React.Fragment key={item?.id}>
                                     <tbody className="bg-white divide-y divide-slate-100 dark:bg-slate-800 dark:divide-slate-700">
                                       <tr>
                                         <td className="table-td py-2">
-                                          {" "}
-                                          <span>{item.sub_info?.id}</span>
+                                          <span>
+                                            {" "}
+                                            {item?.id.slice(0, 5)}...
+                                            {item.id.slice(-10)}
+                                          </span>
                                         </td>
-                                        {/* <td className="table-td py-2 "> {item.sub_info?.userid} </td> */}
-                                        <td className="table-td py-2">
-                                          {" "}
-                                          {item.sub_info?.package_}{" "}
-                                        </td>
-                                        <td className="table-td py-2">
+                                        <td className="table-td py-2 ">
                                           {" "}
                                           {naira.format(
-                                            item.sub_info?.price || "0"
+                                            item?.amount || "0"
+                                          )}{" "}
+                                        </td>
+                                        <td className="table-td py-2">
+                                          {item?.interestRate}
+                                        </td>
+                                        <td className="table-td py-2">
+                                          <span className="block w-full">
+                                            {item?.isOverdue}
+                                          </span>
+
+                                          {item.isOverdue === true ? (
+                                            <span className="block w-full">
+                                              <p
+                                                className={` inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 ${
+                                                  item?.isOverdue === true
+                                                    ? "text-danger-500 bg-danger-500"
+                                                    : ""
+                                                }`}
+                                              >
+                                                Yes
+                                              </p>
+                                            </span>
+                                          ) : (
+                                            <span className="block w-full">
+                                              <p
+                                                className={` inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 
+          
+            ${
+              item?.isOverdue === false ? "text-success-500 bg-success-500" : ""
+            }
+                
+             `}
+                                              >
+                                                No
+                                              </p>
+                                            </span>
                                           )}
                                         </td>
                                         <td className="table-td py-2">
-                                          {" "}
-                                          {item.package?.package_name}{" "}
+                                          {item?.limit}
                                         </td>
                                         <td className="table-td py-2">
-                                          {" "}
-                                          {item.sub_info?.duration} days
+                                          {item?.outstanding}
                                         </td>
                                         <td className="table-td py-2">
-                                          {" "}
-                                          {item.sub_info?.interest || "0"}{" "}
+                                          {item?.totalLoan}
                                         </td>
                                         <td className="table-td py-2">
                                           <span className="block w-full">
                                             <span
                                               className={` inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 ${
-                                                item.sub_info?.status_text ===
-                                                "approve"
+                                                item?.status === "Active"
                                                   ? "text-success-500 bg-success-500"
                                                   : ""
                                               } 
-            ${
-              item.sub_info?.status_text === "pending"
-                ? "text-warning-500 bg-warning-500"
-                : ""
-            }
-            ${
-              item.sub_info?.status_text === "queried"
-                ? "text-pending-500 bg-pending-500"
-                : ""
-            }
-            
-            ${
-              item.sub_info?.status_text === "denied"
-                ? "text-danger-500 bg-danger-500"
-                : ""
-            }
+          
+            ${item?.status === "denied" ? "text-danger-500 bg-danger-500" : ""}
                 
              `}
                                             >
-                                              {item.sub_info?.status_text}
+                                              {item?.status}
                                             </span>
                                           </span>
                                         </td>
                                         <td className="table-td py-2">
-                                          {" "}
-                                          {formattedDate(
-                                            item.sub_info?.due_date
-                                          )}{" "}
+                                          {formattedDate(item?.dueDate)}
                                         </td>
-                                        <td className="table-td py-2">
-                                          {" "}
-                                          {formattedDate(
-                                            item.sub_info?.created_at
-                                          )}{" "}
-                                        </td>
-                                        <td className="table-td py-2">
+                                        {/* <td className="table-td py-2">
                                           <div>
                                             <Dropdown
                                               classMenuItems="right-0 w-[140px] top-[110%] "
@@ -2331,7 +3375,7 @@ const AllSubcriptions = ({ title = "Subscriptions", item }) => {
                                               </div>
                                             </Dropdown>
                                           </div>
-                                        </td>
+                                        </td> */}
                                       </tr>
                                     </tbody>
                                   </React.Fragment>
@@ -2452,6 +3496,7 @@ const AllSubcriptions = ({ title = "Subscriptions", item }) => {
                     </Card>
                   </div>
                 </Tab.Panel>
+
                 <Tab.Panel>
                   <div className="text-slate-600 dark:text-slate-400 text-sm font-normal">
                     <Card>
@@ -2483,13 +3528,13 @@ const AllSubcriptions = ({ title = "Subscriptions", item }) => {
                                       ID
                                     </th>
                                     <th scope="col" className="table-th">
-                                      Customer ID
+                                      Customer Username
                                     </th>
                                     <th scope="col" className="table-th">
-                                      Image
+                                      Mobile Number
                                     </th>
                                     <th scope="col" className="table-th">
-                                      Product Name
+                                      Location
                                     </th>
                                     <th scope="col" className="table-th">
                                       Price
@@ -2497,9 +3542,11 @@ const AllSubcriptions = ({ title = "Subscriptions", item }) => {
                                     <th scope="col" className="table-th">
                                       Payment Channel
                                     </th>
+
                                     <th scope="col" className="table-th">
-                                      Qty
+                                      City
                                     </th>
+
                                     <th scope="col" className="table-th">
                                       Status
                                     </th>
@@ -2507,145 +3554,147 @@ const AllSubcriptions = ({ title = "Subscriptions", item }) => {
                                       Date
                                     </th>
                                     <th scope="col" className="table-th">
+                                      Est-Delivery
+                                    </th>
+
+                                    <th scope="col" className="table-th">
                                       Action
                                     </th>
                                   </tr>
                                 </thead>
                                 {paginatedOrder.map((item) => (
-                                  <React.Fragment key={item.cart_info?.id}>
+                                  <React.Fragment key={item?.id}>
                                     <tbody className="bg-white divide-y divide-slate-100 dark:bg-slate-800 dark:divide-slate-700">
                                       <tr>
                                         <td className="table-td py-2">
                                           {" "}
-                                          <span>{item.cart_info?.id}</span>
+                                          <span>
+                                            {item.id.slice(0, 8)}...
+                                            {item.id.slice(-10)}
+                                          </span>
                                         </td>
                                         <td className="table-td py-2 ">
                                           {" "}
-                                          {item.cart_info?.userid}{" "}
+                                          {item.user?.username}{" "}
                                         </td>
-                                        <td className="w-8 h-8 rounded-[100%] ltr:mr-2 rtl:ml-2">
-                                          <img
-                                            className="w-20 h-20 rounded"
-                                            src={
-                                              item.product === null
-                                                ? "https://www.pngkey.com/png/full/233-2332677_image-500580-placeholder-transparent.png"
-                                                : item.product?.image
-                                            }
-                                            width={70}
-                                            height={70}
-                                            alt=""
-                                          />
+                                        <td className="table-td py-2 ">
+                                          {" "}
+                                          {"+234" + "" + item?.phone}{" "}
                                         </td>
 
-                                        <td className="table-td py-2">
-                                          {" "}
-                                          {item.product?.product_name}{" "}
+                                        <td className="table-td py-2 ">
+                                          {item.trackingId?.location ||
+                                            "No Location"}
                                         </td>
                                         <td className="table-td py-2">
                                           {" "}
                                           {naira.format(
-                                            item.product?.price || "0"
+                                            item?.totalPrice || "0"
                                           )}
                                         </td>
                                         <td className="table-td py-2">
                                           {" "}
-                                          BNPL{" "}
+                                          {item.transaction?.paymentMode}{" "}
                                         </td>
+
                                         <td className="table-td py-2">
                                           {" "}
-                                          {item.cart_info?.qty || "0"}{" "}
+                                          {item?.city}{" "}
                                         </td>
                                         <td className="table-td py-2">
                                           <span className="block w-full">
                                             <span
                                               className={` inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 ${
-                                                item.order_tracking
-                                                  ?.current_status.name ===
-                                                "delivered"
+                                                item.trackingId?.status ===
+                                                "Delivered"
                                                   ? "text-success-500 bg-success-500"
                                                   : ""
                                               } 
             ${
-              item.order_tracking?.current_status.name === "closed"
+              item.trackingId?.status === "Closed"
                 ? "text-warning-500 bg-warning-500"
                 : ""
             }
             ${
-              item.order_tracking?.current_status.name === "paid"
+              item.trackingId?.status === "Paid"
                 ? "text-info-500 bg-info-500"
                 : ""
             }
             ${
-              item.order_tracking?.current_status.name === "processing"
+              item.trackingId?.status === "Processing"
                 ? "text-processing-400 bg-processing-400"
                 : ""
             }
             ${
-              item.order_tracking?.current_status.name === "closed"
+              item.trackingId?.status === "Closed"
                 ? "text-danger-500 bg-danger-500"
                 : ""
             }
                 ${
-                  item.order_tracking?.current_status.name === "pending"
+                  item.trackingId?.status === "Pending"
                     ? "text-pending-500 bg-pending-500"
                     : ""
                 } ${
-                                                item.order_tracking
-                                                  ?.current_status.name ===
-                                                "in-transit"
+                                                item.trackingId?.status ===
+                                                "In-transit"
                                                   ? "text-primary-500 bg-primary-500"
                                                   : ""
                                               }
             
              `}
                                             >
-                                              {
-                                                item.order_tracking
-                                                  ?.current_status.name
-                                              }
+                                              {item.trackingId?.status}
                                             </span>
                                           </span>
                                         </td>
 
                                         <td className="table-td py-2">
+                                          {formattedDate(item?.dateOrdered)}
+                                        </td>
+                                        <td className="table-td py-2">
                                           {" "}
                                           {formattedDate(
-                                            item.cart_info?.created_at
+                                            item.trackingId?.estimatedDelivery
                                           )}{" "}
                                         </td>
 
                                         <td className="table-td py-2">
                                           {" "}
                                           <div className="flex space-x-3 rtl:space-x-reverse">
-                                            {/* <Tooltip content="View" placement="top" arrow animation="shift-away">
-                            
-                              <button className="action-btn" 
-                              type="button"
-                              onClick={() => {
-                                setSelectedOrder(item);
-                                 setActiveModal(true);
-                             }}
-                              >
-                                <Icon icon="heroicons:eye" />
-                              </button>
-                            
-                            </Tooltip> */}
-
                                             <Tooltip
-                                              content="Edit"
+                                              content="View"
                                               placement="top"
                                               arrow
                                               animation="shift-away"
                                             >
                                               <button
                                                 className="action-btn"
-                                                //  onClick={() => router.push(`/order/${item.cart_info.id}`)}
-                                                onClick={() =>
-                                                  handleClick(item)
-                                                }
                                                 type="button"
+                                                onClick={() => {
+                                                  setSelectedOrder(item);
+                                                  setActiveModal(true);
+                                                }}
                                               >
-                                                <Icon icon="heroicons:pencil-square" />
+                                                <Icon icon="heroicons:eye" />
+                                              </button>
+                                            </Tooltip>
+
+                                            <Tooltip
+                                              content="Delete"
+                                              placement="top"
+                                              arrow
+                                              animation="shift-away"
+                                              theme="danger"
+                                            >
+                                              <button
+                                                className="action-btn"
+                                                type="button"
+                                                onClick={() => {
+                                                  setSelectedOrder(item);
+                                                  setDelete_orderModal(true);
+                                                }}
+                                              >
+                                                <Icon icon="heroicons:trash" />
                                               </button>
                                             </Tooltip>
                                           </div>
@@ -2685,9 +3734,6 @@ const AllSubcriptions = ({ title = "Subscriptions", item }) => {
                             </span>
                           </span>
                         </div>
-                        <p>
-                          Total Amount : <b>{naira.format(priceTotal)}</b>{" "}
-                        </p>
                         <ul className="flex flex-wrap items-center space-x-3 rtl:space-x-reverse">
                           <li className="text-xl leading-4 text-slate-900 dark:text-white rtl:rotate-180">
                             <button
@@ -2765,6 +3811,7 @@ const AllSubcriptions = ({ title = "Subscriptions", item }) => {
                     </Card>
                   </div>
                 </Tab.Panel>
+
                 <Tab.Panel>
                   <div className="text-slate-600 dark:text-slate-400 text-sm font-normal">
                     Aliqua id fugiat nostrud irure ex duis ea quis id quis ad
@@ -2778,7 +3825,7 @@ const AllSubcriptions = ({ title = "Subscriptions", item }) => {
           </Card>
         </div>
       </div>
-      {isBusiness == 0 ? ( // Conditionally rendering based on cart items
+      {!isBusiness == true ? ( // Conditionally rendering based on cart items
         <center>
           <h4 className="mt-10 text-2xl font-bold text-primary">
             Not a Business Account
@@ -2786,73 +3833,82 @@ const AllSubcriptions = ({ title = "Subscriptions", item }) => {
         </center>
       ) : (
         <div>
-          <center>
-            <Button
-              icon="mdi:approve"
-              text="Approve Business"
-              className="btn-outline-success "
-              onClick={() => handleApprovepartner(CustomerID)}
-              disabled={isLoading}
-            />
-            &nbsp;&nbsp;&nbsp;
-            <Button
-              icon="subway:error"
-              text="Disapprove Business"
-              className="btn-outline-danger "
-              onClick={() => handleDisapprovepartner(CustomerID)}
-              disabled={isLoading}
-            />
-          </center>
           <br />
-
           <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-6">
-            <Card>
-              <div className="space-y-6">
-                <div className="flex space-x-3 items-center rtl:space-x-reverse">
-                  <div className="flex-none h-8 w-8 rounded-full bg-slate-800 dark:bg-slate-700 text-slate-300 flex flex-col items-center justify-center text-lg">
-                    <Icon icon="ic:round-add-business" />
+            {businessinfo.map((item) => (
+              <React.Fragment key={item?.user}>
+                <Card>
+                  <div className="space-y-6">
+                    <div className="flex space-x-3 items-center rtl:space-x-reverse">
+                      <div className="flex-none h-8 w-8 rounded-full bg-slate-800 dark:bg-slate-700 text-slate-300 flex flex-col items-center justify-center text-lg">
+                        <Icon icon="ic:round-add-business" />
+                      </div>
+                      <div className="flex-1 text-base text-slate-900 dark:text-white font-medium">
+                        Business Name
+                      </div>
+                    </div>
+                    <div className="flex-1 text-base text-slate-900 dark:text-white font-medium">
+                      {item.name}
+                    </div>
                   </div>
-                  <div className="flex-1 text-base text-slate-900 dark:text-white font-medium">
-                    Business Name
+                </Card>
+                <Card>
+                  <div className="space-y-6">
+                    <div className="flex space-x-3 items-center rtl:space-x-reverse">
+                      <div className="flex-none h-8 w-8 rounded-full bg-primary-500 text-slate-300 flex flex-col items-center justify-center text-lg">
+                        <Icon icon="carbon:category-new-each" />
+                      </div>
+                      <div className="flex-1 text-base text-slate-900 dark:text-white font-medium">
+                        Business Category
+                      </div>
+                    </div>
+                    <div className="flex-1 text-base text-slate-900 dark:text-white font-medium">
+                      {item.category}
+                    </div>
                   </div>
-                </div>
-                <div className="flex-1 text-base text-slate-900 dark:text-white font-medium">
-                  {businessName}
-                </div>
-              </div>
-            </Card>
-            <Card>
-              <div className="space-y-6">
-                <div className="flex space-x-3 items-center rtl:space-x-reverse">
-                  <div className="flex-none h-8 w-8 rounded-full bg-primary-500 text-slate-300 flex flex-col items-center justify-center text-lg">
-                    <Icon icon="carbon:category-new-each" />
-                  </div>
-                  <div className="flex-1 text-base text-slate-900 dark:text-white font-medium">
-                    Business Category
-                  </div>
-                </div>
-                <div className="flex-1 text-base text-slate-900 dark:text-white font-medium">
-                  {businessCategory}
-                </div>
-              </div>
-            </Card>
-            <Card>
-              <div className="space-y-6">
-                <div className="flex space-x-3 rtl:space-x-reverse items-center">
-                  <div className="flex-none h-8 w-8 rounded-full bg-success-500 text-white flex flex-col items-center justify-center text-lg">
-                    <Icon icon="entypo:address" />
-                  </div>
-                  <div className="flex-1 text-base text-slate-900 dark:text-white font-medium">
-                    Business Address
-                  </div>
-                </div>
-                <div className="flex-1 text-base text-slate-900 dark:text-white font-medium">
-                  {businessAddress}
-                </div>
+                </Card>
+                <Card>
+                  <div className="space-y-6">
+                    <div className="flex space-x-3 rtl:space-x-reverse items-center">
+                      <div className="flex-none h-8 w-8 rounded-full bg-success-500 text-white flex flex-col items-center justify-center text-lg">
+                        <Icon icon="entypo:address" />
+                      </div>
+                      <div className="flex-1 text-base text-slate-900 dark:text-white font-medium">
+                        Business Address
+                      </div>
+                    </div>
+                    <div className="flex-1 text-base text-slate-900 dark:text-white font-medium">
+                      {item.address}
+                    </div>
 
-                {/* <span>{busi}</span>  */}
-              </div>
-            </Card>
+                    {/* <span>{busi}</span>  */}
+                  </div>
+                </Card>
+                {item.isRegistered == true ? (
+                  <>
+                    <Card>
+                      <div className="space-y-6">
+                        <div className="flex space-x-3 rtl:space-x-reverse items-center">
+                          <div className="flex-none h-8 w-8 rounded-full bg-success-500 text-white flex flex-col items-center justify-center text-lg">
+                            <Icon icon="entypo:address" />
+                          </div>
+                          <div className="flex-1 text-base text-slate-900 dark:text-white font-medium">
+                            RC Number
+                          </div>
+                        </div>
+                        <div className="flex-1 text-base text-slate-900 dark:text-white font-medium">
+                          {item.rcNumber}
+                        </div>
+
+                        {/* <span>{busi}</span>  */}
+                      </div>
+                    </Card>
+                  </>
+                ) : (
+                  " "
+                )}
+              </React.Fragment>
+            ))}
           </div>
         </div>
       )}
@@ -2866,7 +3922,7 @@ const buttons = [
     icon: "tdesign:undertake-transaction",
   },
   {
-    title: "Subscriptions",
+    title: "Loan",
     icon: "eos-icons:subscriptions-created-outlined",
   },
   {
