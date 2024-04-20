@@ -38,24 +38,25 @@ import { SwiperSlide } from "swiper/react";
 // find current step schema
 
 const AllOrders = ({ title = "All Orders", item }) => {
-  const getStatus = (status) => {
+  const getStatus = (status ) => {
     switch (status) {
-      case "Pending":
-        return "pending-100";
-      case "Paid":
-        return "primary-100";
-      case "Processing":
-        return "processing-100";
-      case "In-Transit":
-        return "gray-100";
-      case "Delivered":
-        return "success-100";
-      case "Closed":
-        return "danger-200";
-      default:
-        return "";
+     case "Pending":
+       return "Pending";
+     case "Paid":
+       return "Paid";
+     case  "Proccessing":
+       return "Proccessing";
+     case "In-Transit":
+       return "In-Transit";
+     case "Delivered":
+       return "Delivering";
+     case "Closed":
+       return "Closed";
+     default:
+       return "";
     }
-  };
+  
+   }
 
   const router = useRouter();
   // handleClick to view project single page
@@ -71,22 +72,15 @@ const AllOrders = ({ title = "All Orders", item }) => {
   const maxPageButtons = 5; // Number of page buttons to display
   const [globalFilter, setGlobalFilter] = useState(""); // Global filter
   const [activeModal, setActiveModal] = useState(false);
-  const [status_, setStatus_] = useState("");
+  const [status_, setStatus_] = useState();
   const orderStatus = getStatus(status_);
   const [delete_orderModal, setDelete_orderModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
-  
-  const steps = [
-    "Pending",
-    "Paid",
-    "Processing",
-    "In-transit",
-    "Delivering",
-    "Complete",
-  ];
+  const steps = ["Pending", "Paid", "Proccessing", "In-Transit", "Delivering", "Closed"];
   const statusIndex = steps.indexOf(orderStatus);
+
 
   // // Determine if the order is complete
   // const isComplete = orderStatus === "complete";
@@ -211,13 +205,12 @@ const AllOrders = ({ title = "All Orders", item }) => {
         if (response) {
           // console.log(response.data); // Use response.data
           setOrderItems(response.data);
-          // setStatus_(response.transaction.status);
-          // console.log(response.transaction.status);
+          // setStatus_(selectedOrder?.data.data.trackingId?.status);
         } else {
           // Handle case where response or response.data is undefined
         }
       } catch (err) {
-        console.error("Error:", err);
+        // console.error("Error:", err);
       }
     };
     fetchData();
@@ -246,8 +239,9 @@ const AllOrders = ({ title = "All Orders", item }) => {
         throw new Error("Invalid user data");
       }
       const userById = selectedOrder?.id;
-      console.log(userById);
-            console.log(user.token);
+      
+      // console.log(userById);
+      //       console.log(user.token);
   
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BASE_URL}/order/${userById}`,
@@ -270,7 +264,7 @@ const AllOrders = ({ title = "All Orders", item }) => {
         setError(responseData.message);
       }
     } catch (error) {
-      console.error("Error during oder deletion:", error.message);
+      // console.error("Error during oder deletion:", error.message);
     } finally {
       setIsLoading(false);
     }
@@ -295,67 +289,70 @@ const AllOrders = ({ title = "All Orders", item }) => {
           />
         }
       >
-        <div>
+        {/* <div>
           <Card>
             <div>
-              <div className="flex z-[5] items-center relative justify-center md:mx-8">
-                {steps.map((item, i) => (
-                  <div
-                    className="relative z-[1] items-center item flex flex-start flex-1 last:flex-none group"
-                    key={i}
-                  >
-                    <div
-                      className={`${
-                        statusIndex >= i
-                          ? "bg-slate-900 text-white ring-slate-900 ring-offset-2 dark:ring-offset-slate-500 dark:bg-slate-900 dark:ring-slate-900"
-                          : "bg-white ring-slate-900 ring-opacity-70  text-slate-900 dark:text-slate-300 dark:bg-slate-600 dark:ring-slate-600 text-opacity-70"
-                      }  transition duration-150 icon-box md:h-12 md:w-12 h-7 w-7 rounded-full flex flex-col items-center justify-center relative z-[66] ring-1 md:text-lg text-base font-medium`}
-                    >
-                      {statusIndex <= i ? (
-                        i === 0 ? (
-                          <Icon icon="ic:twotone-pending-actions" /> // Replace with your first icon
-                        ) : i === 1 ? (
-                          <Icon icon="flat-color-icons:paid" /> // Replace with your third icon
-                        ) : i === 2 ? (
-                          <Icon icon="uis:process" /> // Replace with your second icon
-                        ) : i === 3 ? (
-                          <Icon icon="wpf:in-transit" /> // Replace with your third icon
-                        ) : i === 4 ? (
-                          <Icon icon="solar:delivery-bold" /> // Replace with your third icon
-                        ) : i === 5 ? (
-                          <Icon icon="fluent-mdl2:completed-solid" /> // Replace with your third icon
-                        ) : (
-                          <span>{i + 1}</span>
-                        )
-                      ) : (
-                        <span className="text-3xl">
-                          <Icon icon="bx:check-double" />
-                        </span>
-                      )}
-                    </div>
+            <div className="flex z-[5] items-center relative justify-center md:mx-8">
+            {steps.map((item, i) => (
+              <div
+                className="relative z-[1] items-center item flex flex-start flex-1 last:flex-none group"
+                key={i}
+              >
+                <div
+                  className={`${
+                    statusIndex >= i
+                      ? "bg-slate-900 text-white ring-slate-900 ring-offset-2 dark:ring-offset-slate-500 dark:bg-slate-900 dark:ring-slate-900"
+                      : "bg-white ring-slate-900 ring-opacity-70  text-slate-900 dark:text-slate-300 dark:bg-slate-600 dark:ring-slate-600 text-opacity-70"
+                  }  transition duration-150 icon-box md:h-12 md:w-12 h-7 w-7 rounded-full flex flex-col items-center justify-center relative z-[66] ring-1 md:text-lg text-base font-medium`}
+                >
+                  {statusIndex <= i ? (
+                    
+                    i === "Pending" ? (
+                      <Icon icon="ic:twotone-pending-actions" />// Replace with your first icon
+    
+    ) : i === "Paid" ? (
+      <Icon icon="flat-color-icons:paid" /> // Replace with your third icon
+      ) : i === "Proccessing" ? (
+      <Icon icon="uis:process" /> // Replace with your second icon
+    ) : i === "In-Transit" ? (
+      <Icon icon="wpf:in-transit" /> // Replace with your third icon
+    ) : i === "Delivered" ? (
+      <Icon icon="solar:delivery-bold" /> // Replace with your third icon
+    ) : i === "Closed" ? (
+      <Icon icon="fluent-mdl2:completed-solid" /> // Replace with your third icon
+   
+    ) : (
+      <span>{i + 1}</span>
+    )
+                  ) : (
+                    <span className="text-3xl">
+                      <Icon icon="bx:check-double" />
+                    </span>
+                  )}
+                </div>
 
-                    <div
-                      className={`${
-                        statusIndex >= i
-                          ? "bg-slate-900 dark:bg-slate-900"
-                          : "bg-[#E0EAFF] dark:bg-slate-700"
-                      } absolute top-1/2 h-[2px] w-full`}
-                    ></div>
-                    <div
-                      className={` ${
-                        statusIndex >= i
-                          ? " text-slate-900 dark:text-slate-300"
-                          : "text-slate-500 dark:text-slate-300 dark:text-opacity-40"
-                      } absolute top-full text-base md:leading-6 mt-3 transition duration-150 md:opacity-100 opacity-0 group-hover:opacity-100`}
-                    >
-                      <span className="w-max">{item}</span>
-                    </div>
-                  </div>
-                ))}
+                <div
+                  className={`${
+                    statusIndex >= i
+                      ? "bg-slate-900 dark:bg-slate-900"
+                      : "bg-[#E0EAFF] dark:bg-slate-700"
+                  } absolute top-1/2 h-[2px] w-full`}
+                ></div>
+                <div
+                  className={` ${
+                    statusIndex >= i
+                      ? " text-slate-900 dark:text-slate-300"
+                      : "text-slate-500 dark:text-slate-300 dark:text-opacity-40"
+                  } absolute top-full text-base md:leading-6 mt-3 transition duration-150 md:opacity-100 opacity-0 group-hover:opacity-100`}
+                >
+                  <span className="w-max">{item}</span>
+                </div>
               </div>
+            ))}
+          </div>
             </div>
           </Card>
-        </div>
+        </div> */}
         <br />
 
         <div className="-mx-6 overflow-x-auto">
@@ -368,7 +365,7 @@ const AllOrders = ({ title = "All Orders", item }) => {
                       ID
                     </th>
                     <th scope="col" className="table-th">
-                      Customer Username
+                      Customer Name
                     </th>
                     <th scope="col" className="table-th">
                       Mobile Number
@@ -408,7 +405,7 @@ const AllOrders = ({ title = "All Orders", item }) => {
                       </span>
                     </td>
                     <td className="table-td py-2">
-                      {selectedOrder?.user?.username}
+                      {selectedOrder?.user?.fullName}
                     </td>
                     <td className="table-td py-2">
                       {"+234" + "" + selectedOrder?.phone}
@@ -496,9 +493,6 @@ const AllOrders = ({ title = "All Orders", item }) => {
                       Product Name
                     </th>
                     <th scope="col" className="table-th">
-                      Description
-                    </th>
-                    <th scope="col" className="table-th">
                       Price
                     </th>
                     <th scope="col" className="table-th">
@@ -529,10 +523,6 @@ const AllOrders = ({ title = "All Orders", item }) => {
                         />
                       </td>
                       <td className="table-td py-2">{item.product?.name}</td>
-                      <td className="table-td py-2">
-                      {item.product?.description ? HTMLReactParser(item.product.description) : null}
-                       
-                      </td>
                       <td className="table-td py-2">{item.product?.price}</td>
                       <td className="table-td py-2">{item?.quantity}</td>
                     </tr>
@@ -773,7 +763,7 @@ const AllOrders = ({ title = "All Orders", item }) => {
                       ID
                     </th>
                     <th scope="col" className="table-th">
-                      Customer Username
+                      Customer Name
                     </th>
                     <th scope="col" className="table-th">
                       Mobile Number
@@ -819,7 +809,7 @@ const AllOrders = ({ title = "All Orders", item }) => {
                         </td>
                         <td className="table-td py-2 ">
                           {" "}
-                          {item.user?.username}{" "}
+                          {item.user?.fullName}{" "}
                         </td>
                         <td className="table-td py-2 ">
                           {" "}

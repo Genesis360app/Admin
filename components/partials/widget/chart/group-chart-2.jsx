@@ -225,8 +225,8 @@ const GroupChart2 = () => {
         const response = await orderService.totalSales(); // Call fetchUsers as a function
 
         if (response) {
-          // console.log(response); // Use response.data
-          setIstotalSales(response.totalsales);
+          // console.log(response.totalsales); // Use response.data
+          setIstotalSales(response);
         } else {
           // Handle case where response or response.data is undefined
         }
@@ -240,8 +240,8 @@ const GroupChart2 = () => {
         const response = await orderService.totalOderCount(); // Call fetchUsers as a function
 
         if (response) {
-          // console.log(response); // Use response.data
-          setIsTotalorders(response.orderCount);
+          // console.log(response.data.orderCount); // Use response.data
+          setIsTotalorders(response);
         } else {
           // Handle case where response or response.data is undefined
         }

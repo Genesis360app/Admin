@@ -27,14 +27,14 @@ const OrderPage = ({params}) => {
        return "Pending";
      case "Paid":
        return "Paid";
-     case  "Processing":
-       return "Processing";
+     case  "Proccessing":
+       return "Proccessing";
      case "In-Transit":
-       return "In-transit";
+       return "In-Transit";
      case "Delivered":
        return "Delivering";
      case "Closed":
-       return "Completed";
+       return "Closed";
      default:
        return "";
     }
@@ -43,7 +43,7 @@ const OrderPage = ({params}) => {
 
   const [status_, setStatus_] = useState("");
   const orderStatus = getStatus(status_);
-  const steps = ["Pending", "Paid", "Processing", "in-transit", "Delivering", "Complete"];
+  const steps = ["Pending", "Paid", "Proccessing", "In-Transit", "Delivering", "Closed"];
   const statusIndex = steps.indexOf(orderStatus);
   const [cartItems, setCartItems] = useState([]);
   const [orderid, setOrderid ]= useState("");
@@ -138,8 +138,8 @@ const naira = new Intl.NumberFormat("en-NG", {
           );
   
           if (response) {
-                  console.log(response.data.data); // Use response.data
-                  setCartItems(response?.data.data.orderItems);
+                  // console.log(response.data.data); // Use response.data
+                  setCartItems(response?.data.data);
                   setCity(response?.data.data.city);
                   setZip(response?.data.data.zip);
                   setContactPhone(response?.data.data.phone);
@@ -154,7 +154,7 @@ const naira = new Intl.NumberFormat("en-NG", {
                   setTracking(response?.data.data.trackingId.id);
                   setPrice(response?.data.data.totalPrice);
                   setPaymentMode(response?.data.data.transaction.paymentMode);
-                  setStatus_(response?.data.data.transaction?.status);
+                  setStatus_(response?.data.data.trackingId?.status);
                   setActualDelivery(response?.data.data.trackingId.actualDelivery);
                   setEstimatedDelivery(response?.data.data.trackingId.estimatedDelivery);
       
@@ -503,69 +503,7 @@ const naira = new Intl.NumberFormat("en-NG", {
     <div>
     <ToastContainer/>
 
-    {/* <center> 
-   
-    <Card title=" Status Variation Badges ">
-    {cartItems.map((item) => (
-
-            <div key={item.cart_info.id}>
-        <div className="space-xy-5">
-
-          <Button className="bg-secondary-500 text-white"
-           onClick={() => handlePendingStatus('pending', item.cart_info.id)} disabled={isLoading}
-          >
-            <div className="space-x-1 rtl:space-x-reverse">
-              <span>{isLoading ? 'Updating...' : 'Pending'}</span>
-              <Badge  icon="material-symbols:pending-actions-rounded" className="bg-white text-slate-900 " />
-            </div>
-          </Button>
-          
-          <Button className="btn-info"
-            onClick={() => handlePaidStatus('Paid', item.cart_info.id)} disabled={isLoading}
-          >
-            <div className="space-x-1 rtl:space-x-reverse">
-              <span>{isLoading ? 'Updating...' : 'Paid'}</span>
-              <Badge  icon="uiw:pay" className="bg-white text-slate-900 " />
-            </div>
-          </Button>
-          <Button className="btn-warning"
-           onClick={() => handleProcessingStatus('Processing', item.cart_info.id)} disabled={isLoading}
-          >
-            <div className="space-x-1 rtl:space-x-reverse">
-              <span>{isLoading ? 'Updating...' : 'Processing'}</span>
-              <Badge  icon="uis:process" className="bg-white text-slate-900 " />
-            </div>
-          </Button>
-          <Button className="btn-dark"
-           onClick={() => handleTransitStatus('In-Transit', item.cart_info.id)} disabled={isLoading}
-          >
-            <div className="space-x-1 rtl:space-x-reverse">
-              <span>{isLoading ? 'Updating...' : 'In-Transit '}</span>
-              <Badge  icon="wpf:in-transit" className="bg-white text-slate-900" />
-            </div>
-          </Button>
-          <Button className="btn-success"
-           onClick={() => handleDeliveredStatus('Delivered', item.cart_info.id)} disabled={isLoading}
-          >
-            <div className="space-x-1 rtl:space-x-reverse">
-              <span> {isLoading ? 'Updating...' : 'Delivered '}</span>
-              <Badge  icon="mdi:package-delivered" className="bg-white text-slate-900" />
-            </div>
-          </Button>
-          <Button className="btn-danger"
-           onClick={() => handleClosedStatus('Closed', item.cart_info.id)} disabled={isLoading}
-          >
-            <div className="space-x-1 rtl:space-x-reverse">
-              <span> {isLoading ? 'Updating...' : 'Closed '}</span>
-              <Badge  icon="ooui:eye-closed" className="bg-white text-slate-900" />
-            </div>
-          </Button>
-        </div>
-        </div>
-        ))}
- 
-      </Card>
-      </center> */}
+    
 
     <Card title="Product Status">
       <div>
@@ -587,15 +525,15 @@ const naira = new Intl.NumberFormat("en-NG", {
                     i === "Pending" ? (
                       <Icon icon="ic:twotone-pending-actions" />// Replace with your first icon
     
-    ) : i === 1 ? (
+    ) : i === "Paid" ? (
       <Icon icon="flat-color-icons:paid" /> // Replace with your third icon
-      ) : i === 2 ? (
+      ) : i === "Proccessing" ? (
       <Icon icon="uis:process" /> // Replace with your second icon
-    ) : i === 3 ? (
+    ) : i === "In-Transit" ? (
       <Icon icon="wpf:in-transit" /> // Replace with your third icon
-    ) : i === 4 ? (
+    ) : i === "Delivered" ? (
       <Icon icon="solar:delivery-bold" /> // Replace with your third icon
-    ) : i === 5 ? (
+    ) : i === "Closed" ? (
       <Icon icon="fluent-mdl2:completed-solid" /> // Replace with your third icon
    
     ) : (
@@ -650,7 +588,7 @@ const naira = new Intl.NumberFormat("en-NG", {
                       ID
                     </th>
                     <th scope="col" className="table-th">
-                      Customer Username
+                      Customer Name
                     </th>
                     <th scope="col" className="table-th">
                       Mobile Number
@@ -735,7 +673,7 @@ const naira = new Intl.NumberFormat("en-NG", {
                 : ""
             }
             ${
-              status_ === "Processing"
+              status_ === "Proccessing"
                 ? "text-processing-400 bg-processing-400"
                 : ""
             }
@@ -749,7 +687,7 @@ const naira = new Intl.NumberFormat("en-NG", {
                     ? "text-pending-500 bg-pending-500"
                     : ""
                 } ${
-                               status_ === "In-transit"
+                               status_ === "In-Transit"
                                   ? "text-primary-500 bg-primary-500"
                                   : ""
                               }
@@ -786,7 +724,68 @@ const naira = new Intl.NumberFormat("en-NG", {
               </div>
           <br/>
           <br/>
-         
+
+           <div className="-mx-6 overflow-x-auto">
+          <div className="inline-block min-w-full align-middle">
+            <div className="overflow-hidden ">
+              <table className="min-w-full divide-y table-fixed divide-slate-100 dark:divide-slate-700">
+                <thead className="bg-slate-200 dark:bg-slate-700">
+                  <tr>
+                    <th scope="col" className="table-th">
+                      ID
+                    </th>
+                    <th scope="col" className="table-th">
+                      Image
+                    </th>
+                    <th scope="col" className="table-th">
+                      Product Name
+                    </th>
+                    <th scope="col" className="table-th">
+                      Description
+                    </th>
+                    <th scope="col" className="table-th">
+                      Price
+                    </th>
+                    <th scope="col" className="table-th">
+                      Qty
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-slate-100 dark:bg-slate-800 dark:divide-slate-700">
+                  {cartItems?.orderItems?.map((item) => (
+                    <tr key={item.id}>
+                      <td className="table-td py-2">
+                        {" "}
+                        {item.product?.id.slice(0, 8)}...
+                        {item.product?.id.slice(-10)}
+                      </td>
+
+                      <td className="w-8 h-8 rounded-[100%] ltr:mr-2 rtl:ml-2">
+                        <img
+                          className="w-20 h-20 rounded"
+                          src={
+                            item.product?.image === null
+                              ? "https://www.pngkey.com/png/full/233-2332677_image-500580-placeholder-transparent.png"
+                              : item.product?.image
+                          }
+                          width={70}
+                          height={70}
+                          alt={item.product?.name}
+                        />
+                      </td>
+                      <td className="table-td py-2">{item.product?.name}</td>
+                      <td className="table-td py-2">
+                      {item.product?.description ? HTMLReactParser(item.product.description) : null}
+                      </td>
+                      <td className="table-td py-2">{item.product?.price}</td>
+                      <td className="table-td py-2">{item?.quantity}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
         
               <div className="grid grid-cols-12 gap-6">
           <div className="lg:col-span-4 col-span-12">

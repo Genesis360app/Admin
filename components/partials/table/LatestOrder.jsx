@@ -72,9 +72,10 @@ const AllOrders= ({ title = "All Orders", item }) => {
 
    const router = useRouter();
    // handleClick to view project single page
-   const handleClick = (item) => {
-     router.push(`/order/${item?.id}`);
-   };
+   const handleClick = async (item) => {
+    router.push(`/order/${item?.id}`);
+  };
+
   
   const [orderItems, setOrderItems] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null); // State to store the selected order data
@@ -94,6 +95,10 @@ const AllOrders= ({ title = "All Orders", item }) => {
   const [shippingState, setShippingState] = useState("");
   const [status_, setStatus_] = useState(0);
   const orderStatus = getStatus(status_);
+  const [delete_orderModal, setDelete_orderModal] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
   const steps = [
     "Pending",
     "Paid",
@@ -232,7 +237,7 @@ useEffect(() => {
 
       if (response) {
         // console.log(response); // Use response.data
-        setOrderItems(response);
+        setOrderItems(response.data);
       } else {
         // Handle case where response or response.data is undefined
       }
@@ -251,7 +256,51 @@ const handleItemClick = (item) => {
   history.push('/anotherPage', { selectedItem: item });
 };
 
+const handleDeleteOrder = async () => {
+  setIsLoading(true);
+  try {
+    const userString = localStorage.getItem("user");
 
+    if (!userString) {
+      throw new Error("User token not found");
+    }
+
+    const user = JSON.parse(userString);
+
+    if (!user || !user.token || !user.userId) {
+      throw new Error("Invalid user data");
+    }
+    const userById = selectedOrder?.id;
+    
+    // console.log(userById);
+    //       console.log(user.token);
+
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/order/${userById}`,
+      {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+        method: "DELETE",
+      }
+    );
+    const responseData = await response.json();
+
+    if (response.status === 200) {
+      _notifySuccess(responseData.message);
+      setSuccess(responseData.message);
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+    } else {
+      setError(responseData.message);
+    }
+  } catch (error) {
+    // console.error("Error during oder deletion:", error.message);
+  } finally {
+    setIsLoading(false);
+  }
+};
   return (
     <>
     <ToastContainer/>
@@ -387,7 +436,7 @@ const handleItemClick = (item) => {
                     </td>
                     <td className="table-td py-2">
                       {" "}
-                      {selectedOrder?.user.username}{" "}
+                      {selectedOrder?.user.fullName}{" "}
                     </td>
                     <td className="table-td py-2">
                       {" "}
@@ -424,7 +473,7 @@ const handleItemClick = (item) => {
                 : ""
             }
             ${
-              selectedOrder?.trackingId?.status === "Processing"
+              selectedOrder?.trackingId?.status === "Proccessing"
                 ? "text-processing-400 bg-processing-400"
                 : ""
             }
@@ -438,7 +487,7 @@ const handleItemClick = (item) => {
                     ? "text-pending-500 bg-pending-500"
                     : ""
                 } ${
-                            selectedOrder?.trackingId?.status === "In-transit"
+                            selectedOrder?.trackingId?.status === "In-Transit"
                               ? "text-primary-500 bg-primary-500"
                               : ""
                           }
@@ -483,9 +532,7 @@ const handleItemClick = (item) => {
                     <th scope="col" className="table-th">
                       Product Name
                     </th>
-                    <th scope="col" className="table-th">
-                      Description
-                    </th>
+                    
                     <th scope="col" className="table-th">
                       Price
                     </th>
@@ -517,9 +564,7 @@ const handleItemClick = (item) => {
                         />
                       </td>
                       <td className="table-td py-2">{item.product?.name}</td>
-                      <td className="table-td py-2">
-                        {item.product?.description}
-                      </td>
+                    
                       <td className="table-td py-2">{item.product?.price}</td>
                       <td className="table-td py-2">{item?.quantity}</td>
                     </tr>
@@ -589,7 +634,81 @@ const handleItemClick = (item) => {
         </div>
       </Modal>
 
+      <Modal
+        activeModal={delete_orderModal}
+        onClose={() => setDelete_orderModal(false)}
+        centered
+        title= {selectedOrder?.id}
+        footer={
+          <Button
+            text="Close"
+            btnClass="btn-danger"
+            onClick={() => setDelete_orderModal(false)}
+          />
+        }
+      >
+        <form className="space-y-4 ">
+          <center>
+            <img
+              src={ "https://p.turbosquid.com/ts-thumb/Kc/2Qw5vF/rQ/searchimagetransparentalternative_whitebg/png/1680707751/300x300/sharp_fit_q85/cdff1a28155c195262452dd977d32caa67becfc8/searchimagetransparentalternative_whitebg.jpg"
+                 
+              }
+                alt="order"
+              
+              className="w-[150px] h-[150px] rounded-md "
+            />
 
+            <div className="text-slate-600 dark:text-slate-200 text-lg pt-4 pb-1">
+              <p className="font-bold">Are you sure you want to delete this Oder ?</p>
+            </div>
+            <div className="text-slate-600 dark:text-slate-200 text-lg rounded-lg pb-1">
+            {selectedOrder?.id}
+            </div>
+            <div className="text-slate-600 dark:text-slate-200 text-lg pb-1">
+            {naira.format(selectedOrder?.totalPrice)}
+            </div>
+            <div className="text-slate-600 dark:text-slate-200 text-lg pb-1">
+            {"+234" + "" + selectedOrder?.phone}
+            </div>
+            {error ? (
+              <Alert label={error} className="alert-danger light-mode w-fit " />
+            ) : (
+              ""
+            )}
+
+            {success ? (
+              <Alert
+                label={success}
+                className="alert-success light-mode w-full"
+              />
+            ) : (
+              ""
+            )}
+            <br />
+
+            <div className="flex ltr:text-right rtl:text-left space-x-2 justify-center">
+              <Button
+                className="btn btn-dark  text-center"
+                onClick={() => setDelete_orderModal(false)}
+              >
+                Cancel
+              </Button>
+
+              <Button
+                className="btn btn-danger  text-center"
+                onClick={handleDeleteOrder}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <CircularProgress color="inherit" size={24} />
+                ) : (
+                  "Delete Order"
+                )}
+              </Button>
+            </div>
+          </center>
+        </form>
+      </Modal>
   
       <Card>
         <div className="items-center justify-between mb-6 md:flex">
@@ -697,7 +816,7 @@ const handleItemClick = (item) => {
                 : ""
             }
             ${
-              item.trackingId?.status === "Processing"
+              item.trackingId?.status === "Proccessing"
                 ? "text-processing-400 bg-processing-400"
                 : ""
             }
@@ -711,7 +830,7 @@ const handleItemClick = (item) => {
                     ? "text-pending-500 bg-pending-500"
                     : ""
                 } ${
-                                item.trackingId?.status === "In-transit"
+                                item.trackingId?.status === "In-Transit"
                                   ? "text-primary-500 bg-primary-500"
                                   : ""
                               }
@@ -768,6 +887,25 @@ const handleItemClick = (item) => {
                                 type="button"
                               >
                                 <Icon icon="heroicons:pencil-square" />
+                              </button>
+                            </Tooltip>
+
+                            <Tooltip
+                              content="Delete"
+                              placement="top"
+                              arrow
+                              animation="shift-away"
+                              theme="danger"
+                            >
+                              <button
+                                className="action-btn"
+                                type="button"
+                                onClick={() => {
+                                  setSelectedOrder(item);
+                                  setDelete_orderModal(true);
+                                }}
+                              >
+                                <Icon icon="heroicons:trash" />
                               </button>
                             </Tooltip>
                           </div>

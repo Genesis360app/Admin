@@ -18,14 +18,19 @@ import Link from "next/link";
 import { orderService } from "@/services/order.services";
 
 const RecentOrderTable = () => {
-  const [orderItems, setOrderItems] = useState([]);
+
   const router = useRouter();
+  // handleClick to view project single page
+  const handleClick = async (item) => {
+    router.push(`/order/${item?.id}`);
+  };
+  const [orderItems, setOrderItems] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(5); // Added pageSize state
   const itemsPerPage = pageSize; // Use pageSize for itemsPerPage
   const maxPageButtons = 5; // Number of page buttons to display
   const [globalFilter, setGlobalFilter] = useState(""); // Global filter
-
+ 
 
 // Function to format date value
 function formattedDate(rawDate) {
@@ -126,7 +131,7 @@ const getPageNumbers = () => {
 
         if (response) {
           // console.log(response); // Use response.data
-          setOrderItems(response);
+          setOrderItems(response.data);
         } else {
           // Handle case where response or response.data is undefined
         }
@@ -152,7 +157,7 @@ const getPageNumbers = () => {
                       ID
                     </th>
                     <th scope="col" className="table-th">
-                      Customer Username
+                      Customer Name
                     </th>
                     <th scope="col" className="table-th">
                       Mobile Number
@@ -198,7 +203,7 @@ const getPageNumbers = () => {
                         </td>
                         <td className="table-td py-2 ">
                           {" "}
-                          {item.user?.username}{" "}
+                          {item.user?.fullName}{" "}
                         </td>
                         <td className="table-td py-2 ">
                           {" "}
@@ -276,12 +281,20 @@ const getPageNumbers = () => {
                           )}{" "}
                         </td>
                         <td className="table-td py-2">  <div className="flex space-x-3 rtl:space-x-reverse">
-                            <Tooltip content="View" placement="top" arrow animation="shift-away">
-                            <Link href={`/Order/${item?.id}`}>
-                              <button className="action-btn" type="button">
+                        <Tooltip
+                              content="Edit"
+                              placement="top"
+                              arrow
+                              animation="shift-away"
+                            >
+                              <button
+                                className="action-btn"
+                                //  onClick={() => router.push(`/order/${item.cart_info.id}`)}
+                                onClick={() => handleClick(item)}
+                                type="button"
+                              >
                                 <Icon icon="heroicons:eye" />
                               </button>
-                              </Link>
                             </Tooltip>
                             </div>
                             </td>

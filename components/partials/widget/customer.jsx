@@ -16,7 +16,7 @@ const Customer = () => {
   
         if (response) {
           // console.log(response); // Use response.data
-          setAllUsers(response);
+          setAllUsers(response.data);
         } else {
           // Handle case where response or response.data is undefined
         }

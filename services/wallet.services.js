@@ -41,6 +41,44 @@ const fetchTransactions = async () => {
       }
     }
   };
+const fetchLoans = async () => {
+    try {
+      const userString = localStorage.getItem("user");
+        if (!userString) {
+          throw new Error('User token not found');
+        }
+    
+        const user = JSON.parse(userString);
+    
+        if (!user || !user.token || !user.userId) {
+          throw new Error('Invalid user data');
+        }
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/loan/list`,
+        {
+          
+          headers: {
+            // cache: 'no-store',
+            Authorization: `Bearer ${user.token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+  
+      if (response.data) {
+  
+        // console.log(response.data);
+      }
+  
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw error.response?.data ||handleApiError; // Include error.message for unexpected errors
+      } else {
+        throw 'An unexpected error occurred';
+      }
+    }
+  };
 
   const getBankAccount = async (
     bvn) => {
@@ -159,6 +197,7 @@ const fetchTransactions = async () => {
     fetchTransactions,
     getBankAccount,
     getWallet,
+    fetchLoans,
 
     };
     

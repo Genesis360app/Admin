@@ -15,10 +15,10 @@ export const menuItems = [
         childlink: "ecommerce",
       },
 
-      {
-        childtitle: " CRM Dashbaord",
-        childlink: "crm",
-      },
+      // {
+      //   childtitle: " CRM Dashbaord",
+      //   childlink: "crm",
+      // },
       {
         childtitle: "Banking Dashboard",
         childlink: "banking",
@@ -77,10 +77,10 @@ export const menuItems = [
   },
 
   {
-    title: "Subscriptions",
+    title: "Available Loans",
     isHide: true,
     icon: "eos-icons:subscriptions-created-outlined",
-    link: "subscriptions",
+    link: "loans",
     badge: "All",
   },
   // {
@@ -190,10 +190,10 @@ export const menuItems = [
         childlink: "account",
         badge: "User Account",
       },
-      {
-        childtitle: "Recover Password",
-        childlink: "forgetpassword",
-      },
+      // {
+      //   childtitle: "Recover Password",
+      //   childlink: "forgetpassword",
+      // },
     ],
   },
   // {
@@ -323,10 +323,10 @@ export const menuItems = [
     title: "AI Assistance",
   },
   {
-    title: "Bank Analysis",
+    title: "Blog",
     isHide: true,
     icon: "eos-icons:subscriptions-created-outlined",
-    link: "bank_analysis",
+    link: "blog",
   },
 
   // {

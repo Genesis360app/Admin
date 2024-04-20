@@ -71,11 +71,17 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
     }
   };
 
+
+
+
+
   const dispatch = useDispatch();
   const router = useRouter();
   const { id } = params;
   // handleClick to view project single page
-
+  const handleClick = async (item) => {
+    router.push(`/order/${item?.id}`);
+  };
   const [currentBackground, setCurrentBackground] = useState(0);
   const [orderItems, setOrderItems] = useState([]);
   const [subByID, setSubByID] = useState([]);
@@ -158,8 +164,19 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
   const [status_, setStatus_] = useState("");
   const orderStatus = getStatus(status_);
   const [isChecked, setIsChecked] = useState(false);
+  
+  const [kycId, setKycId] = useState("");
+  const [kycStatus, setKycStatus] = useState("");
+
+
+  const [isusername, setIsusername] = useState("");
+  const [isfirstname, setIsfirstname] = useState("");
+  const [islastname, setIslastname] = useState("");
+  const [isemail, setIsemail] = useState("");
+  const [isphone, setIsphone] = useState("");
   const [isBusinessDefault, setBusinessDefault] = useState(false);
   const [password, setPassword] = useState("");
+
 
   const handleToggleChange = () => {
     setIsChecked(!isChecked);
@@ -355,291 +372,6 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
     libraries: ["places"],
   });
 
-  // useEffect(() => {
-  //   const fetchUserShippingAddress = async () => {
-  //     try {
-  //       const userid = localStorage.getItem("userid");
-  //       const token = localStorage.getItem("token");
-  //       const response = await fetch(
-  //         `${process.env.NEXT_PUBLIC_BASE_URL}/User/getShippingAddress.php?userid=${userid}`,
-  //         {
-  //           cache: "no-cache",
-  //           headers: {
-  //             Authorization: `Bearer ${token}`,
-  //           },
-  //         }
-  //       );
-
-  //       if (!response.ok) {
-  //         throw new Error("Network response was not ok");
-  //       }
-
-  //       const res = await response.json();
-  //       // console.log(res);
-  //       if (res.code === 200) {
-  //         setLatitude(res.payload.latitude);
-  //         setLongitude(res.payload.longitude);
-  //         setLandmark(res.payload.landmark);
-  //         setMapCenter({
-  //           lat: parseFloat(res.payload.latitude),
-  //           lng: parseFloat(res.payload.longitude),
-  //         });
-  //       } else if (res.code === 401) {
-  //         setTimeout(() => {
-  //           window.location.href = "/";
-  //         }, 2000);
-  //       }
-  //     } catch (error) {
-  //       toast.error(`Error fetching user shipping address: ${error}`, {
-  //         position: "top-right",
-  //         autoClose: 1500,
-  //         hideProgressBar: false,
-  //         closeOnClick: true,
-  //         pauseOnHover: true,
-  //         draggable: true,
-  //         progress: undefined,
-  //         theme: "light",
-  //       });
-  //       // Handle the error as needed (e.g., show an error message)
-  //     }
-  //   };
-
-  //   const fetchData = async () => {
-  //     try {
-  //       var token = localStorage.getItem("token");
-  //       // var userid = localStorage.getItem("userid");
-
-  //       const response = await fetch(
-  //         `${process.env.NEXT_PUBLIC_BASE_URL}/Products/getSubscription.php?userid=${userid}`,
-  //         {
-  //           cache: "no-store",
-  //           headers: {
-  //             Authorization: `Bearer ${token}`,
-  //           },
-  //         }
-  //       );
-
-  //       if (!response.ok) {
-  //         // Handle error if the response is not OK
-  //         toast.warning("Network response was not ok", {
-  //           position: "top-right",
-  //           autoClose: 1500,
-  //           hideProgressBar: false,
-  //           closeOnClick: true,
-  //           pauseOnHover: true,
-  //           draggable: true,
-  //           progress: undefined,
-  //           theme: "light",
-  //         });
-  //         throw new Error(`HTTP error! Status: ${response.status}`);
-  //       }
-
-  //       const res = await response.json();
-
-  //       // console.log(res);
-
-  //       if (res.code === 200) {
-  //         setSubByID(res.sub);
-  //         setUser_id(res.sub[1].sub_info.userid);
-  //       } else if (res.code === 401) {
-  //         setTimeout(() => {
-  //           router.push("/");
-  //         }, 1500);
-  //       }
-  //     } catch (error) {
-  //       // Handle errors here
-  //       toast.error(error, {
-  //         position: "top-right",
-  //         autoClose: 1500,
-  //         hideProgressBar: false,
-  //         closeOnClick: true,
-  //         pauseOnHover: true,
-  //         draggable: true,
-  //         progress: undefined,
-  //         theme: "light",
-  //       });
-  //     }
-  //   };
-
-  //   const fetchDatas = async () => {
-  //     try {
-  //       const token = localStorage.getItem("token");
-
-  //       const response = await axios.get(
-  //         `${process.env.NEXT_PUBLIC_BASE_URL}/User/getKYC.php?userid=${userid}`,
-  //         {
-  //           headers: {
-  //             Authorization: `Bearer ${token}`,
-  //           },
-  //         }
-  //       );
-
-  //       if (!response.data) {
-  //         // Handle error if the response data is not available
-  //         toast.warning("Network response was not ok", {
-  //           position: "top-right",
-  //           autoClose: 1500,
-  //           hideProgressBar: false,
-  //           closeOnClick: true,
-  //           pauseOnHover: true,
-  //           draggable: true,
-  //           progress: undefined,
-  //           theme: "light",
-  //         });
-  //         throw new Error(`HTTP error! Status: ${response.status}`);
-  //       }
-
-  //       if (response.data.code === 200) {
-  //         // console.log(response.data);
-  //         // Handle successful response
-  //         setBank_statement(response.data.bank_statement_pdf);
-  //         setStatus(response.data.kyc.status);
-  //         setIncome(response.data.kyc.income);
-  //         setGender(response.data.kyc.gender);
-  //         setIncome(response.data.kyc.income);
-  //         setRemita(response.data.kyc.remita);
-  //         setMarital(response.data.kyc.marital);
-  //         setMaiden(response.data.kyc.maiden);
-  //         setDOB(response.data.kyc.dob);
-  //         setKycdate(response.data.kyc.created_at);
-  //         setEmployment(response.data.kyc.employment);
-  //         setNum(response.data.kyc.family_num);
-  //         setProof(response.data.kyc.proof);
-  //         setPdfpassword(response.data.kyc.statment_of_account_passcode);
-  //         setEmployment(response.data.kyc.employment);
-  //         setState(response.data.kyc.state);
-  //         setCity(response.data.kyc.city);
-  //         setStep(response.data.kyc.step);
-  //         setStreet(response.data.kyc.street);
-  //         setState(response.data.kyc.state);
-  //       } else if (response.data.code === 401) {
-  //         setTimeout(() => {
-  //           router.push("/");
-  //         }, 1500);
-  //       }
-  //     } catch (error) {
-  //       // Handle errors here
-  //       toast.error(error.message, {
-  //         position: "top-right",
-  //         autoClose: 1500,
-  //         hideProgressBar: false,
-  //         closeOnClick: true,
-  //         pauseOnHover: true,
-  //         draggable: true,
-  //         progress: undefined,
-  //         theme: "light",
-  //       });
-  //     }
-  //   };
-
-  //   var token = localStorage.getItem("token");
-  //   // Use the orderId prop directly
-  //   fetch(
-  //     `${process.env.NEXT_PUBLIC_BASE_URL}/User/getUser.php?userid=${userid}`,
-  //     {
-  //       headers: {
-  //         Authorization: `Bearer ${token}`,
-  //       },
-  //     }
-  //   )
-  //     .then((response) => response.json())
-  //     .then((res) => {
-  //       console.log(res);
-  //       if (res.code === 200) {
-  //         setFirstname(res.user.first_name);
-  //         setEmail(res.user.email);
-  //         setId(res.user.id);
-  //         setCustomerID(res.user.user_id);
-  //         setUsername(res.user.username);
-  //         setLastname(res.user.last_name);
-  //         setPhone(res.user.phone);
-  //         setIsbusiness(res.user.isBusiness);
-  //         setWallet(res.user.wallet);
-  //         setOutstanding(res.outstanding);
-  //         setSpending_limit(res.user.spending_limit);
-  //         setBusinessIsPartner(res.user.businessIsPartner);
-  //         setAvatar(res.user.avatar);
-  //         setBusinessCategory(res.user.businessCategory);
-  //         setBusinessName(res.user.businessName);
-  //         setBusinessAddress(res.user.businessAddress);
-  //         setReferralcode(res.user.user_ref_id);
-  //         setRefby(res.user.referral_id);
-  //         setRcNumber(res.user.rcNumber);
-  //         setBank_name(res.user.bank_name);
-  //         setAccount_number(res.user.account_number);
-  //       } else if (res.code === 401) {
-  //       }
-  //     });
-
-  //   fetch(
-  //     `${process.env.NEXT_PUBLIC_BASE_URL}/User/getProof?userid=${userid}`,
-  //     {
-  //       headers: {
-  //         Authorization: `Bearer ${token}`,
-  //       },
-  //     }
-  //   )
-  //     .then((response) => response.json())
-  //     .then((res) => {
-  //       // console.log(res);
-  //       if (res.code == 200) {
-  //         setProof_id(res.temp_url);
-  //       } else if (res.code == 401) {
-  //       }
-  //     });
-
-  //   var token = localStorage.getItem("token");
-  //   fetch(
-  //     `${process.env.NEXT_PUBLIC_BASE_URL}/Wallet/History.php?user_id=${userid}`,
-  //     {
-  //       headers: {
-  //         Authorization: `Bearer ${token}`,
-  //       },
-  //     }
-  //   )
-  //     .then((response) => response.json())
-  //     .then((res) => {
-  //       // console.log(res);
-  //       if (res.code == 200) {
-  //         setHistory(res.history);
-  //       } else if (res.code == 401) {
-  //         toast.info(`An error occurred, please login again`, {
-  //           position: "top-right",
-  //           autoClose: 1500,
-  //           hideProgressBar: false,
-  //           closeOnClick: true,
-  //           pauseOnHover: true,
-  //           draggable: true,
-  //           progress: undefined,
-  //           theme: "light",
-  //         });
-  //       }
-  //     });
-
-  //   fetch(
-  //     `${process.env.NEXT_PUBLIC_BASE_URL}/Products/getOrders.php?userid=${userid}`,
-  //     {
-  //       headers: {
-  //         Authorization: `Bearer ${token}`,
-  //       },
-  //     }
-  //   )
-  //     .then((response) => response.json())
-  //     .then((res) => {
-  //       // console.log(res);
-  //       if (res.code == 200) {
-  //         // console.log("Orders");
-  //         // console.log(res)
-  //         setOrderItems(res.cart);
-  //         setPriceTotal(res.total);
-  //       } else if (res.code == 401) {
-  //       }
-  //     });
-
-  //   fetchData(); // Call the asynchronous function
-  //   fetchDatas();
-  //   fetchUserShippingAddress();
-  // }, []);
 
   useEffect(() => {
     const userById = async () => {
@@ -720,6 +452,8 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
           // Handle response data
           const userKyc = response.data.data;
           const userinfo2 = response.data.data.user;
+          setKycId(userKyc.id);status
+          setKycStatus(userKyc.status);
           setGender(userKyc.gender);
           setIncome(userKyc.monthlyIncome);
           setMarital(userKyc.maritalStatus);
@@ -903,11 +637,11 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
       // console.log(user.userId);
       // console.log(user.token);
       const formData = new FormData();
-      formData.append("username", username);
-      formData.append("first_name", firstname);
-      formData.append("last_name", lastname);
-      formData.append("email", email);
-      formData.append("phone", phone);
+      formData.append("username", isusername);
+      formData.append("first_name", isfirstname);
+      formData.append("last_name", islastname);
+      formData.append("email", isemail);
+      formData.append("phone", isphone);
       formData.append("password", password);
       formData.append("isBusiness", isBusinessDefault);
 
@@ -935,6 +669,52 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
       setIsLoading(false);
     }
   };
+
+  const handleDeleteOrder = async () => {
+    setIsLoading(true);
+    try {
+      const userString = localStorage.getItem("user");
+  
+      if (!userString) {
+        throw new Error("User token not found");
+      }
+  
+      const user = JSON.parse(userString);
+  
+      if (!user || !user.token || !user.userId) {
+        throw new Error("Invalid user data");
+      }
+      const userById = selectedOrder?.id;
+      console.log(userById);
+            console.log(user.token);
+  
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/order/${userById}`,
+        {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+          method: "DELETE",
+        }
+      );
+      const responseData = await response.json();
+  
+      if (response.status === 200) {
+        _notifySuccess(responseData.message);
+        setSuccess(responseData.message);
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      } else {
+        setError(responseData.message);
+      }
+    } catch (error) {
+      console.error("Error during oder deletion:", error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -1028,68 +808,6 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
   };
 
   // kyc approval
-  // const handleApprovekyc = async (status, CustomerID) => {
-  //   setIsLoading(true);
-
-  //     try {
-  //       const userString = localStorage.getItem("user");
-  //       if (!userString) {
-  //         throw new Error("User token not found");
-  //       }
-  
-  //       const user = JSON.parse(userString);
-  
-  //       if (!user || !user.token || !user.userId) {
-  //         throw new Error("Invalid user data");
-  //       }
-  //     const headers = {
-  //       Authorization: `Bearer ${token}`,
-  //       "Content-Type": "multipart/form-data",
-  //     };
-
-  //     const body = {
-  //       status: "Approved", // Use the status parameter here
-  //     };
-
-  //     const response = await axios.post(
-  //       `${process.env.NEXT_PUBLIC_BASE_URL}/kyc/update-status/${id}`,
-
-  //       body,
-  //       { headers, cache: "no-store" }
-  //     );
-
-  //     // Handle the response as needed
-  //     // console.log(response.data);
-  //     if (response.status === 200) {
-  //       // Handle a successful response here
-  //       _notifySuccess("updated");
-  //       console.log(response);
-  //       setTimeout(() => {
-  //         window.location.reload();
-  //       }, 3000);
-  //       setIsLoading(false);
-  //     } else if (response.status === 401) {
-  //       // Handle unauthorized access
-  //     } else {
-  //       // Handle other status codes or errors
-  //     }
-  //   } catch (error) {
-  //     setError("An error occurred while updating the order status.");
-
-  //     toast.error(error, {
-  //       position: "top-right",
-  //       autoClose: 1500,
-  //       hideProgressBar: false,
-  //       closeOnClick: true,
-  //       pauseOnHover: true,
-  //       draggable: true,
-  //       progress: undefined,
-  //       theme: "light",
-  //     });
-  //     setIsLoading(false);
-  //   }
-  // };
-
 
   const handleApprovekyc = async () => {
     setIsLoading(true);
@@ -1111,12 +829,13 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
       });
   
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/kyc/update-status/${id}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/kyc/update-status/${kycId}`,
         {
           method: "PUT",
           headers: {
             Authorization: `Bearer ${user.token}`,
-            "Content-Type": "application/json", // Specify JSON content type
+            "Content-Type": "application/json",
+            cache: "no-store" ,
           },
           body: body,
         }
@@ -1125,9 +844,9 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
       if (response.ok) {
         const responseData = await response.json();
         console.log(responseData);
-        // setTimeout(() => {
-        //   window.location.reload();
-        // }, 2000);
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
       } else {
         throw new Error(`Failed to approve KYC: ${response}`);
       }
@@ -1159,12 +878,13 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
       });
   
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/kyc/update-status/${id}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/kyc/update-status/${kycId}`,
         {
           method: "PUT",
           headers: {
             Authorization: `Bearer ${user.token}`,
             "Content-Type": "application/json", // Specify JSON content type
+            cache: "no-store",
           },
           body: body,
         }
@@ -1173,9 +893,9 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
       if (response.ok) {
         const responseData = await response.json();
         console.log(responseData);
-        // setTimeout(() => {
-        //   window.location.reload();
-        // }, 2000);
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
       } else {
         throw new Error(`Failed to approve KYC: ${response.statusText}`);
       }
@@ -1253,129 +973,6 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
   // };
 
   // end of kyc
-
-  // partnership
-
-  const handleApprovepartner = async (CustomerID) => {
-    setIsLoading(true);
-    try {
-      const token = localStorage.getItem("token"); // Replace with your authentication method
-      const headers = {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data",
-      };
-
-      const body = {
-        businessID: CustomerID, // Use the itemId parameter here
-      };
-
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/User/verifyBusinessAsPartner`,
-
-        body,
-        { headers, cache: "no-store" }
-      );
-
-      // Handle the response as needed
-      // console.log(response.data);
-      if (response.status === 200) {
-        // Handle a successful response here
-        toast.success("Business verified as Partner successfully", {
-          position: "top-right",
-          autoClose: 1500,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
-        setTimeout(() => {
-          window.location.reload();
-        }, 3000);
-        setIsLoading(false);
-      } else if (response.status === 401) {
-        // Handle unauthorized access
-      } else {
-        // Handle other status codes or errors
-      }
-    } catch (error) {
-      setError("An error occurred while updating  status.");
-
-      toast.error(error, {
-        position: "top-right",
-        autoClose: 1500,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
-      setIsLoading(false);
-    }
-  };
-  const handleDisapprovepartner = async (CustomerID) => {
-    setIsLoading(true);
-    try {
-      const token = localStorage.getItem("token"); // Replace with your authentication method
-      const headers = {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data",
-      };
-
-      const body = {
-        businessID: CustomerID, // Use the itemId parameter here
-      };
-
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/User/unverifyBusinessAsPartner
-      `,
-
-        body,
-        { headers, cache: "no-store" }
-      );
-
-      // Handle the response as needed
-      // console.log(response.data);
-      if (response.status === 200) {
-        // Handle a successful response here
-        toast.error("Business Unverified as Partner successfully", {
-          position: "top-right",
-          autoClose: 1500,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
-        setTimeout(() => {
-          window.location.reload();
-        }, 3000);
-        setIsLoading(false);
-      } else if (response.status === 401) {
-        // Handle unauthorized access
-      } else {
-        // Handle other status codes or errors
-      }
-    } catch (error) {
-      setError("An error occurred while updating  status.");
-
-      toast.error(error, {
-        position: "top-right",
-        autoClose: 1500,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
-      setIsLoading(false);
-    }
-  };
-  // end of partnership
 
   //  subscriptions
   const handleApproveStatus = async (status, subscription_id) => {
@@ -1751,9 +1348,9 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                   type="text"
                   placeholder="First Name"
                   onChange={(e) => {
-                    setFirstname(e.target.value);
+                    setIsusername(e.target.value);
                   }}
-                  defaultValue={username}
+                  defaultValue={isusername}
                 />
                 <Textinput
                   label="First Name*"
@@ -1762,9 +1359,9 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                   type="text"
                   placeholder="First Name"
                   onChange={(e) => {
-                    setFirstname(e.target.value);
+                    setIsfirstname(e.target.value);
                   }}
-                  defaultValue={firstname}
+                  defaultValue={isfirstname}
                 />
                 <Textinput
                   label="Last Name*"
@@ -1773,9 +1370,9 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                   id="last_name"
                   name="last_name"
                   onChange={(e) => {
-                    setLastname(e.target.value);
+                    setIslastname(e.target.value);
                   }}
-                  defaultValue={lastname}
+                  defaultValue={islastname}
                 />
                 <Textinput
                   label="Phone Number"
@@ -1784,9 +1381,9 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                   name="phone"
                   placeholder="8122233345"
                   onChange={(e) => {
-                    setPhone(e.target.value);
+                    setIsphone(e.target.value);
                   }}
-                  defaultValue={phone}
+                  defaultValue={isphone}
                 />
                 <Textinput
                   label="Email Address "
@@ -1794,8 +1391,11 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                   type="email"
                   id="email"
                   name="email"
-                  defaultValue={email}
-                  readonly
+                  onChange={(e) => {
+                    setIsemail(e.target.value);
+                  }}
+                  defaultValue={isemail}
+                
                 />
                 <Textinput
                   label="Password "
@@ -1803,6 +1403,9 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                   type="password"
                   id="password"
                   name="password"
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                  }}
                   defaultValue={password}
                   readonly
                 />
@@ -2493,13 +2096,25 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                 >
                   <Icon icon="heroicons:pencil-square" />
                 </div>
+
+               
               
               </div>
             </div>
 
             <div className="flex-1">
               <div className="text-2xl font-medium text-slate-900 dark:text-slate-200 mb-[3px]">
-                {`${firstname} ${lastname}`.toUpperCase()}
+                {`${firstname} ${lastname}`.toUpperCase()} 
+                &nbsp;
+                {isVerified == true ? (
+                <div className=" text-success-500 bg-success-500 px-3 inline-block  min-w-[60px] text-xs font-medium text-center mx-auto py-1 rounded-[999px] bg-opacity-25">
+                Verified
+                </div>
+              ) : (
+                <div className=" text-danger-500 bg-danger-500 px-3 inline-block  min-w-[60px]  text-xs font-medium text-center mx-auto py-1 rounded-[999px] bg-opacity-25">
+                  Not Verified
+                </div>
+              )}
                 <br />
               </div>
 
@@ -2513,6 +2128,10 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                     Customer Account
                   </div>
                 )}
+
+                <div className="flex-1">
+           
+          </div>
               </div>
             </div>
           </div>
@@ -2542,6 +2161,23 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
           &nbsp;&nbsp; &nbsp;
           <div className="flex-1">
             <div className="text-base text-slate-900 dark:text-slate-300 font-medium mb-1 pr-3">
+              {kycStatus === "Approved" ? (
+                <div className=" text-success-500 bg-success-500 px-3 inline-block  min-w-[60px] text-xs font-medium text-center mx-auto py-1 rounded-[999px] bg-opacity-25">
+                  Approved
+                </div>
+              ) : (
+                <div className=" text-danger-500 bg-danger-500 px-3 inline-block  min-w-[60px]  text-xs font-medium text-center mx-auto py-1 rounded-[999px] bg-opacity-25">
+                Rejected
+                </div>
+              )}
+            </div>
+
+            <div className="text-sm text-slate-600 font-light dark:text-slate-300">
+              Kyc Status
+            </div>
+          </div>
+          {/* <div className="flex-1">
+            <div className="text-base text-slate-900 dark:text-slate-300 font-medium mb-1 pr-3">
               {isVerified == true ? (
                 <div className=" text-success-500 bg-success-500 px-3 inline-block  min-w-[60px] text-xs font-medium text-center mx-auto py-1 rounded-[999px] bg-opacity-25">
                   Approve
@@ -2556,7 +2192,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
             <div className="text-sm text-slate-600 font-light dark:text-slate-300">
               Kyc Status
             </div>
-          </div>
+          </div> */}
           <div className="flex-1">
             <>
               <div className="text-base text-slate-900 dark:text-slate-300 font-medium mb-1">
@@ -3678,6 +3314,22 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                                                 <Icon icon="heroicons:eye" />
                                               </button>
                                             </Tooltip>
+
+                                           <Tooltip
+                              content="Edit"
+                              placement="top"
+                              arrow
+                              animation="shift-away"
+                            >
+                              <button
+                                className="action-btn"
+                              
+                                onClick={() => handleClick(item)}
+                                type="button"
+                              >
+                                <Icon icon="heroicons:pencil-square" />
+                              </button>
+                            </Tooltip>
 
                                             <Tooltip
                                               content="Delete"
