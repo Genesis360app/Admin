@@ -328,6 +328,12 @@ export const menuItems = [
     icon: "eos-icons:subscriptions-created-outlined",
     link: "blog",
   },
+  {
+    title: "Contact Us",
+    isHide: true,
+    icon: "heroicons-outline:table",
+    link: "contact",
+  },
 
   // {
   //   isHeadr: true,
