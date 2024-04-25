@@ -578,7 +578,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
         );
         if (response.data) {
           // Handle response data
-          // console.log(response.data);
+          console.log(response.data);
           setLoan(response.data);
         } else {
           // Handle case where response or response.data is undefined
@@ -2801,23 +2801,23 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                                       ID
                                     </th>
                                     <th scope="col" className="table-th">
-                                      Amount
-                                    </th>
-                                    <th scope="col" className="table-th">
-                                      Interest Rate
+                                      Total Loan
                                     </th>
                                     <th scope="col" className="table-th">
                                       Overdue
                                     </th>
                                     <th scope="col" className="table-th">
-                                      Loan Limit
+                                      Repayment Mode
                                     </th>
                                     <th scope="col" className="table-th">
-                                      Outstanding
+                                      Interest Rate
                                     </th>
+                                   
+                                    
                                     <th scope="col" className="table-th">
-                                      Total Loan
+                                      Loan ID
                                     </th>
+                                    
                                     <th scope="col" className="table-th">
                                       Status
                                     </th>
@@ -2837,14 +2837,10 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                                             {item.id.slice(-10)}
                                           </span>
                                         </td>
-                                        <td className="table-td py-2 ">
-                                          {" "}
-                                          {naira.format(
-                                            item?.amount || "0"
-                                          )}{" "}
-                                        </td>
                                         <td className="table-td py-2">
-                                          {item?.interestRate}
+                                        {naira.format(
+                                            item?.totalLoan || "0"
+                                          )}
                                         </td>
                                         <td className="table-td py-2">
                                           <span className="block w-full">
@@ -2879,15 +2875,19 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                                             </span>
                                           )}
                                         </td>
-                                        <td className="table-td py-2">
-                                          {item?.limit}
+                                        <td className="table-td py-2 ">
+                                          {" "}
+                                         {" "}
                                         </td>
+                                        <td className="table-td py-2">
+                                          {item?.interestRate}
+                                        </td>
+                                      
+                                       
                                         <td className="table-td py-2">
                                           {item?.outstanding}
                                         </td>
-                                        <td className="table-td py-2">
-                                          {item?.totalLoan}
-                                        </td>
+                                       
                                         <td className="table-td py-2">
                                           <span className="block w-full">
                                             <span

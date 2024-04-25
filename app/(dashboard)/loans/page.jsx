@@ -1,31 +1,31 @@
-'use client'
+"use client";
 
-import React,{useEffect,useState,useMemo} from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { advancedTable } from "../../../constant/table-data";
 import Card from "@/components/ui/Card";
 import Icon from "@/components/ui/Icon";
 import Tooltip from "@/components/ui/Tooltip";
 import GlobalFilter from "@/components/partials/table/GlobalFilter";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import Modal from "@/components/ui/Modal";
 import Button from "@/components/ui/Button";
-import { useRouter } from 'next/navigation'
+import { useRouter } from "next/navigation";
 import Badge from "@/components/ui/Badge";
 import Dropdown from "@/components/ui/Dropdown";
 import { Menu } from "@headlessui/react";
 import { useSelector, useDispatch } from "react-redux";
 import Link from "next/link";
 import BasicArea from "@/components/partials/chart/appex-chart/BasicArea";
-import axios from 'axios'; // Import Axios at the top of your file
+import axios from "axios"; // Import Axios at the top of your file
 import { walletService } from "@/services/wallet.services";
 
-
-const AllLoans = ({ title = ("All Subscriptions"), item }) => {
+const AllLoans = ({ title = "All Loans", item }) => {
   const dispatch = useDispatch();
-  const router = useRouter()
-  const [subByID, setSubByID] = useState([]);
-  const [selectedSub, setSelectedSub] = useState(null); // State to store the selected order data
+  const router = useRouter();
+  const [allLoan, setAllLoan] = useState([]);
+  const [selectedLoan, setSelectedLoan] = useState(null); // State to store the selected order data
+  const [selectedLoanId, setSelectedLoanId] = useState(null); // State to store the selected order data
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(5); // Added pageSize state
   const itemsPerPage = pageSize; // Use pageSize for itemsPerPage
@@ -48,449 +48,390 @@ const AllLoans = ({ title = ("All Subscriptions"), item }) => {
   const [isBusiness, setIsbusiness] = useState(null);
   const [status, setStatus] = useState(null);
 
-  const userid = "24011343-7323075-4480759";
-  
-// Function to format date value
-function formattedDate(rawDate) {
-  const date = new Date(rawDate);
+  // Function to format date value
+  function formattedDate(rawDate) {
+    const date = new Date(rawDate);
 
-  if (!isNaN(date.getTime())) {
-    const options = {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      // second: '2-digit',
-      hour12: true, // Use 24-hour format
-    };
+    if (!isNaN(date.getTime())) {
+      const options = {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        // second: '2-digit',
+        hour12: true, // Use 24-hour format
+      };
 
-    const formattedDate = date.toLocaleString(undefined, options);
-    return <span>{formattedDate}</span>;
-  } else {
-    return <span>Invalid Date</span>;
-  }
-}
-
-const last25Items = subByID;
-
-// Sort the last 25 items by the 'id' property in ascending order
-last25Items.sort((a, b) => {
-  const idA = a.cart_info?.id || 0; // Use a default value if 'a.cart_info.id' is null
-  const idB = b.cart_info?.id || 0; // Use a default value if 'b.cart_info.id' is null
-
-  return  idB  - idA; // Sort in ascending order by 'id'
-});
-
-// Function to filter data based on globalFilter value
-// Function to filter data based on globalFilter value
-const filteredData = useMemo(() => {
-return (last25Items || []).filter((item) => {
-  const sub_id = (item.sub_info?.id|| "").toString(); // Access product_name safely and convert to lowercase
-  const status_text = (item.sub_info?.status_text || "").toString(); // Access package_id safely and convert to string
-  const package_name = (item.package?.package_name|| "").toString(); // Access package_id safely and convert to string
-
-  // Check if globalFilter is defined and not null before using trim
-  const filterText = globalFilter ? globalFilter.trim() : "";
-
-  // Customize this logic to filter based on your specific requirements
-  return (
-    sub_id.includes(filterText.toLowerCase()) ||
-    status_text.includes(filterText)||
-    package_name.includes(filterText)
-  );
-});
-}, [subByID, globalFilter]);
-
-
-const naira = new Intl.NumberFormat("en-NG", {
-  style: "currency",
-  currency: "NGN",
-  maximumFractionDigits: 0,
-  minimumFractionDigits: 0,
-});
-
-const handleNextPage = () => {
-  if (currentPage < Math.ceil(filteredData.length / itemsPerPage)) {
-    setCurrentPage((prevPage) => prevPage + 1);
-  }
-};
-
-const handlePrevPage = () => {
-  if (currentPage > 1) {
-    setCurrentPage((prevPage) => prevPage - 1);
-  }
-};
-
-// Calculate the index range for the current page
-const startIndex = (currentPage - 1) * itemsPerPage;
-const endIndex = Math.min(startIndex + itemsPerPage, filteredData.length);
-
-// Get the paginated history data for the current page
-const paginatedHistory = filteredData.slice(startIndex, endIndex);
-
-// Calculate the total number of pages
-const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-
-const getPageNumbers = () => {
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-  const middlePage = Math.ceil(maxPageButtons / 2);
-
-  let startPage = currentPage - middlePage + 1;
-  let endPage = currentPage + middlePage - 1;
-
-  if (totalPages <= maxPageButtons) {
-    startPage = 1;
-    endPage = totalPages;
-  } else if (currentPage <= middlePage) {
-    startPage = 1;
-    endPage = maxPageButtons;
-  } else if (currentPage >= totalPages - middlePage) {
-    startPage = totalPages - maxPageButtons + 1;
-    endPage = totalPages;
-  }
-
-  const pageNumbers = [];
-  for (let i = startPage; i <= endPage; i++) {
-    pageNumbers.push(i);
-  }
-
-  return pageNumbers;
-};
-
-useEffect(() => {
-  const fetchData = async () => {
-    try {
-      var token = localStorage.getItem("token");
-      // var userid = localStorage.getItem("userid");
-
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/Products/getSubscription.php?userid=${userid}`, {
-        cache: 'no-store',
-        headers: {
-          "Authorization": `Bearer ${token}`
-        }
-      });
-
-      if (!response.ok) {
-        // Handle error if the response is not OK
-        toast.warning("Network response was not ok", {
-          position: "top-right",
-          autoClose: 1500,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-
-      const res = await response.json();
-
-      // console.log(res);
-
-      if (res.code === 200) {
-        setSubByID(res.sub);
-        setUser_id((res.sub[1].sub_info.userid));
-      } else if (res.code === 401) {
-        setTimeout(() => {
-          router.push("/");
-        }, 1500);
-      }
-    } catch (error) {
-   
-      // Handle errors here
-      toast.error(error, {
-        position: "top-right",
-        autoClose: 1500,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
+      const formattedDate = date.toLocaleString(undefined, options);
+      return <span>{formattedDate}</span>;
+    } else {
+      return <span>Invalid Date</span>;
     }
-  };
+  }
 
+  const last25Items = allLoan;
 
-  const fetchDatas = async () => {
-    try {
-      const token = localStorage.getItem('token');
+  // Sort the last 25 items by the 'id' property in ascending order
+  last25Items.sort((a, b) => {
+    const idA = a.cart_info?.id || 0; // Use a default value if 'a.cart_info.id' is null
+    const idB = b.cart_info?.id || 0; // Use a default value if 'b.cart_info.id' is null
 
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/User/getKYC.php?userid=${userid}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.data) {
-        // Handle error if the response data is not available
-        toast.warning('Network response was not ok', {
-          position: 'top-right',
-          autoClose: 1500,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: 'light',
-        });
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-
-      
-
-      if (response.data.code === 200) {
-        // console.log(response.data);
-        // Handle successful response
-        setStatus(response.data.kyc.status);
-      } else if (response.data.code === 401) {
-        setTimeout(() => {
-          router.push('/');
-        }, 1500);
-      }
-    } catch (error) {
-      // Handle errors here
-      toast.error(error.message, {
-        position: 'top-right',
-        autoClose: 1500,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: 'light',
-      });
-    }
-  };
-  
-  var token = localStorage.getItem("token");
-  // Use the orderId prop directly
-  fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/Products/orderById.php?orderid=${selectedSub?.sub_info?.userid}`, {
-    headers: {
-      "Authorization": `Bearer ${token}`
-    }
-  })
-  .then(response => response.json())
-  .then((res) => {
-    // console.log(res);
-    if (res.code === 200) {
-      setSubByID(res.sub);
-    } else if (res.code === 401) {
-    
-    }
+    return idB - idA; // Sort in ascending order by 'id'
   });
 
-  fetchData(); // Call the asynchronous function
-  fetchDatas(); 
-}, []);
-    
+  // Function to filter data based on globalFilter value
+  // Function to filter data based on globalFilter value
+  const filteredData = useMemo(() => {
+    return (last25Items || []).filter((item) => {
+      const sub_id = (item.sub_info?.id || "").toString(); // Access product_name safely and convert to lowercase
+      const status_text = (item.sub_info?.status_text || "").toString(); // Access package_id safely and convert to string
+      const package_name = (item.package?.package_name || "").toString(); // Access package_id safely and convert to string
 
-useEffect(() => {
-  const fetchData = async () => {
-    try {
-      const response = await walletService.fetchLoans(); // Call fetchUsers as a function
+      // Check if globalFilter is defined and not null before using trim
+      const filterText = globalFilter ? globalFilter.trim() : "";
 
-      if (response) {
-        console.log(response); // Use response.data
-        // setAll_user(response.data);
-      } else {
-        // Handle case where response or response.data is undefined
-      }
-    } catch (err) {
-      console.error("Error:", err);
+      // Customize this logic to filter based on your specific requirements
+      return (
+        sub_id.includes(filterText.toLowerCase()) ||
+        status_text.includes(filterText) ||
+        package_name.includes(filterText)
+      );
+    });
+  }, [allLoan, globalFilter]);
+
+  const naira = new Intl.NumberFormat("en-NG", {
+    style: "currency",
+    currency: "NGN",
+    maximumFractionDigits: 0,
+    minimumFractionDigits: 0,
+  });
+
+  const handleNextPage = () => {
+    if (currentPage < Math.ceil(filteredData.length / itemsPerPage)) {
+      setCurrentPage((prevPage) => prevPage + 1);
     }
   };
-  fetchData();
-}, []);
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage((prevPage) => prevPage - 1);
+    }
+  };
+
+  // Calculate the index range for the current page
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, filteredData.length);
+
+  // Get the paginated history data for the current page
+  const paginatedHistory = filteredData.slice(startIndex, endIndex);
+
+  // Calculate the total number of pages
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+
+  const getPageNumbers = () => {
+    const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+    const middlePage = Math.ceil(maxPageButtons / 2);
+
+    let startPage = currentPage - middlePage + 1;
+    let endPage = currentPage + middlePage - 1;
+
+    if (totalPages <= maxPageButtons) {
+      startPage = 1;
+      endPage = totalPages;
+    } else if (currentPage <= middlePage) {
+      startPage = 1;
+      endPage = maxPageButtons;
+    } else if (currentPage >= totalPages - middlePage) {
+      startPage = totalPages - maxPageButtons + 1;
+      endPage = totalPages;
+    }
+
+    const pageNumbers = [];
+    for (let i = startPage; i <= endPage; i++) {
+      pageNumbers.push(i);
+    }
+
+    return pageNumbers;
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await walletService.fetchLoans(); // Call fetchUsers as a function
+
+        if (response) {
+          console.log(response); // Use response.data
+          setAllLoan(response);
+        } else {
+          // Handle case where response or response.data is undefined
+        }
+      } catch (err) {
+        console.error("Error:", err);
+      }
+    };
+    fetchData();
+  }, []);
 
 
+   // Loan approval
 
+   const handleApproveLoan = async (loanId ) => {
+    setIsLoading(true);
+    try {
+      const userString = localStorage.getItem("user");
+  
+      if (!userString) {
+        throw new Error("User token not found");
+      }
+  
+      const user = JSON.parse(userString);
+  
+      if (!user || !user.token || !user.userId) {
+        throw new Error("Invalid user data");
+      }
+    //  console.log(selectedLoanId?._id);
+      const body = JSON.stringify({
+        action: "approve", // Use the correct status for approval
+      });
+  
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/loan/update-status/${selectedLoan?.id}/${loanId}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+            "Content-Type": "application/json",
+            cache: "no-store" ,
+          },
+          body: body,
+        }
+      );
 
+      if (response.ok) {
+        const responseData = await response.json();
+        console.log(responseData);
+        
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      } else {
+        throw new Error(`Failed to approve KYC: ${response}`);
+      }
+    } catch (error) {
+      console.error("Error during KYC approval:", error);
+      setError(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+   const handleRejectedLoan = async ( loanId) => {
+    setIsLoading(true);
+    try {
+      const userString = localStorage.getItem("user");
+  
+      if (!userString) {
+        throw new Error("User token not found");
+      }
+  
+      const user = JSON.parse(userString);
+  
+      if (!user || !user.token || !user.userId) {
+        throw new Error("Invalid user data");
+      }
+ 
+      const body = JSON.stringify({
+        action: "reject", // Use the correct status for approval
+      });
+  
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/loan/update-status/${selectedLoan?.id}/${loanId}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+            "Content-Type": "application/json",
+            cache: "no-store" ,
+          },
+          body: body,
+        }
+      );
 
-
-
+      if (response.ok) {
+        const responseData = await response.json();
+        console.log(responseData);
+        
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      } else {
+        throw new Error(`Failed to approve KYC: ${response}`);
+      }
+    } catch (error) {
+      console.error("Error during KYC approval:", error);
+      setError(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <>
-    <ToastContainer/>
+      <ToastContainer />
 
-    {/* <Modal className="w-[49%]"
-    activeModal={activeModal}
-    onClose={() => setActiveModal(false)}
-    title="Subscription Details"
-    footer={
-      <Button
-        text="Close"
-        btnClass="btn-primary"
-        onClick={() => setActiveModal(false)}
-        router={router}
-      />
-    }
-  >
-     <div>
-     <center> 
-    
-    <Card title=" Status Variation Badges ">
-
-
- 
-        <div className="space-xy-5">
-
-          <Button className="bg-secondary-500 text-white"
-           onClick={() => handleApproveStatus('approve', selectedSub.sub_info.id)} disabled={isLoading}
-          >
-            <div className="space-x-1 rtl:space-x-reverse">
-              <span>{isLoading ? 'Updating...' : 'Approve'}</span>
-              <Badge  icon="mdi:approve" className="bg-white text-slate-900 " />
-            </div>
-          </Button>
-          
-          <Button className="btn-info"
-            onClick={() => handlePendingStatus('pending', selectedSub.sub_info.id)} disabled={isLoading}  >
-          
-            <div className="space-x-1 rtl:space-x-reverse">
-              <span>{isLoading ? 'Updating...' : 'Pend'}</span>
-              <Badge  icon="material-symbols:pending-actions-rounded" className="bg-white text-slate-900 " />
-            </div>
-          </Button>
-          <Button className="btn-warning"
-          onClick={() => handleQueryStatus('queried', selectedSub.sub_info.id)} disabled={isLoading}>
-            <div className="space-x-1 rtl:space-x-reverse">
-              <span>{isLoading ? 'Updating...' : 'Query'}</span>
-              <Badge  icon="streamline:interface-help-question-square-frame-help-mark-query-question-square" className="bg-white text-slate-900 " />
-            </div>
-          </Button>
-          <Button className="btn-dark"
-          onClick={() => handleDenyStatus('denied', selectedSub.sub_info.id)} disabled={isLoading}
-          >
-            <div className="space-x-1 rtl:space-x-reverse">
-              <span>{isLoading ? 'Updating...' : 'Deny '}</span>
-              <Badge  icon="fluent:shifts-deny-24-regular" className="bg-white text-slate-900" />
-            </div>
-          </Button>
-        
-       
-        </div>
-        
-</Card>
-</center>
-</div>
-<br/>
-        
+      <Modal
+        className="w-[48%]"
+        activeModal={activeModal}
+        onClose={() => setActiveModal(false)}
+        title="Loan Details"
+        footer={
+          <Button
+            text="Close"
+            btnClass="btn-primary"
+            onClick={() => setActiveModal(false)}
+            router={router}
+          />
+        }
+      >
         <div className="-mx-6 overflow-x-auto">
           <div className="inline-block min-w-full align-middle">
             <div className="overflow-hidden ">
-            <table className="min-w-full divide-y table-fixed divide-slate-100 dark:divide-slate-700">
+              <table className="min-w-full divide-y table-fixed divide-slate-100 dark:divide-slate-700">
                 <thead className="bg-slate-200 dark:bg-slate-700">
-                <tr>
-                      <th scope="col" className="table-th">
-                      ID
-                    </th>
-                      <th scope="col" className="table-th">
-                     Customer ID
+                  <tr>
+                    <th scope="col" className="table-th">
+                      Loan ID
                     </th>
                     <th scope="col" className="table-th">
-                    Package
+                      Amount
                     </th>
                     <th scope="col" className="table-th">
-                    Price
+                      Repayment Mode
                     </th>
                     <th scope="col" className="table-th">
-                    Package Name
+                      Interest Rate
                     </th>
                     <th scope="col" className="table-th">
-                    Duration
-                    </th>
-                    <th scope="col" className="table-th">
-                    Interest (%)
-                    </th>
-                    <th scope="col" className="table-th">
-                    Status
+                      Status
                     </th>
                     <th scope="col" className="table-th">
                       Due Date
                     </th>
                     <th scope="col" className="table-th">
-                      Date
+                   Action
                     </th>
-                    <th scope="col" className="table-th">
-                      Kyc
-                    </th>
-                   
-                    </tr>
+                  </tr>
                 </thead>
-                <tbody  className="bg-white divide-y divide-slate-100 dark:bg-slate-800 dark:divide-slate-700" >
-                  
-                      <tr >
-                      <td className="table-td py-2"> <span>{selectedSub.sub_info?.id}</span></td>
-                      <td className="table-td py-2 "> {selectedSub.sub_info?.userid} </td>
-                        <td className="table-td py-2"> {selectedSub.sub_info?.package_} </td>
-                        <td className="table-td py-2">  {naira.format(selectedSub.sub_info?.price || "0")}</td>
-                        <td className="table-td py-2"> {selectedSub.package?.package_name } </td>
-                        <td className="table-td py-2"> {selectedSub.sub_info?.duration } days</td>
-                        <td className="table-td py-2"> {selectedSub.sub_info?.interest || "0"} </td>
-                        <td className="table-td py-2"> 
+
+                <tbody className="bg-white divide-y divide-slate-100 dark:bg-slate-800 dark:divide-slate-700">
+                  {selectedLoan?.loanItems?.map((item) => (
+                    <tr key={item?._id}>
+                      <td className="table-td py-2"> {item?._id}</td>
+                      <td className="table-td py-2">
+                        {naira.format(item?.amount)}
+                      </td>
+
+                      <td className="w-8 h-8 rounded-[100%] ltr:mr-2 rtl:ml-2">
+                        {item?.repayment}{" "}
+                      </td>
+                      <td className="table-td py-2">{item?.interestRate}%</td>
+                      <td className="table-td py-2">
                         <span className="block w-full">
-            <span
-            className={` inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 ${
-              selectedSub.sub_info?.status_text === "approve"
-                ? "text-success-500 bg-success-500"
-                : ""
-            } 
+                          <span
+                            className={` inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 ${
+                              item?.status === "Approved"
+                                ? "text-success-500 bg-success-500"
+                                : ""
+                            } 
             ${
-              selectedSub.sub_info?.status_text === "pending"
-                ? "text-warning-500 bg-warning-500"
-                : ""
+              item?.status === "Rejected" ? "text-danger-500 bg-danger-500" : ""
             }
-            ${
-              selectedSub.sub_info?.status_text === "queried"
+                ${
+                  item?.status === "Pending"
                     ? "text-pending-500 bg-pending-500"
                     : ""
-                }
+                } 
             
-            ${
-              selectedSub.sub_info?.status_text === "denied"
-                ? "text-danger-500 bg-danger-500"
-                : ""
-            }
-                
              `}
-          >
-            { selectedSub.sub_info?.status_text}
-          </span>
-          </span>
-                        </td>
-              <td className="table-td py-2">  {formattedDate(selectedSub.sub_info?.due_date)} </td>
-               <td className="table-td py-2">  {formattedDate(selectedSub.sub_info?.created_at)} </td>
-               <td className="table-td py-2">  
-               {status == 1 ?  (
-            <div className=" text-success-500 bg-success-500 px-3 inline-block  min-w-[60px] text-xs font-medium text-center mx-auto py-1 rounded-[999px] bg-opacity-25">
-            Approve
-            </div> 
-            ):(
-              <div className=" text-danger-500 bg-danger-500 px-3 inline-block  min-w-[60px]  text-xs font-medium text-center mx-auto py-1 rounded-[999px] bg-opacity-25">
-             Pending
-             
-            </div>
-            )}
-               </td>
+                          >
+                            {item?.status}
+                          </span>
+                        </span>
+                      </td>
 
-                      </tr>
-                      </tbody>
-                </table>
-                </div>
-                </div>
-                </div>
+                      <td className="table-td py-2">
+                        {formattedDate(item?.dueDate)}
+                      </td>
+                      <td className="table-td py-2">
+                      <div>
+                            <Dropdown
+                              classMenuItems="right-0 w-[140px] top-[110%] "
+                              label={
+                                <span className="text-xl text-center block w-full">
+                                  <Icon icon="heroicons-outline:dots-vertical" />
+                                </span>
+                              }
+                            >
+                              <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                                <Menu.Item
+                                  onClick={() => {
+                                    // setSelectedLoanId(item?._id);
+                                    handleApproveLoan(item?._id);
+                                }}
+                                  disabled={isLoading}
+                                >
+                                  <div className="hover:bg-slate-900 hover:text-white dark:hover:bg-slate-600 dark:hover:bg-opacity-50 w-full border-b border-b-gray-500 border-opacity-10 px-4 py-2 text-sm  last:mb-0 cursor-pointer first:rounded-t last:rounded-b flex space-x-2 items-center rtl:space-x-reverse">
+                                    <span className="text-base">
+                                      <Icon icon="mdi:approve" />
+                                    </span>
+                                    <span>
+                                      {" "}
+                                      {isLoading ? "Updating..." : "Approve"}
+                                    </span>
+                                  </div>
+                                </Menu.Item>
 
+                               
+                                
+                                <Menu.Item
 
+                                  onClick={() => {
+                                    // setSelectedLoanId(item?._id);
+                                    handleRejectedLoan(item?._id);
+                                }}
+                                  disabled={isLoading}
+                                >
+                                  <div
+                                    className="bg-danger-500 text-danger-500 bg-opacity-30   hover:bg-opacity-100 hover:text-white w-full border-b border-b-gray-500 border-opacity-10 px-4 py-2 text-sm  last:mb-0 cursor-pointer 
+                   first:rounded-t last:rounded-b flex  space-x-2 items-center rtl:space-x-reverse "
+                                  >
+                                    <span className="text-base">
+                                      <Icon icon="fluent:shifts-deny-24-regular" />
+                                    </span>
+                                    <span>
+                                      {" "}
+                                      {isLoading ? "Updating..." : "Deny"}
+                                    </span>
+                                  </div>
+                                </Menu.Item>
+                              </div>
+                            </Dropdown>
+                          </div>
+                      </td>
+                    </tr>
+                   
+                  ))}
+                </tbody>
                 <br/>
-               
-                         
-  </Modal> */}
-    
+                <br/>
+                <br/>
+                <br/>
+              </table>
+            </div>
+          </div>
+        </div>
+      </Modal>
+
       <Card>
         <div className="items-center justify-between mb-6 md:flex">
           <h4 className="card-title">{title}</h4>
@@ -501,190 +442,105 @@ useEffect(() => {
         <div className="-mx-6 overflow-x-auto">
           <div className="inline-block min-w-full align-middle">
             <div className="overflow-hidden ">
-            <table className="min-w-full divide-y table-fixed divide-slate-100 dark:divide-slate-700">
+              <table className="min-w-full divide-y table-fixed divide-slate-100 dark:divide-slate-700">
                 <thead className="bg-slate-200 dark:bg-slate-700">
                   <tr>
-                      <th scope="col" className="table-th">
+                    <th scope="col" className="table-th">
                       ID
                     </th>
-                      <th scope="col" className="table-th">
-                     Customer ID
+                    <th scope="col" className="table-th">
+                      Total Loan
                     </th>
                     <th scope="col" className="table-th">
-                    Package
+                      Overdue
                     </th>
-                    <th scope="col" className="table-th">
-                    Price
-                    </th>
-                    <th scope="col" className="table-th">
-                    Package Name
-                    </th>
-                    <th scope="col" className="table-th">
-                    Duration
-                    </th>
-                    <th scope="col" className="table-th">
-                    Interest (%)
-                    </th>
-                    <th scope="col" className="table-th">
-                    Status
-                    </th>
-                    <th scope="col" className="table-th">
-                      Due Date
-                    </th>
-                    <th scope="col" className="table-th">
-                      Date
-                    </th>
+
                     <th scope="col" className="table-th">
                       Action
                     </th>
-                    </tr>
-
-               
+                  </tr>
                 </thead>
                 {paginatedHistory.map((item) => (
-                  <React.Fragment key={item.sub_info?.id}>
-                <tbody  className="bg-white divide-y divide-slate-100 dark:bg-slate-800 dark:divide-slate-700" >
-                  
-                      <tr >
-                      <td className="table-td py-2"> <span>{item.sub_info?.id}</span></td>
-                      <td className="table-td py-2 "> {item.sub_info?.userid} </td>
-                        <td className="table-td py-2"> {item.sub_info?.package_} </td>
-                        <td className="table-td py-2">  {naira.format(item.sub_info?.price || "0")}</td>
-                        <td className="table-td py-2"> {item.package?.package_name } </td>
-                        <td className="table-td py-2"> {item.sub_info?.duration } days</td>
-                        <td className="table-td py-2"> {item.sub_info?.interest || "0"} </td>
-                        <td className="table-td py-2"> 
-                        <span className="block w-full">
-            <span
-            className={` inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 ${
-              item.sub_info?.status_text === "approve"
-                ? "text-success-500 bg-success-500"
-                : ""
-            } 
+                  <React.Fragment key={item?.id}>
+                    <tbody className="bg-white divide-y divide-slate-100 dark:bg-slate-800 dark:divide-slate-700">
+                      <tr>
+                        <td className="table-td py-2">
+                          <span>
+                            {" "}
+                            {item?.id.slice(0, 5)}...
+                            {item.id.slice(-10)}
+                          </span>
+                        </td>
+                        <td className="table-td py-2">
+                          {naira.format(item?.totalLoan || "0")}
+                        </td>
+                        <td className="table-td py-2">
+                          <span className="block w-full">
+                            {item?.isOverdue}
+                          </span>
+
+                          {item.isOverdue === true ? (
+                            <span className="block w-full">
+                              <p
+                                className={` inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 ${
+                                  item?.isOverdue === true
+                                    ? "text-danger-500 bg-danger-500"
+                                    : ""
+                                }`}
+                              >
+                                Yes
+                              </p>
+                            </span>
+                          ) : (
+                            <span className="block w-full">
+                              <p
+                                className={` inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 
+          
             ${
-              item.sub_info?.status_text === "pending"
-                ? "text-warning-500 bg-warning-500"
-                : ""
-            }
-            ${
-                  item.sub_info?.status_text === "queried"
-                    ? "text-pending-500 bg-pending-500"
-                    : ""
-                }
-            
-            ${
-              item.sub_info?.status_text === "denied"
-                ? "text-danger-500 bg-danger-500"
-                : ""
+              item?.isOverdue === false ? "text-success-500 bg-success-500" : ""
             }
                 
              `}
-          >
-            { item.sub_info?.status_text}
-          </span>
-          </span>
-              </td>
-              <td className="table-td py-2">  {formattedDate(item.sub_info?.due_date)} </td>
-               <td className="table-td py-2">  {formattedDate(item.sub_info?.created_at)} </td>
-             <td className="table-td py-2">                    
-        <div>
-              <Dropdown
-              classMenuItems="right-0 w-[140px] top-[110%] "
-              label={
-                <span className="text-xl text-center block w-full">
-                  <Icon icon="heroicons-outline:dots-vertical" />
-                </span>
-              }
-            >
-              <div className="divide-y divide-slate-100 dark:divide-slate-800">
-                
-                  <Menu.Item
-                   onClick={() => { setSelectedSub(item);setActiveModal(true); }} disabled={isLoading}
-                  >
-                     <div className= "hover:bg-slate-900 hover:text-white dark:hover:bg-slate-600 dark:hover:bg-opacity-50 w-full border-b border-b-gray-500 border-opacity-10 px-4 py-2 text-sm  last:mb-0 cursor-pointer first:rounded-t last:rounded-b flex space-x-2 items-center rtl:space-x-reverse"
-                 >
-                      <span className="text-base">
-                        <Icon icon='mdi:eye'/>
-                      </span>
-                      <span> View</span>
-                    </div>
-                    
-                  </Menu.Item>
-                  
-                  <Menu.Item
-                  onClick={() => handleApproveStatus('approve', item.sub_info.id)} disabled={isLoading}
-                  >
-                     <div className= "hover:bg-slate-900 hover:text-white dark:hover:bg-slate-600 dark:hover:bg-opacity-50 w-full border-b border-b-gray-500 border-opacity-10 px-4 py-2 text-sm  last:mb-0 cursor-pointer first:rounded-t last:rounded-b flex space-x-2 items-center rtl:space-x-reverse"
-                 >
-                      <span className="text-base">
-                        <Icon icon='mdi:approve'/>
-                      </span>
-                      <span> {isLoading ? 'Updating...' : 'Approve'}</span>
-                    </div>
-                    
-                  </Menu.Item>
-
-                  <Menu.Item
-                     onClick={() => handlePendingStatus('pending', item.sub_info.id)} disabled={isLoading}  >
-                  
-                    <div className= "hover:bg-slate-900 hover:text-white dark:hover:bg-slate-600 dark:hover:bg-opacity-50 w-full border-b border-b-gray-500 border-opacity-10 px-4 py-2 text-sm  last:mb-0 cursor-pointer first:rounded-t last:rounded-b flex space-x-2 items-center rtl:space-x-reverse"
-                 >
-                      <span className="text-base">
-                        <Icon icon='material-symbols:pending-actions-rounded'/>
-                      </span>
-                      <span> {isLoading ? 'Updating...' : 'Pend'}</span>
-                    </div>
-                    
-                  </Menu.Item>
-                  <Menu.Item
-                   onClick={() => handleQueryStatus('queried', item.sub_info.id)} disabled={isLoading}>
-                     <div className= "hover:bg-slate-900 hover:text-white dark:hover:bg-slate-600 dark:hover:bg-opacity-50 w-full border-b border-b-gray-500 border-opacity-10 px-4 py-2 text-sm  last:mb-0 cursor-pointer first:rounded-t last:rounded-b flex space-x-2 items-center rtl:space-x-reverse"
-                 >
-                      <span className="text-base">
-                        <Icon icon='streamline:interface-help-question-square-frame-help-mark-query-question-square'/>
-                      </span>
-                      <span> {isLoading ? 'Updating...' : 'Query'}</span>
-                    </div>
-                    
-                  </Menu.Item>
-
-                  <Menu.Item 
-                  onClick={() => handleDenyStatus('denied', item.sub_info.id)} disabled={isLoading}
-                   >
-                    <div
-                      className="bg-danger-500 text-danger-500 bg-opacity-30   hover:bg-opacity-100 hover:text-white w-full border-b border-b-gray-500 border-opacity-10 px-4 py-2 text-sm  last:mb-0 cursor-pointer 
-                   first:rounded-t last:rounded-b flex  space-x-2 items-center rtl:space-x-reverse " >
-                      <span className="text-base">
-                        <Icon icon='fluent:shifts-deny-24-regular'/>
-                      </span>
-                      <span> {isLoading ? 'Updating...' : 'Deny'}</span>
-                    </div>
-                    
-                  </Menu.Item>
-              </div>
-            </Dropdown>
-          </div>
-
-           </td>
-          
-                </tr>
-                    
-                </tbody>
-                </React.Fragment>
+                              >
+                                No
+                              </p>
+                            </span>
+                          )}
+                        </td>
+                        <td className="table-td py-2">
+                        <div className="flex space-x-3 rtl:space-x-reverse">
+                            <Tooltip
+                              content="View"
+                              placement="top"
+                              arrow
+                              animation="shift-away"
+                            >
+                              <button
+                                className="action-btn"
+                                type="button"
+                                onClick={() => {
+                                  setSelectedLoan(item);
+                                    setActiveModal(true);
+                                }}
+                              >
+                                <Icon icon="heroicons:eye" />
+                              </button>
+                            </Tooltip>
+                            </div>
+                        
+                         
+                        </td>
+                      </tr>
+                    </tbody>
+                  </React.Fragment>
                 ))}
-                <br/>
-                    <br/>
-                    <br/>
-                    <br/>
-                    <br/>
-                    <br/>
-                 
-                    
+                <br />
+                
               </table>
             </div>
           </div>
         </div>
-       
+
         <div className="items-center justify-between mt-6 space-y-5 md:flex md:space-y-0">
           <div className="flex items-center space-x-3 rtl:space-x-reverse">
             <select
@@ -702,8 +558,10 @@ useEffect(() => {
               ))}
             </select>
             <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
-              Page 
-              <span>{currentPage} of {totalPages}</span>
+              Page
+              <span>
+                {currentPage} of {totalPages}
+              </span>
             </span>
           </div>
           <ul className="flex flex-wrap items-center space-x-3 rtl:space-x-reverse">
@@ -750,7 +608,9 @@ useEffect(() => {
             <li className="text-sm leading-4 text-slate-900 dark:text-white rtl:rotate-180">
               <button
                 className={`${
-                  currentPage === totalPages ? "opacity-50 cursor-not-allowed" : ""
+                  currentPage === totalPages
+                    ? "opacity-50 cursor-not-allowed"
+                    : ""
                 }`}
                 onClick={handleNextPage}
                 disabled={currentPage === totalPages}
@@ -763,7 +623,9 @@ useEffect(() => {
                 onClick={() => setCurrentPage(totalPages)}
                 disabled={currentPage === totalPages}
                 className={`${
-                  currentPage === totalPages ? "opacity-50 cursor-not-allowed" : ""
+                  currentPage === totalPages
+                    ? "opacity-50 cursor-not-allowed"
+                    : ""
                 }`}
               >
                 <Icon icon="heroicons:chevron-double-right-solid" />
@@ -771,15 +633,11 @@ useEffect(() => {
             </li>
           </ul>
         </div>
-        
-      
-
 
         {/*end*/}
       </Card>
     </>
   );
 };
-
 
 export default AllLoans;
