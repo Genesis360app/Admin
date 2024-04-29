@@ -31,6 +31,8 @@ import { useParams } from "react-router-dom";
 import Alert from "@/components/ui/Alert";
 import { _notifySuccess, _notifyError } from "@/utils/alart";
 import { CircularProgress } from "@mui/material";
+import moment from "moment";
+import Fileinput from "@/components/ui/Fileinput";
 import {
   GoogleMap,
   Marker,
@@ -96,7 +98,6 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
   const [username, setUsername] = useState("");
   const [firstname, setFirstname] = useState("");
   const [lastname, setLastname] = useState("");
-  const [businessIsPartner, setBusinessIsPartner] = useState("");
   const [isVerified, setIsVerified] = useState(null);
   const [income, setIncome] = useState("");
   const [wallet, setWallet] = useState("");
@@ -105,17 +106,13 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
   const [avatar, setAvatar] = useState("");
   const [isBusiness, setIsbusiness] = useState(null);
   const [gender, setGender] = useState("");
-  const [remita, setRemita] = useState("");
   const [num, setNum] = useState("");
   const [bvn, setBvn] = useState("");
   const [dob, setDOB] = useState("");
   const [kycdate, setKycdate] = useState("");
-  const [CustomerID, setCustomerID] = useState("");
   const [marital, setMarital] = useState("");
   const [maiden, setMaiden] = useState("");
   const [proof, setProof] = useState("");
-  const [proof_id, setProof_id] = useState("");
-  const [bank_statement, setBank_statement] = useState("");
   const [street, setStreet] = useState("");
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
@@ -124,8 +121,6 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
   const [account_number, setAccount_number] = useState("");
   const [bank_name, setBank_name] = useState("");
   const [accountName, setAccountName] = useState("");
-  const [isRegistered, setIsRegistered] = useState(null);
-  const [created_at, setCreated_at] = useState(null);
   const [houseNumber, setHouseNumber] = useState("");
   const [streetAddress, setStreetAddress] = useState("");
   const [contactPhone, setContactPhone] = useState("");
@@ -139,7 +134,6 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
   const [businessinfo, Setbusinessinfo] = useState("");
   const [referralcode, setReferralcode] = useState("");
   const [refby, setRefby] = useState("");
-  const [priceTotal, setPriceTotal] = useState("");
   const [shippingState, setShippingState] = useState("");
   const [lat, setLat] = useState("");
   const [latitude, setLatitude] = useState("");
@@ -151,12 +145,15 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
   const [duration, setDuration] = useState("");
   const [long, setLong] = useState("");
   const [activeModal, setActiveModal] = useState(false);
+  const [activeLoanModal, setActiveLoanModal] = useState(false);
   const [history, setHistory] = useState([]);
   const [loan, setLoan] = useState([]);
   const [history_activeModal, setHistory_activeModal] = useState(false);
   const [selectedHistory, setSelectedHistory] = useState(null);
   const [step, setStep] = useState(0);
   const [delete_orderModal, setDelete_orderModal] = useState(false);
+  const [kycUpdateModal, setKycUpdateModal] = useState(false);
+  const [limitModal, setLimitModal] = useState(false);
   const [profileModal, setProfileModal] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
@@ -164,11 +161,9 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
   const [status_, setStatus_] = useState("");
   const orderStatus = getStatus(status_);
   const [isChecked, setIsChecked] = useState(false);
-  
   const [kycId, setKycId] = useState("");
   const [kycStatus, setKycStatus] = useState("");
-
-
+  const [selectedLoan, setSelectedLoan] = useState(null);
   const [isusername, setIsusername] = useState("");
   const [isfirstname, setIsfirstname] = useState("");
   const [islastname, setIslastname] = useState("");
@@ -176,6 +171,26 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
   const [isphone, setIsphone] = useState("");
   const [isBusinessDefault, setBusinessDefault] = useState(false);
   const [password, setPassword] = useState("");
+
+
+
+  const [address, setAddress] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState("");
+  const [files, setFiles] = useState([]);
+  const [staffStrength, setStaffStrength] = useState("");
+  const [weeklyExpense, setWeeklyExpense] = useState("");
+  const [locationType, setLocationType] = useState("");
+  const [payDay, setPayDay] = useState("");
+  const [placeOfWork, setPlaceOfWork] = useState("");
+  const [corporateAccount, setCorporateAccount] = useState("");
+  const [googleMapLocation, setGoogleMapLocation] = useState("");
+  const [selectedImages, setSelectedImages] = useState([null,null,null, ]);
+  const [imgSrc, setImgSrc] = useState(null); 
+  const [showLoader, setShowLoader] = useState(false);
+  const [loanLoader, setLoanLoader] = useState(false);
+  const [assignLimit, setAssignLimit] = useState("");
+  const [loanError, setLoanError] = useState(null);
+  const [loanSuccess, setLoanSuccess] = useState(null);
 
 
   const handleToggleChange = () => {
@@ -286,21 +301,16 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
 
   const filteredLoan = useMemo(() => {
     return (loan || []).filter((item) => {
-      const amount = (item?.amount || "").toString(); // Access product_name safely and convert to lowercase
-      const status = (item?.status || "").toString(); // Access package_id safely and convert to string
-      const outstanding = (item?.outstanding || "").toString(); // Access package_id safely and convert to string
-      const user = (item?.user || "").toString(); // Access package_id safely and convert to string
-
+      const loan_id = (item?.id || "").toString(); // Access product_name safely and convert to lowercase
+      const totalLoan = (item?.totalLoan || "").toString(); // Access package_id safely and convert to string
+  
       // Check if globalFilter is defined and not null before using trim
       const filterText = globalFilter ? globalFilter.trim() : "";
 
       // Customize this logic to filter based on your specific requirements
       return (
-        user.includes(filterText.toLowerCase()) ||
-        outstanding.includes(filterText) ||
-        status.includes(filterText) ||
-        status.includes(filterText) ||
-        amount.includes(filterText)
+        loan_id.includes(filterText.toLowerCase()) ||
+        totalLoan.includes(filterText.toLowerCase())
       );
     });
   }, [loan, globalFilter]);
@@ -444,7 +454,6 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
             headers: {
               Authorization: `Bearer ${user.token}`,
               "Content-Type": "application/json",
-              "ngrok-skip-browser-warning": "true",
             },
           }
         );
@@ -474,7 +483,11 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
           setImages(userKyc.images);
           setStreet(userKyc.address);
           setStep(response.status);
-          // console.log('Test Data', response);
+          setStaffStrength(userKyc.staffStrength);
+          setLocationType(userKyc.locationType);
+          setGoogleMapLocation(userKyc.googleMapLocation);
+          setCorporateAccount(userKyc.corporateAccount);
+          console.log('Test Data', response);
         } else {
           // Handle case where response or response.data is undefined
         }
@@ -501,7 +514,6 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
             headers: {
               Authorization: `Bearer ${user.token}`,
               "Content-Type": "application/json",
-              "ngrok-skip-browser-warning": "true",
             },
           }
         );
@@ -572,13 +584,12 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
             headers: {
               Authorization: `Bearer ${user.token}`,
               "Content-Type": "application/json",
-              "ngrok-skip-browser-warning": "true",
             },
           }
         );
         if (response.data) {
           // Handle response data
-          console.log(response.data);
+          // console.log(response.data);
           setLoan(response.data);
         } else {
           // Handle case where response or response.data is undefined
@@ -618,58 +629,113 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
     }
   }
 
-
-
-  const UpdateProfile = async () => {
-    setIsLoading(true);
+  const assignLoan = async (assignLimit) => {
     try {
+      setLoanLoader(true);
+  
       const userString = localStorage.getItem("user");
-
+  
       if (!userString) {
-        throw new Error("User token not found");
+        throw new Error('User token not found');
       }
-
+  
       const user = JSON.parse(userString);
-
+  
       if (!user || !user.token || !user.userId) {
-        throw new Error("Invalid user data");
+        throw new Error('Invalid user data');
       }
-      // console.log(user.userId);
-      // console.log(user.token);
-      const formData = new FormData();
-      formData.append("username", isusername);
-      formData.append("first_name", isfirstname);
-      formData.append("last_name", islastname);
-      formData.append("email", isemail);
-      formData.append("phone", isphone);
-      formData.append("password", password);
-      formData.append("isBusiness", isBusinessDefault);
-
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/users/update_user/${id}`,
+  
+      const response = await axios.put(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/loan/assign-limit/${id}`,
+        {
+          "limit" : assignLimit,
+        },
         {
           headers: {
             Authorization: `Bearer ${user.token}`,
+            'Content-Type': 'application/json',
           },
-          method: "PUT",
-          body: formData,
         }
       );
-      const responseData = await response.json();
-      console.log(responseData);
+  
+      if (response.status === 200) {
+        setLoanSuccess("Limit added successfully");
+        // console.log(response);
+      } else {
+        setLoanError(response.message);
+      }
+    } catch (error) {
+      // console.error("Error :", error.message);
+      setLoanError(error.message);
+    } finally {
+      setLoanLoader(false);
+    }
+  };
+  const UpdateProfile = async (
+    username,
+    firstname,
+    lastname,
+    email,
+    phone,
+    password,
+    isBusinessDefault,
+  ) => {
+    try {
+      setIsLoading(true);
+  
+      const userString = localStorage.getItem("user");
+  
+      if (!userString) {
+        throw new Error('User token not found');
+      }
+  
+      const user = JSON.parse(userString);
+  
+      if (!user || !user.token || !user.userId) {
+        throw new Error('Invalid user data');
+      }
+  
+      const response = await axios.put(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/users/update_user/${id}`,
+        {
+          "username" : username,
+          "first_name" : firstname,
+          "last_name" : lastname,
+          "email" : email,
+          "phone" : phone,
+          "password" : password,
+          "isBusiness" : isBusinessDefault,
+
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+            'Content-Type': 'application/json',
+            cache: "no-store" ,
+          },
+        }
+      );
+  
       if (response.status === 200) {
         setSuccess("Profile updated successfully");
         _notifySuccess("Profile updated successfully");
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+
+        // console.log(response.data);
       } else {
-        setError(responseData.message);
+        setError(response.message);
       }
     } catch (error) {
-      console.error("Error during onSuccess:", error.message);
+      // console.error("Error during update:", error.message);
+          setError("Failed to update profile")
     } finally {
       setIsLoading(false);
     }
   };
 
+ 
   const handleDeleteOrder = async () => {
     setIsLoading(true);
     try {
@@ -685,8 +751,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
         throw new Error("Invalid user data");
       }
       const userById = selectedOrder?.id;
-      console.log(userById);
-            console.log(user.token);
+
   
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BASE_URL}/order/${userById}`,
@@ -843,7 +908,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
   
       if (response.ok) {
         const responseData = await response.json();
-        console.log(responseData);
+        // console.log(responseData);
         setTimeout(() => {
           window.location.reload();
         }, 2000);
@@ -892,7 +957,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
   
       if (response.ok) {
         const responseData = await response.json();
-        console.log(responseData);
+        // console.log(responseData);
         setTimeout(() => {
           window.location.reload();
         }, 2000);
@@ -907,318 +972,106 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
     }
   };
   
+  // Loan approval
 
-
-
-
-  // const handleDisapprovekyc = async (status, CustomerID) => {
-  //   setIsLoading(true);
-  //   try {
-  //     const token = localStorage.getItem("token"); // Replace with your authentication method
-  //     const headers = {
-  //       Authorization: `Bearer ${token}`,
-  //       "Content-Type": "multipart/form-data",
-  //     };
-
-  //     const body = {
-  //       userid: CustomerID, // Use the itemId parameter here
-  //       action: status, // Use the status parameter here
-  //     };
-
-  //     const response = await axios.post(
-  //       `${process.env.NEXT_PUBLIC_BASE_URL}/User/kyc.php`,
-
-  //       body,
-  //       { headers, cache: "no-store" }
-  //     );
-
-  //     // Handle the response as needed
-  //     // console.log(response.data);
-  //     if (response.status === 200) {
-  //       // Handle a successful response here
-  //       toast.error("User KYC has been Disapproved successfully", {
-  //         position: "top-right",
-  //         autoClose: 1500,
-  //         hideProgressBar: false,
-  //         closeOnClick: true,
-  //         pauseOnHover: true,
-  //         draggable: true,
-  //         progress: undefined,
-  //         theme: "light",
-  //       });
-  //       setTimeout(() => {
-  //         window.location.reload();
-  //       }, 3000);
-  //       setIsLoading(false);
-  //     } else if (response.status === 401) {
-  //       // Handle unauthorized access
-  //     } else {
-  //       // Handle other status codes or errors
-  //     }
-  //   } catch (error) {
-  //     setError("An error occurred while updating the order status.");
-
-  //     toast.error(error, {
-  //       position: "top-right",
-  //       autoClose: 1500,
-  //       hideProgressBar: false,
-  //       closeOnClick: true,
-  //       pauseOnHover: true,
-  //       draggable: true,
-  //       progress: undefined,
-  //       theme: "light",
-  //     });
-  //     setIsLoading(false);
-  //   }
-  // };
-
-  // end of kyc
-
-  //  subscriptions
-  const handleApproveStatus = async (status, subscription_id) => {
+  const handleApproveLoan = async (loanId ) => {
     setIsLoading(true);
     try {
-      const token = localStorage.getItem("token"); // Replace with your authentication method
-      const headers = {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data",
-      };
-
-      const body = {
-        subscription_id: subscription_id, // Use the itemId parameter here
-        status: status, // Use the status parameter here
-      };
-
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/User/UpdateSubscription.php`,
-
-        body,
-        { headers, cache: "no-store" }
+      const userString = localStorage.getItem("user");
+  
+      if (!userString) {
+        throw new Error("User token not found");
+      }
+  
+      const user = JSON.parse(userString);
+  
+      if (!user || !user.token || !user.userId) {
+        throw new Error("Invalid user data");
+      }
+    //  console.log(selectedLoanId?._id);
+      const body = JSON.stringify({
+        action: "approve", // Use the correct status for approval
+      });
+  
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/loan/update-status/${selectedLoan?.id}/${loanId}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+            "Content-Type": "application/json",
+            cache: "no-store" ,
+          },
+          body: body,
+        }
       );
 
-      // Handle the response as needed
-      // console.log(response.data);
-      if (response.status === 200) {
-        // Handle a successful response here
-        toast.success("subscription marked as Approved", {
-          position: "top-right",
-          autoClose: 1500,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
+      if (response.ok) {
+        const responseData = await response.json();
+        console.log(responseData);
+        
         setTimeout(() => {
           window.location.reload();
-        }, 3000);
-        setIsLoading(false);
-      } else if (response.status === 401) {
-        // Handle unauthorized access
+        }, 2000);
       } else {
-        // Handle other status codes or errors
+        throw new Error(`Failed to approve KYC: ${response}`);
       }
     } catch (error) {
-      setError("An error occurred while updating the order status.");
-
-      toast.error(error, {
-        position: "top-right",
-        autoClose: 1500,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
+      console.error("Error during KYC approval:", error);
+      setError(error.message);
+    } finally {
       setIsLoading(false);
     }
   };
-
-  const handlePendingStatus = async (status, subscription_id) => {
+   const handleRejectedLoan = async (loanId ) => {
     setIsLoading(true);
     try {
-      const token = localStorage.getItem("token"); // Replace with your authentication method
-      const headers = {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data",
-      };
-
-      const body = {
-        subscription_id: subscription_id, // Use the itemId parameter here
-        status: status, // Use the status parameter here
-      };
-
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/User/UpdateSubscription.php`,
-        body,
-        { headers, cache: "no-store" }
+      const userString = localStorage.getItem("user");
+  
+      if (!userString) {
+        throw new Error("User token not found");
+      }
+  
+      const user = JSON.parse(userString);
+  
+      if (!user || !user.token || !user.userId) {
+        throw new Error("Invalid user data");
+      }
+ 
+      const body = JSON.stringify({
+        action: "reject", // Use the correct status for approval
+      });
+  
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/loan/update-status/${selectedLoan?.id}/${loanId}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+            "Content-Type": "application/json",
+            cache: "no-store" ,
+          },
+          body: body,
+        }
       );
 
-      // Handle the response as needed
-      // console.log(response.data);
-
-      if (response.status === 200) {
-        // Handle a successful response here
-        toast.info("subscription marked as Pending", {
-          position: "top-right",
-          autoClose: 1500,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
+      if (response.ok) {
+        const responseData = await response.json();
+        console.log(responseData);
+        
         setTimeout(() => {
           window.location.reload();
-        }, 3000);
-        setIsLoading(false);
-      } else if (response.status === 401) {
-        // Handle unauthorized access
+        }, 2000);
       } else {
-        // Handle other status codes or errors
+        throw new Error(`Failed to approve KYC: ${response}`);
       }
     } catch (error) {
-      setError("An error occurred while updating the order status.");
-
-      toast.error(error, {
-        position: "top-right",
-        autoClose: 1500,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
+      console.error("Error during KYC approval:", error);
+      setError(error.message);
+    } finally {
       setIsLoading(false);
     }
   };
-
-  const handleQueryStatus = async (status, subscription_id) => {
-    setIsLoading(true);
-    try {
-      const token = localStorage.getItem("token"); // Replace with your authentication method
-      const headers = {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data",
-      };
-
-      const body = {
-        subscription_id: subscription_id, // Use the itemId parameter here
-        status: status, // Use the status parameter here
-      };
-
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/User/UpdateSubscription.php`,
-
-        body,
-        { headers, cache: "no-store" }
-      );
-
-      // Handle the response as needed
-      // console.log(response.data);
-      if (response.status === 200) {
-        // Handle a successful response here
-        toast.warning("subscription has been Queried", {
-          position: "top-right",
-          autoClose: 1500,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
-        setTimeout(() => {
-          window.location.reload();
-        }, 3000);
-        setIsLoading(false);
-      } else if (response.status === 401) {
-        // Handle unauthorized access
-      } else {
-        // Handle other status codes or errors
-      }
-    } catch (error) {
-      setError("An error occurred while updating the order status.");
-
-      toast.error(error, {
-        position: "top-right",
-        autoClose: 1500,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
-      setIsLoading(false);
-    }
-  };
-
-  const handleDenyStatus = async (status, subscription_id) => {
-    setIsLoading(true);
-    try {
-      const token = localStorage.getItem("token"); // Replace with your authentication method
-      const headers = {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data",
-      };
-
-      const body = {
-        subscription_id: subscription_id, // Use the itemId parameter here
-        status: status, // Use the status parameter here
-      };
-
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/User/UpdateSubscription.php`,
-
-        body,
-        { headers, cache: "no-store" }
-      );
-
-      // Handle the response as needed
-      // console.log(response.data);
-      if (response.status === 200) {
-        // Handle a successful response here
-        toast.error("subscription has been Denied", {
-          position: "top-right",
-          autoClose: 1500,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
-        setTimeout(() => {
-          window.location.reload();
-        }, 3000);
-        setIsLoading(false);
-      } else if (response.status === 401) {
-        // Handle unauthorized access
-      } else {
-        // Handle other status codes or errors
-      }
-    } catch (error) {
-      setError("An error occurred while updating the order status.");
-
-      toast.error(error, {
-        position: "top-right",
-        autoClose: 1500,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
-      setIsLoading(false);
-    }
-  };
-  // end of subscription
 
   const RadarChart = () => {
     const [isDark] = useDarkMode();
@@ -1282,6 +1135,121 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
     );
   };
 
+
+
+  const onSuccess = async () => {
+    setShowLoader(true);
+    try {
+      const userString = localStorage.getItem("user");
+
+      if (!userString) {
+        throw new Error("User token not found");
+      }
+
+      const user = JSON.parse(userString);
+
+      if (!user || !user.token || !user.userId) {
+        throw new Error("Invalid user data");
+      }
+      // console.log(user.userId);
+      // console.log(user.token);
+      const formData = new FormData();
+      formData.append(
+        "date_of_birth",
+        moment(dateOfBirth).format("YYYY-MM-DD")
+      );
+      formData.append("gender", gender);
+      formData.append("nationality", nationality);
+      formData.append("address", address);
+      formData.append("idType", proof);
+      formData.append("idNumber", idNumber);
+      formData.append("issueDate", moment(issueDate).format("YYYY-MM-DD"));
+      formData.append("expiryDate", moment(expiryDate).format("YYYY-MM-DD"));
+      formData.append("motherMaidenName", maiden);
+      formData.append("state", state);
+      formData.append("city", city);
+      formData.append("monthlyIncome", income);
+      formData.append("householdNo", num);
+      formData.append("bvn", bvn);
+      formData.append("maritalStatus", marital);
+      formData.append("staffStrength", staffStrength);
+      formData.append("weeklyExpense", weeklyExpense);
+      formData.append("locationType", locationType);
+      formData.append("payDay", moment(payDay).format("YYYY-MM-DD"));
+      formData.append("placeOfWork", placeOfWork);
+
+      // Append each image if it exists
+      if (files[0]) {
+        formData.append("images", files[0]);
+      }
+      if (files[1]) {
+        formData.append("images", files[1]);
+      }
+      if (files[2]) {
+        formData.append("images", files[2]);
+      }
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/kyc/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+          method: "PUT",
+          body: formData,
+        }
+      );
+      const responseData = await response.json();
+      console.log(responseData);
+      if (response == 200) {
+        // console.log(responseData);
+        router.push("/Kyc");
+      }
+      setError(responseData.message);
+      // const exist = responseData.error.keyPattern.user;
+      // const missing = responseData.error.keyPattern.idNumber;
+
+      if (exist === 1) {
+        setError("User KYC already submitted");
+        // console.log(responseData.error.keyPattern.user);
+      } else  {
+        setError(missing);
+      }
+    } catch (error) {
+      console.error("Error during onSuccess:", error.message);
+    } finally {
+      setShowLoader(false);
+    }
+  };
+
+  
+
+  const handleImageChange = (e, index) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+  
+    // Set up the FileReader onloadend event handler
+    reader.onloadend = () => {
+      setSelectedImages((prevImages) => {
+        const updatedImages = [...prevImages];
+        updatedImages[index] = reader.result; // Set the selected image at the specified index
+        return updatedImages;
+      });
+    };
+  
+    // Read the file as a data URL
+    if (file) {
+      reader.readAsDataURL(file);
+    }
+  
+    // Update the files state with the selected file
+    setFiles((prevFiles) => {
+      const updatedFiles = [...prevFiles];
+      updatedFiles[index] = file;
+      return updatedFiles;
+    });
+  };
+  
   // const files = [
   //   {
   //     img: "/assets/images/icon/pdf-1.svg",
@@ -1315,6 +1283,356 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
   return (
     <>
       <ToastContainer />
+      <Modal
+  activeModal={limitModal}
+  onClose={() => setLimitModal(false)}
+  centered
+  title={`Set Limit for ${firstname} ${lastname}`}
+  footer={
+    <Button
+      text="Close"
+      btnClass="btn-danger"
+      onClick={() => setLimitModal(false)}
+    />
+  }
+  footerContent={
+    <div className="flex ltr:text-right rtl:text-left space-x-1">
+      <Button
+        className="btn btn-dark text-center"
+        onClick={() => assignLoan(assignLimit)}
+        disabled={loanLoader}
+      >
+        {loanLoader ? (
+          <CircularProgress color="inherit" size={24} />
+        ) : (
+          "Assign"
+        )}
+      </Button>
+    </div>
+  }
+>
+  <form className="space-y-4">
+    <div className="xl:col-span-2 col-span-1">
+      <Card>
+        <Textinput
+          label={`Assign Loan Limit to ${firstname} ${lastname}`}
+          id="formatter-pn"
+          type="text"
+          placeholder="Enter loan Amount"
+          description={`Loan of ${naira.format(assignLimit)} will be assigned to ${firstname} ${lastname}`}
+          onChange={(e) => {
+            setAssignLimit(e.target.value);
+          }}
+          value={assignLimit}
+        />
+        <br />
+        {loanError ? (
+          <Alert
+            dismissible
+            label={loanError}
+            className="alert-danger light-mode w-full"
+          />
+        ) : (
+          ""
+        )}
+
+        {loanSuccess ? (
+          <Alert
+            dismissible
+            label={loanSuccess}
+            className="alert-success light-mode w-full"
+          />
+        ) : (
+          ""
+        )}
+      </Card>
+    </div>
+  </form>
+</Modal>
+
+      <Modal
+     
+        activeModal={kycUpdateModal}
+        onClose={() => setKycUpdateModal(false)}
+        title={showLoader ? "Updating..." :  "Update KYC"}
+        className="max-w-[80%]"
+        footerContent={
+          <div className="flex ltr:text-right rtl:text-left space-x-1">
+            <Button
+              className="btn btn-dark   text-center"
+              onClick={onSuccess}
+              disabled={showLoader}
+            >
+              {showLoader ? (
+                <CircularProgress color="inherit" size={24} />
+              ) : (
+                "Update Kyc"
+              )}
+            </Button>
+          </div>
+        }
+      >
+        <div className="text-base text-slate-600 dark:text-slate-300">
+          <Card title="">
+            <form>
+              <div className="space-y-3">
+                <Textinput
+                  label="Nationality"
+                  placeholder="Nationality"
+            type="text"
+            id="nationality"
+            name="nationality"
+            onChange={(e) => {
+              setNationality(e.target.value);
+            }}
+                  defaultValue={nationality}
+                />
+                <Textinput
+                label=" Date of Birth"
+                  type="date"
+            id="date_of_birth"
+            name="date_of_birth"
+            onChange={(e) => {
+              setDateOfBirth(e.target.value);
+            }}
+               defaultValue={dateOfBirth}
+                />
+                <Textinput
+                  label="Address"
+                  placeholder="Address"
+            type="text"
+            id="address"
+            name="address"
+            onChange={(e) => {
+              setAddress(e.target.value);
+            }}
+             defaultValue={address}
+                />
+                <Textinput
+                 label="Monthly income in ₦"
+                  type="text"
+            id="monthlyIncome"
+            name="monthlyIncome"
+            placeholder="₦ 150,000"
+            onChange={(e) => {
+            setIncome(e.target.value);
+            }}
+                  defaultValue={income}
+                />
+                <Textinput
+                  label=" Mother &#39;s Maiden Name "
+                  placeholder="Mother &#39;s Maiden Name"
+            type="text"
+            id="motherMaidenName"
+            name="motherMaidenName"
+            onChange={(e) => {
+              setMaiden(e.target.value);
+            }}
+                  defaultValue={maiden}
+                
+                />
+                <Textinput
+                  label=" Gender "
+                  id="gender"
+            name="gender"
+           
+            onChange={(e) => {
+              setGender(e.target.value);
+            }}
+                  defaultValue={gender}
+                
+                />
+                <Textinput
+                  label="  Family Number "
+                  placeholder="Family Number"
+            type="text"
+            id="householdNo"
+            name="householdNo"
+            onChange={(e) => {
+              setNum(e.target.value);
+            }}
+                  defaultValue={num}
+                
+                />
+                <Textinput
+                  label="Marital Status "
+                  id="maritalStatus"
+            name="maritalStatus"
+            onChange={(e) => {
+              setMarital(e.target.value);
+            }}
+                  defaultValue={marital}
+                
+                />
+                <Textinput
+                  label="Means of Identification"
+                  id="idType"
+            name="idType"
+            onChange={(e) => {
+              setProof(e.target.value);
+            }}
+                  defaultValue={proof}
+                
+                />
+                <Textinput
+                  label="  Identity Number"
+                  placeholder="ID number"
+            type="text"
+            id="idNumber"
+            name="idNumber"
+            onChange={(e) => {
+              setIdNumber(e.target.value);
+            }}
+                  defaultValue={idNumber}
+                
+                />
+                <Textinput
+                  label=" BVN"
+                  type="text"
+            id="bvn"
+            name="bvn"
+            placeholder="Enter BVN"
+            onChange={(e) => {
+              setBvn(e.target.value);
+            }}
+                  defaultValue={bvn}
+                
+                />
+                <Textinput
+                  label=" Issue Date "
+                  placeholder="Issue Date"
+            type="date"
+            id="issueDate"
+            name="issueDate"
+            onChange={(e) => {
+              setIssueDate(e.target.value);
+            }}
+                  defaultValue={issueDate}
+                
+                />
+                <Textinput
+                  label=" Expiry Date "
+                  type="date"
+            id="expiryDate"
+            name="expiryDate"
+            placeholder="Expiry date"
+            value={expiryDate}
+            onChange={(e) => {
+              setExpiryDate(e.target.value);
+            }}
+                  defaultValue={expiryDate}
+                
+                />
+                <Textinput
+                  label=" City"
+                  placeholder="Enter city"
+            type="text"
+            id="city"
+            name="city"
+            onChange={(e) => {
+              setCity(e.target.value);
+            }}
+                  defaultValue={city}
+                
+                />
+                <Textinput
+                  label=" State "
+                  placeholder="Enter State"
+                  type="text"
+            id="state"
+            name="state"
+            onChange={(e) => {
+              setState(e.target.value);
+            }}
+                  defaultValue={state}
+                
+                />
+                <Textinput
+                  label=" Staff Strength "
+                  placeholder="Enter Staff Strength"
+            type="text"
+            id="staffStrength"
+            name="staffStrength"
+            onChange={(e) => {
+              setStaffStrength(e.target.value);
+            }}
+                  defaultValue={staffStrength}
+                
+                />
+                <Textinput
+                  label=" Weekly Expense "
+                  placeholder="Enter weekly Expense"
+            type="text"
+            id="weeklyExpense"
+            name="weeklyExpense"
+            onChange={(e) => {
+              setWeeklyExpense(e.target.value);
+            }}
+                  defaultValue={weeklyExpense}
+                
+                />
+                <Textinput
+                  label=" Home Location Type "
+                  placeholder="Enter location Type (e.g Owned, Rented, Working) "
+            type="text"
+            id="locationType"
+            name="locationType"
+            onChange={(e) => {
+              setLocationType(e.target.value);
+            }}
+                  defaultValue={locationType}
+                
+                />
+                <Textinput
+                  label=" Pay Day "
+            type="date"
+            id="payDay"
+            name="payDay"
+            onChange={(e) => {
+              setPayDay(e.target.value);
+            }}
+                  defaultValue={payDay}
+                
+                />
+                <Textinput
+                  label=" Place Of Work"
+                  placeholder="Enter Place Of Worke"
+            type="date"
+            id="placeOfWork"
+            name="placeOfWork"
+            onChange={(e) => {
+              setPlaceOfWork(e.target.value);
+            }}
+                  defaultValue={placeOfWork}
+                
+                />
+                
+                
+              </div>
+            </form>
+            <br />
+            {error ? (
+              <Alert
+               dismissible
+                label={error}
+                className="alert-danger light-mode w-full "
+              />
+            ) : (
+              ""
+            )}
+
+            {success ? (
+              <Alert
+               dismissible
+                label={success}
+                className="alert-success light-mode w-full "
+              />
+            ) : (
+              ""
+            )}
+          </Card>
+        </div>
+      </Modal>
 
       <Modal
         activeModal={profileModal}
@@ -1325,8 +1643,16 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
           <div className="flex ltr:text-right rtl:text-left space-x-1">
             <Button
               className="btn btn-dark   text-center"
-              onClick={UpdateProfile}
               disabled={isLoading}
+              onClick={() => UpdateProfile(
+                username,
+                firstname,
+                lastname,
+                email,
+                phone,
+                password,
+                isBusinessDefault,
+                )}
             >
               {isLoading ? (
                 <CircularProgress color="inherit" size={24} />
@@ -1338,96 +1664,98 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
         }
       >
         <div className="text-base text-slate-600 dark:text-slate-300">
-          <Card title="Update Profile Details">
-            <form>
-              <div className="space-y-3">
-                <Textinput
-                  label="Username"
-                  id="username"
-                  name="username"
-                  type="text"
-                  placeholder="First Name"
-                  onChange={(e) => {
-                    setIsusername(e.target.value);
-                  }}
-                  defaultValue={isusername}
-                />
-                <Textinput
-                  label="First Name*"
-                  id="first_name"
-                  name="first_name"
-                  type="text"
-                  placeholder="First Name"
-                  onChange={(e) => {
-                    setIsfirstname(e.target.value);
-                  }}
-                  defaultValue={isfirstname}
-                />
-                <Textinput
-                  label="Last Name*"
-                  placeholder="Last Name"
-                  type="text"
-                  id="last_name"
-                  name="last_name"
-                  onChange={(e) => {
-                    setIslastname(e.target.value);
-                  }}
-                  defaultValue={islastname}
-                />
-                <Textinput
-                  label="Phone Number"
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  placeholder="8122233345"
-                  onChange={(e) => {
-                    setIsphone(e.target.value);
-                  }}
-                  defaultValue={isphone}
-                />
-                <Textinput
-                  label="Email Address "
-                  placeholder="Email Address *"
-                  type="email"
-                  id="email"
-                  name="email"
-                  onChange={(e) => {
-                    setIsemail(e.target.value);
-                  }}
-                  defaultValue={isemail}
-                
-                />
-                <Textinput
-                  label="Password "
-                  placeholder="Password *"
-                  type="password"
-                  id="password"
-                  name="password"
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                  }}
-                  defaultValue={password}
-                  readonly
-                />
+          <Card title="">
+          <form 
+      >
+    <div className="space-y-3">
+        <Textinput
+            label="Username"
+            id="username"
+            name="username"
+            type="text"
+            placeholder="First Name"
+            onChange={(e) => {
+              setUsername(e.target.value);
+            }}
+            defaultValue={username}
+        />
+        <Textinput
+            label="First Name*"
+            id="isfirstname"
+            name="isfirstname"
+            type="text"
+            placeholder="First Name"
+            onChange={(e) => {
+              setFirstname(e.target.value);
+            }}
+            value={firstname}
+        />
+        <Textinput
+            label="Last Name*"
+            placeholder="Last Name"
+            type="text"
+            id="islastname"
+            name="islastname"
+            onChange={(e) => {
+              setLastname(e.target.value);
+            }}
+            value={lastname}
+        />
+        <Textinput
+            label="Phone Number"
+            type="tel"
+            id="isphone"
+            name="isphone"
+            placeholder="8122233345"
+            onChange={(e) => {
+              setPhone(e.target.value);
+            }}
+            value={phone}
+        />
+        <Textinput
+            label="Email Address "
+            placeholder="Email Address *"
+            type="email"
+            id="isemail"
+            name="isemail"
+            onChange={(e) => {
+              setEmail(e.target.value);
+            }}
+            value={email}
+        />
+        <Textinput
+            label="Password "
+            placeholder="Password *"
+            type="password"
+            id="password"
+            name="password"
+            onChange={(e) => {
+                setPassword(e.target.value);
+            }}
+            value={password}
+            // readOnly
+        />
 
-                <label className="relative mt-4 inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    value={isBusinessDefault}
-                    className="sr-only peer"
-                    checked={isChecked}
-                    onChange={handleToggleChange}
-                  />
-                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-gray-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-800"></div>
-                  <span className="ms-3 ml-4 text-sm font-medium text-success-900 dark:text-success-900">
-                    Mark as Business Account
-                  </span>
-                </label>
-              </div>
-            </form>
+        <label className="relative mt-4 inline-flex items-center cursor-pointer">
+            <input
+                type="checkbox"
+                className="sr-only peer"
+                checked={isChecked}
+                onChange={handleToggleChange}
+            />
+            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-gray-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-800"></div>
+            <span className="ms-3 ml-4 text-sm font-medium text-success-900 dark:text-success-900">
+                Mark as Business Account
+            </span>
+        </label>
+
+    </div>
+</form>
+
             <br />
             {error ? (
               <Alert
+               dismissible
                 label={error}
                 className="alert-danger light-mode w-full "
               />
@@ -1437,6 +1765,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
 
             {success ? (
               <Alert
+               dismissible
                 label={success}
                 className="alert-success light-mode w-full "
               />
@@ -2041,6 +2370,158 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
         </form>
       </Modal>
 
+      <Modal
+        className="w-[48%]"
+        activeModal={activeLoanModal}
+        onClose={() => setActiveLoanModal(false)}
+        title="Loan Details"
+        footer={
+          <Button
+            text="Close"
+            btnClass="btn-primary"
+            onClick={() => setActiveLoanModal(false)}
+            router={router}
+          />
+        }
+      >
+        <div className="-mx-6 overflow-x-auto">
+          <div className="inline-block min-w-full align-middle">
+            <div className="overflow-hidden ">
+              <table className="min-w-full divide-y table-fixed divide-slate-100 dark:divide-slate-700">
+                <thead className="bg-slate-200 dark:bg-slate-700">
+                  <tr>
+                    <th scope="col" className="table-th">
+                      Loan ID
+                    </th>
+                    <th scope="col" className="table-th">
+                      Amount
+                    </th>
+                    <th scope="col" className="table-th">
+                      Repayment Mode
+                    </th>
+                    <th scope="col" className="table-th">
+                      Interest Rate
+                    </th>
+                    <th scope="col" className="table-th">
+                      Status
+                    </th>
+                    <th scope="col" className="table-th">
+                      Due Date
+                    </th>
+                    <th scope="col" className="table-th">
+                   Action
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody className="bg-white divide-y divide-slate-100 dark:bg-slate-800 dark:divide-slate-700">
+                  {selectedLoan?.loanItems?.map((item) => (
+                    <tr key={item?._id}>
+                      <td className="table-td py-2"> {item?._id}</td>
+                      <td className="table-td py-2">
+                        {naira.format(item?.amount)}
+                      </td>
+
+                      <td className="w-8 h-8 rounded-[100%] ltr:mr-2 rtl:ml-2">
+                        {item?.repayment}{" "}
+                      </td>
+                      <td className="table-td py-2">{item?.interestRate}%</td>
+                      <td className="table-td py-2">
+                        <span className="block w-full">
+                          <span
+                            className={` inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 ${
+                              item?.status === "Approved"
+                                ? "text-success-500 bg-success-500"
+                                : ""
+                            } 
+            ${
+              item?.status === "Rejected" ? "text-danger-500 bg-danger-500" : ""
+            }
+                ${
+                  item?.status === "Pending"
+                    ? "text-pending-500 bg-pending-500"
+                    : ""
+                } 
+            
+             `}
+                          >
+                            {item?.status}
+                          </span>
+                        </span>
+                      </td>
+
+                      <td className="table-td py-2">
+                        {formattedDate(item?.dueDate)}
+                      </td>
+                      <td className="table-td py-2">
+                      <div>
+                            <Dropdown
+                              classMenuItems="right-0 w-[140px] top-[110%] "
+                              label={
+                                <span className="text-xl text-center block w-full">
+                                  <Icon icon="heroicons-outline:dots-vertical" />
+                                </span>
+                              }
+                            >
+                              <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                                <Menu.Item
+                                  onClick={() => {
+                                    // setSelectedLoanId(item?._id);
+                                    handleApproveLoan(item?._id);
+                                }}
+                                  disabled={isLoading}
+                                >
+                                  <div className="hover:bg-slate-900 hover:text-white dark:hover:bg-slate-600 dark:hover:bg-opacity-50 w-full border-b border-b-gray-500 border-opacity-10 px-4 py-2 text-sm  last:mb-0 cursor-pointer first:rounded-t last:rounded-b flex space-x-2 items-center rtl:space-x-reverse">
+                                    <span className="text-base">
+                                      <Icon icon="mdi:approve" />
+                                    </span>
+                                    <span>
+                                      {" "}
+                                      {isLoading ? "Updating..." : "Approve"}
+                                    </span>
+                                  </div>
+                                </Menu.Item>
+
+                               
+                                
+                                <Menu.Item
+
+                                  onClick={() => {
+                                    // setSelectedLoanId(item?._id);
+                                    handleRejectedLoan(item?._id);
+                                }}
+                                  disabled={isLoading}
+                                >
+                                  <div
+                                    className="bg-danger-500 text-danger-500 bg-opacity-30   hover:bg-opacity-100 hover:text-white w-full border-b border-b-gray-500 border-opacity-10 px-4 py-2 text-sm  last:mb-0 cursor-pointer 
+                   first:rounded-t last:rounded-b flex  space-x-2 items-center rtl:space-x-reverse "
+                                  >
+                                    <span className="text-base">
+                                      <Icon icon="fluent:shifts-deny-24-regular" />
+                                    </span>
+                                    <span>
+                                      {" "}
+                                      {isLoading ? "Updating..." : "Deny"}
+                                    </span>
+                                  </div>
+                                </Menu.Item>
+                              </div>
+                            </Dropdown>
+                          </div>
+                      </td>
+                    </tr>
+                   
+                  ))}
+                </tbody>
+                <br/>
+                <br/> 
+                <br/> 
+              </table>
+            </div>
+          </div>
+        </div>
+      </Modal>
+
       <div className="profiel-wrap px-[35px] pb-10 md:pt-[84px] pt-10 rounded-lg bg-white dark:bg-[#000000] lg:flex lg:space-y-0 space-y-6 justify-between items-end relative z-[1]">
         <div
           className="bg-slate-900 dark:bg-slate-700 absolute left-0 top-0 md:h-1/2 h-[150px] w-full z-[-1] rounded-t-lg"
@@ -2357,8 +2838,22 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
         </div>
         <div className="lg:col-span-4 col-span-12">
           <Card title="Account Overview">
+        
+          <div className="flex justify-between">
+                      <span>Assign Limit</span>
+                      <span
+                        onClick={() => {
+                          setLimitModal(true);
+                        }}
+                      >
+                        {" "}
+                        <Icon icon="heroicons:pencil-square" />
+                      </span>
+                    </div>
+             
             <RadarChart />
             <div className="bg-slate-50 dark:bg-slate-900 rounded p-4 mt-8 flex justify-between flex-wrap">
+            
               <div className="space-y-1">
                 <h4 className="text-slate-600 dark:text-slate-200 text-xs font-normal">
                   Monthly Income
@@ -2401,7 +2896,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                       <span>Update KYC</span>
                       <span
                         onClick={() => {
-                          setProfileModal(true);
+                          setKycUpdateModal(true);
                         }}
                       >
                         {" "}
@@ -2448,6 +2943,18 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                   </li>
                   <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
                     <div className="flex justify-between">
+                      <span>Corporate Account</span>
+                      {corporateAccount ==true ? ( 
+                        <span className=" text-success-500 text-center bg-success-500 px-3 inline-block  min-w-[60px] text-xs font-medium   py-1 rounded-[999px] bg-opacity-25">Yes</span>
+                      ):(
+
+                        <span className=" text-danger-500 bg-danger-500 px-3 inline-block  min-w-[60px]  text-xs font-medium text-center py-1 rounded-[999px] bg-opacity-25">No</span>
+                      )}
+                      
+                    </div>
+                  </li>
+                  <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
+                    <div className="flex justify-between">
                       <span>Gender</span>
                       <span>{gender}</span>
                     </div>
@@ -2478,6 +2985,18 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                   </li>
                   <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
                     <div className="flex justify-between">
+                      <span>Location Type</span>
+                      <span>{locationType}</span>
+                    </div>
+                  </li>
+                  <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
+                    <div className="flex justify-between">
+                      <span>Staff Strength</span>
+                      <span>{staffStrength}</span>
+                    </div>
+                  </li>
+                  <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
+                    <div className="flex justify-between">
                       <span>Rc Number</span>
                       <span>{rcNumber}</span>
                     </div>
@@ -2492,6 +3011,12 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                     <div className="flex justify-between">
                       <span>Referred By</span>
                       <span>{refby}</span>
+                    </div>
+                  </li>
+                  <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
+                    <div className="flex justify-between">
+                      <span>Google Map Location</span>
+                      <span>{googleMapLocation}</span>
                     </div>
                   </li>
                 </ul>
@@ -2797,225 +3322,95 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                               <table className="min-w-full divide-y table-fixed divide-slate-100 dark:divide-slate-700">
                                 <thead className="bg-slate-200 dark:bg-slate-700">
                                   <tr>
-                                    <th scope="col" className="table-th">
-                                      ID
-                                    </th>
-                                    <th scope="col" className="table-th">
-                                      Total Loan
-                                    </th>
-                                    <th scope="col" className="table-th">
-                                      Overdue
-                                    </th>
-                                    <th scope="col" className="table-th">
-                                      Repayment Mode
-                                    </th>
-                                    <th scope="col" className="table-th">
-                                      Interest Rate
-                                    </th>
-                                   
-                                    
-                                    <th scope="col" className="table-th">
-                                      Loan ID
-                                    </th>
-                                    
-                                    <th scope="col" className="table-th">
-                                      Status
-                                    </th>
-                                    <th scope="col" className="table-th">
-                                      Due Date
-                                    </th>
+                                     <th scope="col" className="table-th">
+                      ID
+                    </th>
+                    <th scope="col" className="table-th">
+                      Total Loan
+                    </th>
+                    <th scope="col" className="table-th">
+                      Overdue
+                    </th>
+
+                    <th scope="col" className="table-th">
+                      Action
+                    </th>
                                   </tr>
                                 </thead>
                                 {paginatedLoan.map((item) => (
-                                  <React.Fragment key={item?.id}>
-                                    <tbody className="bg-white divide-y divide-slate-100 dark:bg-slate-800 dark:divide-slate-700">
-                                      <tr>
-                                        <td className="table-td py-2">
-                                          <span>
-                                            {" "}
-                                            {item?.id.slice(0, 5)}...
-                                            {item.id.slice(-10)}
-                                          </span>
-                                        </td>
-                                        <td className="table-td py-2">
-                                        {naira.format(
-                                            item?.totalLoan || "0"
-                                          )}
-                                        </td>
-                                        <td className="table-td py-2">
-                                          <span className="block w-full">
-                                            {item?.isOverdue}
-                                          </span>
+                  <React.Fragment key={item?.id}>
+                    <tbody className="bg-white divide-y divide-slate-100 dark:bg-slate-800 dark:divide-slate-700">
+                      <tr>
+                        <td className="table-td py-2">
+                          <span>
+                            {" "}
+                            {item?.id.slice(0, 5)}...
+                            {item.id.slice(-10)}
+                          </span>
+                        </td>
+                        <td className="table-td py-2">
+                          {naira.format(item?.totalLoan || "0")}
+                        </td>
+                        <td className="table-td py-2">
+                          <span className="block w-full">
+                            {item?.isOverdue}
+                          </span>
 
-                                          {item.isOverdue === true ? (
-                                            <span className="block w-full">
-                                              <p
-                                                className={` inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 ${
-                                                  item?.isOverdue === true
-                                                    ? "text-danger-500 bg-danger-500"
-                                                    : ""
-                                                }`}
-                                              >
-                                                Yes
-                                              </p>
-                                            </span>
-                                          ) : (
-                                            <span className="block w-full">
-                                              <p
-                                                className={` inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 
+                          {item.isOverdue === true ? (
+                            <span className="block w-full">
+                              <p
+                                className={` inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 ${
+                                  item?.isOverdue === true
+                                    ? "text-danger-500 bg-danger-500"
+                                    : ""
+                                }`}
+                              >
+                                Yes
+                              </p>
+                            </span>
+                          ) : (
+                            <span className="block w-full">
+                              <p
+                                className={` inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 
           
             ${
               item?.isOverdue === false ? "text-success-500 bg-success-500" : ""
             }
                 
              `}
-                                              >
-                                                No
-                                              </p>
-                                            </span>
-                                          )}
-                                        </td>
-                                        <td className="table-td py-2 ">
-                                          {" "}
-                                         {" "}
-                                        </td>
-                                        <td className="table-td py-2">
-                                          {item?.interestRate}
-                                        </td>
-                                      
-                                       
-                                        <td className="table-td py-2">
-                                          {item?.outstanding}
-                                        </td>
-                                       
-                                        <td className="table-td py-2">
-                                          <span className="block w-full">
-                                            <span
-                                              className={` inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 ${
-                                                item?.status === "Active"
-                                                  ? "text-success-500 bg-success-500"
-                                                  : ""
-                                              } 
-          
-            ${item?.status === "denied" ? "text-danger-500 bg-danger-500" : ""}
-                
-             `}
-                                            >
-                                              {item?.status}
-                                            </span>
-                                          </span>
-                                        </td>
-                                        <td className="table-td py-2">
-                                          {formattedDate(item?.dueDate)}
-                                        </td>
-                                        {/* <td className="table-td py-2">
-                                          <div>
-                                            <Dropdown
-                                              classMenuItems="right-0 w-[140px] top-[110%] "
-                                              label={
-                                                <span className="text-xl text-center block w-full">
-                                                  <Icon icon="heroicons-outline:dots-vertical" />
-                                                </span>
-                                              }
-                                            >
-                                              <div className="divide-y divide-slate-100 dark:divide-slate-800">
-                                                <Menu.Item
-                                                  onClick={() =>
-                                                    handleApproveStatus(
-                                                      "approve",
-                                                      item.sub_info.id
-                                                    )
-                                                  }
-                                                  disabled={isLoading}
-                                                >
-                                                  <div className="hover:bg-slate-900 hover:text-white dark:hover:bg-slate-600 dark:hover:bg-opacity-50 w-full border-b border-b-gray-500 border-opacity-10 px-4 py-2 text-sm  last:mb-0 cursor-pointer first:rounded-t last:rounded-b flex space-x-2 items-center rtl:space-x-reverse">
-                                                    <span className="text-base">
-                                                      <Icon icon="mdi:approve" />
-                                                    </span>
-                                                    <span>
-                                                      {" "}
-                                                      {isLoading
-                                                        ? "Updating..."
-                                                        : "Approve"}
-                                                    </span>
-                                                  </div>
-                                                </Menu.Item>
-
-                                                <Menu.Item
-                                                  onClick={() =>
-                                                    handlePendingStatus(
-                                                      "pending",
-                                                      item.sub_info.id
-                                                    )
-                                                  }
-                                                  disabled={isLoading}
-                                                >
-                                                  <div className="hover:bg-slate-900 hover:text-white dark:hover:bg-slate-600 dark:hover:bg-opacity-50 w-full border-b border-b-gray-500 border-opacity-10 px-4 py-2 text-sm  last:mb-0 cursor-pointer first:rounded-t last:rounded-b flex space-x-2 items-center rtl:space-x-reverse">
-                                                    <span className="text-base">
-                                                      <Icon icon="material-symbols:pending-actions-rounded" />
-                                                    </span>
-                                                    <span>
-                                                      {" "}
-                                                      {isLoading
-                                                        ? "Updating..."
-                                                        : "Pend"}
-                                                    </span>
-                                                  </div>
-                                                </Menu.Item>
-                                                <Menu.Item
-                                                  onClick={() =>
-                                                    handleQueryStatus(
-                                                      "queried",
-                                                      item.sub_info.id
-                                                    )
-                                                  }
-                                                  disabled={isLoading}
-                                                >
-                                                  <div className="hover:bg-slate-900 hover:text-white dark:hover:bg-slate-600 dark:hover:bg-opacity-50 w-full border-b border-b-gray-500 border-opacity-10 px-4 py-2 text-sm  last:mb-0 cursor-pointer first:rounded-t last:rounded-b flex space-x-2 items-center rtl:space-x-reverse">
-                                                    <span className="text-base">
-                                                      <Icon icon="streamline:interface-help-question-square-frame-help-mark-query-question-square" />
-                                                    </span>
-                                                    <span>
-                                                      {" "}
-                                                      {isLoading
-                                                        ? "Updating..."
-                                                        : "Query"}
-                                                    </span>
-                                                  </div>
-                                                </Menu.Item>
-
-                                                <Menu.Item
-                                                  onClick={() =>
-                                                    handleDenyStatus(
-                                                      "denied",
-                                                      item.sub_info.id
-                                                    )
-                                                  }
-                                                  disabled={isLoading}
-                                                >
-                                                  <div
-                                                    className="bg-danger-500 text-danger-500 bg-opacity-30   hover:bg-opacity-100 hover:text-white w-full border-b border-b-gray-500 border-opacity-10 px-4 py-2 text-sm  last:mb-0 cursor-pointer 
-                   first:rounded-t last:rounded-b flex  space-x-2 items-center rtl:space-x-reverse "
-                                                  >
-                                                    <span className="text-base">
-                                                      <Icon icon="fluent:shifts-deny-24-regular" />
-                                                    </span>
-                                                    <span>
-                                                      {" "}
-                                                      {isLoading
-                                                        ? "Updating..."
-                                                        : "Deny"}
-                                                    </span>
-                                                  </div>
-                                                </Menu.Item>
-                                              </div>
-                                            </Dropdown>
-                                          </div>
-                                        </td> */}
-                                      </tr>
-                                    </tbody>
-                                  </React.Fragment>
-                                ))}
+                              >
+                                No
+                              </p>
+                            </span>
+                          )}
+                        </td>
+                        <td className="table-td py-2">
+                        <div className="flex space-x-3 rtl:space-x-reverse">
+                            <Tooltip
+                              content="View"
+                              placement="top"
+                              arrow
+                              animation="shift-away"
+                            >
+                              <button
+                                className="action-btn"
+                                type="button"
+                                onClick={() => {
+                                  setSelectedLoan(item);
+                                    setActiveLoanModal(true);
+                                }}
+                              >
+                                <Icon icon="heroicons:eye" />
+                              </button>
+                            </Tooltip>
+                            </div>
+                        
+                         
+                        </td>
+                      </tr>
+                    </tbody>
+                  </React.Fragment>
+                ))}
                                 <br />
                                 <br />
                                 <br />
@@ -3586,21 +3981,5 @@ const buttons = [
     icon: "emojione-monotone:bank",
   },
 ];
-const items = [
-  {
-    title: "How does Dashcode work?",
-    content:
-      "Jornalists call this critical, introductory section the  and when bridge properly executed, it's the that carries your reader from anheadine try at attention-grabbing to the body of your blog post.",
-  },
-  {
-    title: "Where i can learn more about using Dashcode?",
-    content:
-      "Jornalists call this critical, introductory section the  and when bridge properly executed, it's the that carries your reader from anheadine try at attention-grabbing to the body of your blog post.",
-  },
-  {
-    title: "Why Dashcode is so important?",
-    content:
-      "Jornalists call this critical, introductory section the  and when bridge properly executed, it's the that carries your reader from anheadine try at attention-grabbing to the body of your blog post.",
-  },
-];
+
 export default AllSubcriptions;
