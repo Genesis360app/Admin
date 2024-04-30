@@ -95,6 +95,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
+  const [age, setAge] = useState("");
   const [username, setUsername] = useState("");
   const [firstname, setFirstname] = useState("");
   const [lastname, setLastname] = useState("");
@@ -189,6 +190,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
   const [showLoader, setShowLoader] = useState(false);
   const [loanLoader, setLoanLoader] = useState(false);
   const [assignLimit, setAssignLimit] = useState("");
+  const [assignOustanding, setAssignOustanding] = useState(null);
   const [loanError, setLoanError] = useState(null);
   const [loanSuccess, setLoanSuccess] = useState(null);
 
@@ -467,6 +469,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
           setIncome(userKyc.monthlyIncome);
           setMarital(userKyc.maritalStatus);
           setMaiden(userKyc.motherMaidenName);
+          setAge(userKyc.age);
           setDOB(userKyc.dateOfBirth);
           setOutstanding(userinfo2.loanOutstanding);
           setSpending_limit(userinfo2.loanLimit);
@@ -589,8 +592,10 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
         );
         if (response.data) {
           // Handle response data
-          // console.log(response.data);
+
+          // console.log("userloan", response.data);
           setLoan(response.data);
+          
         } else {
           // Handle case where response or response.data is undefined
         }
@@ -660,6 +665,8 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
   
       if (response.status === 200) {
         setLoanSuccess("Limit added successfully");
+        setAssignLimit(response.data.limit);
+        setAssignOustanding(response.data.outstanding);
         // console.log(response);
       } else {
         setLoanError(response.message);
@@ -2402,6 +2409,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                     <th scope="col" className="table-th">
                       Interest Rate
                     </th>
+                    
                     <th scope="col" className="table-th">
                       Status
                     </th>
@@ -2426,6 +2434,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                         {item?.repayment}{" "}
                       </td>
                       <td className="table-td py-2">{item?.interestRate}%</td>
+                      
                       <td className="table-td py-2">
                         <span className="block w-full">
                           <span
@@ -2861,9 +2870,9 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                 <div className="text-sm font-medium text-slate-900 dark:text-white">
                   {naira.format(income)}
                 </div>
-                <div className="text-slate-500 dark:text-slate-300 text-xs font-normal">
+                {/* <div className="text-slate-500 dark:text-slate-300 text-xs font-normal">
                   {formattedDate(kycdate)}
-                </div>
+                </div> */}
               </div>
 
               <div className="space-y-1">
@@ -2871,7 +2880,12 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                   Outstanding
                 </h4>
                 <div className="text-sm font-medium text-slate-900 dark:text-white justify-center items-center ">
-                  {naira.format(outstanding)}
+                {assignOustanding ==true ? ( 
+                        <span className=" text-success-500 text-center bg-success-500 px-3 inline-block  min-w-[60px] text-xs font-medium   py-1 rounded-[999px] bg-opacity-25">Yes</span>
+                      ):(
+
+                        <span className=" text-danger-500 bg-danger-500 px-3 inline-block  min-w-[60px]  text-xs font-medium text-center py-1 rounded-[999px] bg-opacity-25">No</span>
+                      )}
                 </div>
               </div>
 
@@ -2880,7 +2894,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                   Spending Limit
                 </h4>
                 <div className="text-sm font-medium text-slate-900 dark:text-white">
-                  {naira.format(spending_limit)}
+                  {naira.format(assignLimit)}
                 </div>
               </div>
             </div>
@@ -2913,8 +2927,20 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
 
                   <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
                     <div className="flex justify-between">
+                      <span>Nationality</span>
+                      <span>{nationality}</span>
+                    </div>
+                  </li>
+                  <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
+                    <div className="flex justify-between">
                       <span>BVN</span>
                       <span>{bvn}</span>
+                    </div>
+                  </li>
+                  <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
+                    <div className="flex justify-between">
+                      <span>Age</span>
+                      <span>{age}</span>
                     </div>
                   </li>
                   <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
@@ -3329,6 +3355,9 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                       Total Loan
                     </th>
                     <th scope="col" className="table-th">
+                       Loan Limit
+                    </th>
+                    <th scope="col" className="table-th">
                       Overdue
                     </th>
 
@@ -3351,6 +3380,9 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                         <td className="table-td py-2">
                           {naira.format(item?.totalLoan || "0")}
                         </td>
+                        <td className="table-td py-2">
+                        {naira.format(item?.limit)}
+                      </td>
                         <td className="table-td py-2">
                           <span className="block w-full">
                             {item?.isOverdue}
