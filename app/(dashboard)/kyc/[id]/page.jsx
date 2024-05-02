@@ -172,6 +172,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
   const [isphone, setIsphone] = useState("");
   const [isBusinessDefault, setBusinessDefault] = useState(false);
   const [password, setPassword] = useState("");
+  const [monoDetails, setMonoDetails] = useState("");
 
 
 
@@ -317,6 +318,22 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
     });
   }, [loan, globalFilter]);
 
+  const filteredMono = useMemo(() => {
+    return (monoDetails || []).filter((item) => {
+      const loan_id = (item?._id || "").toString(); // Access product_name safely and convert to lowercase
+      const totalLoan = (item?.totalLoan || "").toString(); // Access package_id safely and convert to string
+  
+      // Check if globalFilter is defined and not null before using trim
+      const filterText = globalFilter ? globalFilter.trim() : "";
+
+      // Customize this logic to filter based on your specific requirements
+      return (
+        loan_id.includes(filterText.toLowerCase()) ||
+        totalLoan.includes(filterText.toLowerCase())
+      );
+    });
+  }, [monoDetails, globalFilter]);
+
   const naira = new Intl.NumberFormat("en-NG", {
     style: "currency",
     currency: "NGN",
@@ -345,6 +362,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
   const paginatedHistory = filteredhistory.slice(startIndex, endIndex);
   const paginatedOrder = filteredOrder.slice(startIndex, endIndex);
   const paginatedLoan = filteredLoan.slice(startIndex, endIndex);
+  const paginatedMono = monoDetails.slice(startIndex, endIndex);
 
   // Calculate the total number of pages
   const totalPages = Math.ceil(filteredhistory.length / itemsPerPage);
@@ -378,6 +396,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
   const isSubEmpty = subByID.length === 0;
   const isHistoryEmpty = history.length === 0;
   const isLoanEmpty = loan.length === 0;
+  const isMonoEmpty = monoDetails.length === 0;
 
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "", // Provide a default value if the environment variable is not defined
@@ -490,7 +509,9 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
           setLocationType(userKyc.locationType);
           setGoogleMapLocation(userKyc.googleMapLocation);
           setCorporateAccount(userKyc.corporateAccount);
-          console.log('Test Data', response);
+          setMonoDetails(userKyc.verification);
+          // console.log('Test Data', response);
+          console.log('Test verification', userKyc.verification);
         } else {
           // Handle case where response or response.data is undefined
         }
@@ -3638,7 +3659,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                                         </td>
                                         <td className="table-td py-2 ">
                                           {" "}
-                                          {item.user?.username}{" "}
+                                          {item.user?.fullName}{" "}
                                         </td>
                                         <td className="table-td py-2 ">
                                           {" "}
@@ -3684,7 +3705,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                 : ""
             }
             ${
-              item.trackingId?.status === "Processing"
+              item.trackingId?.status === "Proccessing"
                 ? "text-processing-400 bg-processing-400"
                 : ""
             }
@@ -3699,7 +3720,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                     : ""
                 } ${
                                                 item.trackingId?.status ===
-                                                "In-transit"
+                                                "In-Transit"
                                                   ? "text-primary-500 bg-primary-500"
                                                   : ""
                                               }
@@ -3892,11 +3913,273 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                 </Tab.Panel>
 
                 <Tab.Panel>
-                  <div className="text-slate-600 dark:text-slate-400 text-sm font-normal">
-                    Aliqua id fugiat nostrud irure ex duis ea quis id quis ad
-                    et. Sunt qui esse pariatur duis deserunt mollit dolore
-                    cillum minim tempor enim. Elit aute irure tempor cupidatat
-                    incididunt sint deserunt ut voluptate aute id deserunt nisi.
+                <div className="text-slate-600 dark:text-slate-400 text-sm font-normal">
+                    <Card>
+                      <div className="items-center justify-between mb-6 md:flex">
+                        <h4 className="card-title">
+                          {firstname + " " + " Orders"}
+                        </h4>
+                        <div>
+                          <GlobalFilter
+                            filter={globalFilter}
+                            setFilter={setGlobalFilter}
+                          />
+                        </div>
+                      </div>
+                      <div className="-mx-6 overflow-x-auto">
+                        <div className="inline-block min-w-full align-middle">
+                          <div className="overflow-hidden ">
+                            {isOrderEmpty ? ( // Conditionally rendering based on cart items
+                              <center>
+                                <h4 className="mt-10 text-2xl font-bold text-primary">
+                                  No Available Order Items Data
+                                </h4>
+                              </center>
+                            ) : (
+                              <table className="min-w-full divide-y table-fixed divide-slate-100 dark:divide-slate-700">
+                                <thead className="bg-slate-200 dark:bg-slate-700">
+                                  <tr>
+                                    <th scope="col" className="table-th">
+                                      ID
+                                    </th>
+                                    <th scope="col" className="table-th">
+                                    VerificationType
+                                    </th>
+                                    <th scope="col" className="table-th">
+                                    Amount
+                                    </th>
+                                    
+                                    <th scope="col" className="table-th">
+                                    Balance
+                                    </th>
+                                    <th scope="col" className="table-th">
+                                    Currency
+                                    </th>
+                                    <th scope="col" className="table-th">
+                                    Type
+                                    </th>
+                                    <th scope="col" className="table-th">
+                                    Narration
+                                    </th>
+                                    <th scope="col" className="table-th">
+                                      Date
+                                    </th>
+                                    <th scope="col" className="table-th">
+                                      Action
+                                    </th>
+                                  </tr>
+                                </thead>
+                                {paginatedMono.map((item) => (
+                                  <React.Fragment key={item?._id}>
+                                    <tbody className="bg-white divide-y divide-slate-100 dark:bg-slate-800 dark:divide-slate-700">
+                                      <tr>
+                                        <td className="table-td py-2">
+                                          {" "}
+                                          <span>
+                                          {item?._id.slice(0, 5)}...
+                                            {item._id.slice(-10)}
+                                          </span>
+                                        </td>
+                                        <td className="table-td py-2 ">
+                                          {" "}
+                                          {item?.verificationType}
+                                        </td> 
+                                        <td className="table-td py-2 ">
+                                          
+                                          {item?.verificationData.bvn_check}
+                                        </td>
+
+                                        {/* <td className="table-td py-2 ">
+                                          {item.trackingId?.location ||
+                                            "No Location"}
+                                        </td>
+                                        <td className="table-td py-2">
+                                          {" "}
+                                          {naira.format(
+                                            item?.totalPrice || "0"
+                                          )}
+                                        </td>
+                                        <td className="table-td py-2">
+                                          {" "}
+                                          {item.transaction?.paymentMode}{" "}
+                                        </td>
+
+                                        <td className="table-td py-2">
+                                          {" "}
+                                          {item?.city}{" "}
+                                        </td>
+                                       
+                                        <td className="table-td py-2">
+                                          {formattedDate(item?.dateOrdered)}
+                                        </td> */}
+                                    
+
+                                        <td className="table-td py-2">
+                                          <div className="flex space-x-3 rtl:space-x-reverse">
+                                            <Tooltip
+                                              content="View"
+                                              placement="top"
+                                              arrow
+                                              animation="shift-away"
+                                            >
+                                              <button
+                                                className="action-btn"
+                                                type="button"
+                                                onClick={() => {
+                                                  setSelectedOrder(item);
+                                                  setActiveModal(true);
+                                                }}
+                                              >
+                                                <Icon icon="heroicons:eye" />
+                                              </button>
+                                            </Tooltip>
+
+                                           <Tooltip
+                              content="Edit"
+                              placement="top"
+                              arrow
+                              animation="shift-away"
+                            >
+                              <button
+                                className="action-btn"
+                              
+                                onClick={() => handleClick(item)}
+                                type="button"
+                              >
+                                <Icon icon="heroicons:pencil-square" />
+                              </button>
+                            </Tooltip>
+
+                                            <Tooltip
+                                              content="Delete"
+                                              placement="top"
+                                              arrow
+                                              animation="shift-away"
+                                              theme="danger"
+                                            >
+                                              <button
+                                                className="action-btn"
+                                                type="button"
+                                                onClick={() => {
+                                                  setSelectedOrder(item);
+                                                  setDelete_orderModal(true);
+                                                }}
+                                              >
+                                                <Icon icon="heroicons:trash" />
+                                              </button>
+                                            </Tooltip>
+                                          </div>
+                                        </td>
+                                      </tr>
+                                    </tbody>
+                                  </React.Fragment>
+                                ))}
+                              </table>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="items-center justify-between mt-6 space-y-5 md:flex md:space-y-0">
+                        <div className="flex items-center space-x-3 rtl:space-x-reverse">
+                          <select
+                            className="py-2 form-control w-max"
+                            value={pageSize}
+                            onChange={(e) => {
+                              setPageSize(Number(e.target.value));
+                              setCurrentPage(1); // Reset current page to 1 when changing page size
+                            }}
+                          >
+                            {[10, 25, 50, 100, 500].map((pageSizeOption) => (
+                              <option
+                                key={pageSizeOption}
+                                value={pageSizeOption}
+                              >
+                                Show {pageSizeOption}
+                              </option>
+                            ))}
+                          </select>
+                          <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
+                            Page
+                            <span>
+                              {currentPage} of {totalPages}
+                            </span>
+                          </span>
+                        </div>
+                        <ul className="flex flex-wrap items-center space-x-3 rtl:space-x-reverse">
+                          <li className="text-xl leading-4 text-slate-900 dark:text-white rtl:rotate-180">
+                            <button
+                              className={`${
+                                currentPage === 1
+                                  ? "opacity-50 cursor-not-allowed"
+                                  : ""
+                              }`}
+                              onClick={() => setCurrentPage(1)}
+                              disabled={currentPage === 1}
+                            >
+                              <Icon icon="heroicons:chevron-double-left-solid" />
+                            </button>
+                          </li>
+                          <li className="text-sm leading-4 text-slate-900 dark:text-white rtl:rotate-180">
+                            <button
+                              className={`${
+                                currentPage === 1
+                                  ? "opacity-50 cursor-not-allowed"
+                                  : ""
+                              }`}
+                              onClick={handlePrevPage}
+                              disabled={currentPage === 1}
+                            >
+                              Prev
+                            </button>
+                          </li>
+
+                          {getPageNumbers().map((pageNumber) => (
+                            <li key={pageNumber}>
+                              <button
+                                href="#"
+                                aria-current="page"
+                                className={`${
+                                  pageNumber === currentPage
+                                    ? "bg-slate-900 dark:bg-slate-600 dark:text-slate-200 text-white font-medium "
+                                    : "bg-slate-100 dark:bg-slate-700 dark:text-slate-400 text-slate-900  font-normal  "
+                                }    text-sm rounded leading-[16px] flex h-6 w-6 items-center justify-center transition-all duration-150`}
+                                onClick={() => setCurrentPage(pageNumber)}
+                              >
+                                {pageNumber}
+                              </button>
+                            </li>
+                          ))}
+
+                          <li className="text-sm leading-4 text-slate-900 dark:text-white rtl:rotate-180">
+                            <button
+                              className={`${
+                                currentPage === totalPages
+                                  ? "opacity-50 cursor-not-allowed"
+                                  : ""
+                              }`}
+                              onClick={handleNextPage}
+                              disabled={currentPage === totalPages}
+                            >
+                              Next
+                            </button>
+                          </li>
+                          <li className="text-xl leading-4 text-slate-900 dark:text-white rtl:rotate-180">
+                            <button
+                              onClick={() => setCurrentPage(totalPages)}
+                              disabled={currentPage === totalPages}
+                              className={`${
+                                currentPage === totalPages
+                                  ? "opacity-50 cursor-not-allowed"
+                                  : ""
+                              }`}
+                            >
+                              <Icon icon="heroicons:chevron-double-right-solid" />
+                            </button>
+                          </li>
+                        </ul>
+                      </div>
+                      {/*end*/}
+                    </Card>
                   </div>
                 </Tab.Panel>
               </Tab.Panels>
