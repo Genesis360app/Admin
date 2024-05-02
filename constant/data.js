@@ -117,13 +117,13 @@ export const menuItems = [
     link: "transactions",
     badge: "All",
   },
-  {
-    title: "Subscriptionbyid",
-    isHide: true,
-    icon: "eos-icons:subscriptions-created-outlined",
-    link: "subscriptionbyid",
-    badge: "All",
-  },
+  // {
+  //   title: "Subscriptionbyid",
+  //   isHide: true,
+  //   icon: "eos-icons:subscriptions-created-outlined",
+  //   link: "subscriptionbyid",
+  //   badge: "All",
+  // },
 
   // {
   //   title: "Chat",

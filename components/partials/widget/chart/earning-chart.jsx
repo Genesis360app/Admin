@@ -10,7 +10,6 @@ const EarningChart = ({
 }) => {
   const [isDark] = useDarkMode();
   
-
   const options = {
     labels: ["success", "Return"],
     dataLabels: {
@@ -44,13 +43,19 @@ const EarningChart = ({
         },
       },
     },
-
     responsive: [
       {
         breakpoint: 480,
         options: {
           legend: {
             position: "bottom",
+          },
+          plotOptions: {
+            pie: {
+              donut: {
+                size: "80%",
+              },
+            },
           },
         },
       },
@@ -62,50 +67,41 @@ const EarningChart = ({
     if (typeof window !== 'undefined') {
       const storedTotalOrders = localStorage.getItem("totalOrders");
       return storedTotalOrders ? parseInt(storedTotalOrders, 10) : 0;
-
     }
     return 0;
   });
- 
 
   const [totalOrders, setTotalOrders] = useState(prevTotalOrders);
-  const [newTotalOrders, setNewTotalOrders] = useState(null);
 
-  
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await orderService.totalSales();
   
-        if (response && response.totalsales) {
-          setTotalOrders(response.totalsales);
+        if (response) {
+          const newTotalOrders = parseInt(response, 10);
+          let percentageChange = 0;
+          if (prevTotalOrders > 0) {
+            percentageChange = ((newTotalOrders - prevTotalOrders) / prevTotalOrders) * 100;
+          }
+          setTotalOrders(newTotalOrders);
+          setPercentageChange(percentageChange);
+          localStorage.setItem("totalOrders", newTotalOrders.toString());
         } else {
           // Handle case where response or response.totalsales is undefined
         }
       } catch (err) {
-        console.error("Error:", err);
+        // console.error("Error:", err);
       }
     };
   
     fetchData();
   }, []);
-  
-  useEffect(() => {
-    if (prevTotalOrders !== null && newTotalOrders !== null) {
-      const percentageChange = ((newTotalOrders - prevTotalOrders) / prevTotalOrders) * 100;
-      setPercentageChange(percentageChange);
-      localStorage.setItem("totalOrders", newTotalOrders.toString());
-    }
-  }, [prevTotalOrders, newTotalOrders]);
-  
 
+  // Declare percentageChange state
+  const [percentageChange, setPercentageChange] = useState(0);
 
-
-
-// Declare percentageChange state
-const [percentageChange, setPercentageChange] = useState(0);
-
-const series = [totalOrders, prevTotalOrders];
+  const series = [totalOrders, prevTotalOrders];
 
   const naira = new Intl.NumberFormat('en-NG', {
     style: 'currency',

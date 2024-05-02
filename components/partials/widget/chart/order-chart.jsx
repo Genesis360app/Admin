@@ -84,12 +84,13 @@ const OrderChart = ({
         // Fetch total order count from the server
         const response = await orderService.totalOderCount();
   
-        if (response && response.orderCount) {
+        if (response) {
           // Set the total order count in state
-          setAllOrders(response.orderCount);
+          setAllOrders(response);
+          // console.log(response);
   
           // Calculate the percentage change compared to the previous period
-          const currentOrders = response.orderCount;
+          const currentOrders = response;
           const previousOrders = historicalOrdersData[historicalOrdersData.length - 1];
           const changePercentage = ((currentOrders - previousOrders) / previousOrders) * 100;
           setPercentageChange(changePercentage);

@@ -244,7 +244,7 @@ const getPageNumbers = () => {
                 : ""
             }
             ${
-              item.trackingId?.status === "Processing"
+              item.trackingId?.status === "Proccessing"
                 ? "text-processing-400 bg-processing-400"
                 : ""
             }
@@ -258,7 +258,7 @@ const getPageNumbers = () => {
                     ? "text-pending-500 bg-pending-500"
                     : ""
                 } ${
-                                item.trackingId?.status === "In-transit"
+                                item.trackingId?.status === "In-Transit"
                                   ? "text-primary-500 bg-primary-500"
                                   : ""
                               }
