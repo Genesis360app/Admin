@@ -114,13 +114,13 @@ const Customer = () => {
             </div>
             )}
             
-            <div>
+            {/* <div>
               <div className="flex justify-between text-sm font-normal dark:text-slate-300 mb-3 mt-4">
                 <span>Loan Outstanding</span>
                 <span className="font-normal">{item.loanOutstanding}</span>
               </div>
               <ProgressBar value={item.loanLimit} className={item.barColor} />
-            </div>
+            </div> */}
           </div>
         ))}
       </div>
@@ -191,13 +191,13 @@ const Customer = () => {
              
             </div>
             )}
-            <div className="flex-1">
+            {/* <div className="flex-1">
               <div className="flex justify-between text-sm font-normal dark:text-slate-300 mb-3">
               <span>Loan Outstanding</span>
                 <span className="font-normal">{item.loanOutstanding}%</span>
               </div>
               <ProgressBar value={item.loanLimit} className={item.barColor2} />
-            </div>
+            </div> */}
           </div>
         ))}
       </div>

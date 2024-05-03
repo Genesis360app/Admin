@@ -173,6 +173,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
   const [isBusinessDefault, setBusinessDefault] = useState(false);
   const [password, setPassword] = useState("");
   const [monoDetails, setMonoDetails] = useState("");
+  const [monoTxn, setMonoTxn] = useState("");
 
 
 
@@ -318,22 +319,31 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
     });
   }, [loan, globalFilter]);
 
-  const filteredMono = useMemo(() => {
-    return (monoDetails || []).filter((item) => {
-      const loan_id = (item?._id || "").toString(); // Access product_name safely and convert to lowercase
-      const totalLoan = (item?.totalLoan || "").toString(); // Access package_id safely and convert to string
+  const filteredMonoTxn = useMemo(() => {
+    return (monoTxn || []).filter((item) => {
+      const monoTxn_id = (item?.id || "").toString(); // Access product_name safely and convert to lowercase
+      const monoTxn_amount = (item?.amount || "").toString(); // Access package_id safely and convert to string
+      const monoTxn_balance = (item?.balance || "").toString(); // Access package_id safely and convert to string
+      const monoTxn_narration = (item?.narration || "").toString(); // Access package_id safely and convert to string
+      const monoTxn_currency = (item?.currency || "").toString(); // Access package_id safely and convert to string
+      const monoTxn_type = (item?.type || "").toString(); // Access package_id safely and convert to string
   
       // Check if globalFilter is defined and not null before using trim
       const filterText = globalFilter ? globalFilter.trim() : "";
 
       // Customize this logic to filter based on your specific requirements
       return (
-        loan_id.includes(filterText.toLowerCase()) ||
-        totalLoan.includes(filterText.toLowerCase())
+        monoTxn_id.includes(filterText) ||
+        monoTxn_amount.includes(filterText) ||
+        monoTxn_balance.includes(filterText) ||
+        monoTxn_narration.includes(filterText) ||
+        monoTxn_currency.includes(filterText) ||
+        monoTxn_type.includes(filterText) 
       );
     });
-  }, [monoDetails, globalFilter]);
+  }, [monoTxn, globalFilter]);
 
+ 
   const naira = new Intl.NumberFormat("en-NG", {
     style: "currency",
     currency: "NGN",
@@ -358,11 +368,10 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
   const endIndex = Math.min(startIndex + itemsPerPage, filteredhistory.length);
 
   // Get the paginated history data for the current page
-  const paginatedSubscription = filteredOrder.slice(startIndex, endIndex);
+  const paginatedMono_Txn = filteredMonoTxn.slice(startIndex, endIndex);
   const paginatedHistory = filteredhistory.slice(startIndex, endIndex);
   const paginatedOrder = filteredOrder.slice(startIndex, endIndex);
   const paginatedLoan = filteredLoan.slice(startIndex, endIndex);
-  const paginatedMono = monoDetails.slice(startIndex, endIndex);
 
   // Calculate the total number of pages
   const totalPages = Math.ceil(filteredhistory.length / itemsPerPage);
@@ -393,10 +402,11 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
     return pageNumbers;
   };
   const isOrderEmpty = orderItems.length === 0;
-  const isSubEmpty = subByID.length === 0;
+  // const isSubEmpty = subByID.length === 0;
   const isHistoryEmpty = history.length === 0;
   const isLoanEmpty = loan.length === 0;
   const isMonoEmpty = monoDetails.length === 0;
+  const isMonoTxnEmpty = monoTxn.length === 0;
 
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "", // Provide a default value if the environment variable is not defined
@@ -509,7 +519,8 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
           setLocationType(userKyc.locationType);
           setGoogleMapLocation(userKyc.googleMapLocation);
           setCorporateAccount(userKyc.corporateAccount);
-          setMonoDetails(userKyc.verification);
+          setMonoDetails(userKyc.verification[2]);
+          setMonoTxn(userKyc.verification[3].verificationData.mono_transactions);
           // console.log('Test Data', response);
           console.log('Test verification', userKyc.verification);
         } else {
@@ -3929,10 +3940,10 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                       <div className="-mx-6 overflow-x-auto">
                         <div className="inline-block min-w-full align-middle">
                           <div className="overflow-hidden ">
-                            {isOrderEmpty ? ( // Conditionally rendering based on cart items
+                            {isMonoEmpty ? ( // Conditionally rendering based on cart items
                               <center>
                                 <h4 className="mt-10 text-2xl font-bold text-primary">
-                                  No Available Order Items Data
+                                  No Available account info Items Data
                                 </h4>
                               </center>
                             ) : (
@@ -3946,11 +3957,14 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                                     VerificationType
                                     </th>
                                     <th scope="col" className="table-th">
-                                    Amount
+                                    Account Number
                                     </th>
                                     
                                     <th scope="col" className="table-th">
                                     Balance
+                                    </th>
+                                    <th scope="col" className="table-th">
+                                    Auth Method
                                     </th>
                                     <th scope="col" className="table-th">
                                     Currency
@@ -3959,117 +3973,229 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                                     Type
                                     </th>
                                     <th scope="col" className="table-th">
-                                    Narration
+                                    Name
                                     </th>
                                     <th scope="col" className="table-th">
                                       Date
                                     </th>
-                                    <th scope="col" className="table-th">
-                                      Action
-                                    </th>
+                                   
                                   </tr>
                                 </thead>
-                                {paginatedMono.map((item) => (
+                                {/* {monoDetails.map((item) => (
                                   <React.Fragment key={item?._id}>
+                                    
+                                  </React.Fragment>
+                                ))} */}
+                              </table>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="items-center justify-between mt-6 space-y-5 md:flex md:space-y-0">
+                        <div className="flex items-center space-x-3 rtl:space-x-reverse">
+                          <select
+                            className="py-2 form-control w-max"
+                            value={pageSize}
+                            onChange={(e) => {
+                              setPageSize(Number(e.target.value));
+                              setCurrentPage(1); // Reset current page to 1 when changing page size
+                            }}
+                          >
+                            {[10, 25, 50, 100, 500].map((pageSizeOption) => (
+                              <option
+                                key={pageSizeOption}
+                                value={pageSizeOption}
+                              >
+                                Show {pageSizeOption}
+                              </option>
+                            ))}
+                          </select>
+                          <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
+                            Page
+                            <span>
+                              {currentPage} of {totalPages}
+                            </span>
+                          </span>
+                        </div>
+                        <ul className="flex flex-wrap items-center space-x-3 rtl:space-x-reverse">
+                          <li className="text-xl leading-4 text-slate-900 dark:text-white rtl:rotate-180">
+                            <button
+                              className={`${
+                                currentPage === 1
+                                  ? "opacity-50 cursor-not-allowed"
+                                  : ""
+                              }`}
+                              onClick={() => setCurrentPage(1)}
+                              disabled={currentPage === 1}
+                            >
+                              <Icon icon="heroicons:chevron-double-left-solid" />
+                            </button>
+                          </li>
+                          <li className="text-sm leading-4 text-slate-900 dark:text-white rtl:rotate-180">
+                            <button
+                              className={`${
+                                currentPage === 1
+                                  ? "opacity-50 cursor-not-allowed"
+                                  : ""
+                              }`}
+                              onClick={handlePrevPage}
+                              disabled={currentPage === 1}
+                            >
+                              Prev
+                            </button>
+                          </li>
+
+                          {getPageNumbers().map((pageNumber) => (
+                            <li key={pageNumber}>
+                              <button
+                                href="#"
+                                aria-current="page"
+                                className={`${
+                                  pageNumber === currentPage
+                                    ? "bg-slate-900 dark:bg-slate-600 dark:text-slate-200 text-white font-medium "
+                                    : "bg-slate-100 dark:bg-slate-700 dark:text-slate-400 text-slate-900  font-normal  "
+                                }    text-sm rounded leading-[16px] flex h-6 w-6 items-center justify-center transition-all duration-150`}
+                                onClick={() => setCurrentPage(pageNumber)}
+                              >
+                                {pageNumber}
+                              </button>
+                            </li>
+                          ))}
+
+                          <li className="text-sm leading-4 text-slate-900 dark:text-white rtl:rotate-180">
+                            <button
+                              className={`${
+                                currentPage === totalPages
+                                  ? "opacity-50 cursor-not-allowed"
+                                  : ""
+                              }`}
+                              onClick={handleNextPage}
+                              disabled={currentPage === totalPages}
+                            >
+                              Next
+                            </button>
+                          </li>
+                          <li className="text-xl leading-4 text-slate-900 dark:text-white rtl:rotate-180">
+                            <button
+                              onClick={() => setCurrentPage(totalPages)}
+                              disabled={currentPage === totalPages}
+                              className={`${
+                                currentPage === totalPages
+                                  ? "opacity-50 cursor-not-allowed"
+                                  : ""
+                              }`}
+                            >
+                              <Icon icon="heroicons:chevron-double-right-solid" />
+                            </button>
+                          </li>
+                        </ul>
+                      </div>
+                      {/*end*/}
+                    </Card>
+                  </div>
+                </Tab.Panel>
+
+                
+                <Tab.Panel>
+                <div className="text-slate-600 dark:text-slate-400 text-sm font-normal">
+                    <Card>
+                      <div className="items-center justify-between mb-6 md:flex">
+                        <h4 className="card-title">
+                          {firstname + " " + " Mono Bank Transactions"}
+                        </h4>
+                        <div>
+                          <GlobalFilter
+                            filter={globalFilter}
+                            setFilter={setGlobalFilter}
+                          />
+                        </div>
+                      </div>
+                      <div className="-mx-6 overflow-x-auto">
+                        <div className="inline-block min-w-full align-middle">
+                          <div className="overflow-hidden ">
+                            {isMonoTxnEmpty ? ( // Conditionally rendering based on cart items
+                              <center>
+                                <h4 className="mt-10 text-2xl font-bold text-primary">
+                                  No Available Mono Bank Transactions
+                                </h4>
+                              </center>
+                            ) : (
+                              <table className="min-w-full divide-y table-fixed divide-slate-100 dark:divide-slate-700">
+                                <thead className="bg-slate-200 dark:bg-slate-700">
+                                  <tr>
+                                    <th scope="col" className="table-th">
+                                      ID
+                                    </th>
+                                    <th scope="col" className="table-th">
+                                      Amount
+                                    </th>
+                                    <th scope="col" className="table-th">
+                                    Balance
+                                    </th>
+                                    <th scope="col" className="table-th">
+                                    Narration
+                                    </th>
+                                    <th scope="col" className="table-th">
+                                    Currency
+                                    </th>
+                                    <th scope="col" className="table-th">
+                                    Type
+                                    </th>
+                                    <th scope="col" className="table-th">
+                                      Date
+                                    </th>
+                                   
+                                  </tr>
+                                </thead>
+                                {paginatedMono_Txn.map((item) => (
+                                  <React.Fragment key={item?.id}>
                                     <tbody className="bg-white divide-y divide-slate-100 dark:bg-slate-800 dark:divide-slate-700">
                                       <tr>
                                         <td className="table-td py-2">
                                           {" "}
                                           <span>
-                                          {item?._id.slice(0, 5)}...
-                                            {item._id.slice(-10)}
+                                          {item?.id.slice(0, 5)}...
+                                            {item.id.slice(-10)}
                                           </span>
                                         </td>
                                         <td className="table-td py-2 ">
-                                          {" "}
-                                          {item?.verificationType}
-                                        </td> 
-                                        <td className="table-td py-2 ">
-                                          
-                                          {item?.verificationData.bvn_check}
-                                        </td>
-
-                                        {/* <td className="table-td py-2 ">
-                                          {item.trackingId?.location ||
-                                            "No Location"}
-                                        </td>
-                                        <td className="table-td py-2">
-                                          {" "}
                                           {naira.format(
-                                            item?.totalPrice || "0"
+                                            item?.amount|| "0"
+                                          )}
+                                        </td> 
+                                      
+                                        <td className="table-td py-2">
+                                        {naira.format(
+                                            item?.balance|| "0"
                                           )}
                                         </td>
+                                        <td className="table-td py-2 ">
+                                        
+                                          {item?.narration}
+                                        </td>
                                         <td className="table-td py-2">
-                                          {" "}
-                                          {item.transaction?.paymentMode}{" "}
+                                        {item?.currency}
                                         </td>
 
                                         <td className="table-td py-2">
-                                          {" "}
-                                          {item?.city}{" "}
-                                        </td>
+                                        {item?.type === "credit" ? (
+                                          <span className="text-success-500">
+                                            {item?.type}
+                                          </span>
+                                        ) : (
+                                          <span className="text-danger-500">
+                                            {item?.type}
+                                          </span>
+                                        )}
+                                      </td>
+
                                        
                                         <td className="table-td py-2">
-                                          {formattedDate(item?.dateOrdered)}
-                                        </td> */}
+                                          {formattedDate(item?.date)}
+                                        </td>
                                     
 
-                                        <td className="table-td py-2">
-                                          <div className="flex space-x-3 rtl:space-x-reverse">
-                                            <Tooltip
-                                              content="View"
-                                              placement="top"
-                                              arrow
-                                              animation="shift-away"
-                                            >
-                                              <button
-                                                className="action-btn"
-                                                type="button"
-                                                onClick={() => {
-                                                  setSelectedOrder(item);
-                                                  setActiveModal(true);
-                                                }}
-                                              >
-                                                <Icon icon="heroicons:eye" />
-                                              </button>
-                                            </Tooltip>
-
-                                           <Tooltip
-                              content="Edit"
-                              placement="top"
-                              arrow
-                              animation="shift-away"
-                            >
-                              <button
-                                className="action-btn"
-                              
-                                onClick={() => handleClick(item)}
-                                type="button"
-                              >
-                                <Icon icon="heroicons:pencil-square" />
-                              </button>
-                            </Tooltip>
-
-                                            <Tooltip
-                                              content="Delete"
-                                              placement="top"
-                                              arrow
-                                              animation="shift-away"
-                                              theme="danger"
-                                            >
-                                              <button
-                                                className="action-btn"
-                                                type="button"
-                                                onClick={() => {
-                                                  setSelectedOrder(item);
-                                                  setDelete_orderModal(true);
-                                                }}
-                                              >
-                                                <Icon icon="heroicons:trash" />
-                                              </button>
-                                            </Tooltip>
-                                          </div>
-                                        </td>
+                                       
                                       </tr>
                                     </tbody>
                                   </React.Fragment>
@@ -4182,6 +4308,9 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                     </Card>
                   </div>
                 </Tab.Panel>
+
+
+
               </Tab.Panels>
             </Tab.Group>
           </Card>
@@ -4293,6 +4422,10 @@ const buttons = [
   },
   {
     title: "Account Info",
+    icon: "emojione-monotone:bank",
+  },
+  {
+    title: "Mono Bank Transactions",
     icon: "emojione-monotone:bank",
   },
 ];
