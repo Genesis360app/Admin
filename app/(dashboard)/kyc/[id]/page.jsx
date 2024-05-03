@@ -33,6 +33,7 @@ import Alert from "@/components/ui/Alert";
 import { _notifySuccess, _notifyError } from "@/utils/alart";
 import { CircularProgress } from "@mui/material";
 import moment from "moment";
+import { jsPDF } from "jspdf";
 import Fileinput from "@/components/ui/Fileinput";
 import {
   GoogleMap,
@@ -197,6 +198,32 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
   const [loanError, setLoanError] = useState(null);
   const [loanSuccess, setLoanSuccess] = useState(null);
  
+  const printMonoTxnPage = () => {
+    const printMonoTxn = document.getElementById("printMonoTxn");
+    if (!printMonoTxn) {
+      // console.error("Element with id 'printMonoTxn' not found.");
+      return;
+    }
+    const originalTxnContents = document.body.innerHTML;
+    document.body.innerHTML = printMonoTxn.innerHTML;
+    window.print();
+    document.body.innerHTML = originalTxnContents;
+  };
+  const downloadMonoTxnPage = () => {
+    const printMonoTxn = document.getElementById("printMonoTxn");
+    if (!printMonoTxn) {
+      // console.error("Element with id 'printContent' not found.");
+      return;
+    }
+  
+    const Monopdf = new jsPDF();
+    Monopdf.text(printMonoTxn.innerText, 10, 10); // Add the content to the PDF
+    Monopdf.save("Mono Bank Transactions.pdf"); // Save the PDF with the desired filename
+  
+    // Alternatively, you can use the following code to open the PDF in a new tab
+    // const url = pdf.output('bloburl');
+    // window.open(url, '_blank');
+  };
   const printPage = () => {
     const printContent = document.getElementById("printContent");
     if (!printContent) {
@@ -208,6 +235,30 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
     window.print();
     document.body.innerHTML = originalContents;
   };
+
+  const sendPage = () => {
+    const message = encodeURIComponent(document.getElementById("printMonoTxn").innerText);
+    const whatsappLink = `https://api.whatsapp.com/send/?phone=${phone}&text=${message}`;
+    window.open(whatsappLink, '_blank');
+  };
+
+  const downloadPage = () => {
+    const printContent = document.getElementById("printContent");
+    if (!printContent) {
+      console.error("Element with id 'printContent' not found.");
+      return;
+    }
+  
+    const pdf = new jsPDF();
+    pdf.text(printContent.innerText, 10, 10); // Add the content to the PDF
+    pdf.save("invoice.pdf"); // Save the PDF with the desired filename
+  
+    // Alternatively, you can use the following code to open the PDF in a new tab
+    // const url = pdf.output('bloburl');
+    // window.open(url, '_blank');
+  };
+
+  
   const handleToggleChange = () => {
     setIsChecked(!isChecked);
     setBusinessDefault(!isChecked);
@@ -3965,18 +4016,13 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
             </span>
             <span>Print</span>
           </button>
-          <button className="invocie-btn inline-flex btn btn-sm whitespace-nowrap space-x-1 cursor-pointer bg-white dark:bg-slate-800 dark:text-slate-300 btn-md h-min text-sm font-normal text-slate-900 rtl:space-x-reverse">
+          <button onClick={downloadPage}  className="invocie-btn inline-flex btn btn-sm whitespace-nowrap space-x-1 cursor-pointer bg-white dark:bg-slate-800 dark:text-slate-300 btn-md h-min text-sm font-normal text-slate-900 rtl:space-x-reverse">
             <span className="text-lg">
               <Icon icon="heroicons:arrow-down-tray" />
             </span>
             <span>Download</span>
           </button>
-          <button className="invocie-btn inline-flex btn btn-sm whitespace-nowrap space-x-1 cursor-pointer bg-white dark:bg-slate-800 dark:text-slate-300 btn-md h-min text-sm font-normal text-slate-900 rtl:space-x-reverse">
-            <span className="text-lg transform -rotate-45">
-              <Icon icon="heroicons:paper-airplane" />
-            </span>
-            <span>Send invoice</span>
-          </button>
+  
         </div>
       </div>
       <Card bodyClass="p-0" >
@@ -4085,12 +4131,40 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                         <h4 className="card-title">
                           {firstname + " " + " Mono Bank Transactions"}
                         </h4>
-                        <div>
+                        <div className="lg:flex justify-between flex-wrap items-center mb-6">
+                        <div className="flex lg:justify-end items-center flex-wrap space-xy-5">
+          <button
+            type="button"
+            onClick={printMonoTxnPage}
+            className="invocie-btn inline-flex btn btn-sm whitespace-nowrap space-x-1 cursor-pointer bg-white dark:bg-slate-800 dark:text-slate-300 btn-md h-min text-sm font-normal text-slate-900 rtl:space-x-reverse"
+          >
+            <span className="text-lg">
+              <Icon icon="heroicons:printer" />
+            </span>
+            <span>Print</span>
+          </button>
+          <button onClick={downloadMonoTxnPage}  className="invocie-btn inline-flex btn btn-sm whitespace-nowrap space-x-1 cursor-pointer bg-white dark:bg-slate-800 dark:text-slate-300 btn-md h-min text-sm font-normal text-slate-900 rtl:space-x-reverse">
+            <span className="text-lg">
+              <Icon icon="heroicons:arrow-down-tray" />
+            </span>
+            <span>Download</span>
+          </button>
+         
+          <button onClick={sendPage} className="invocie-btn inline-flex btn btn-sm whitespace-nowrap space-x-1 cursor-pointer bg-white dark:bg-slate-800 dark:text-slate-300 btn-md h-min text-sm font-normal text-slate-900 rtl:space-x-reverse">
+            <span className="text-lg transform -rotate-45">
+              <Icon icon="heroicons:paper-airplane" />
+            </span>
+            <span>Send invoice</span>
+          </button>
+          <div>
                           <GlobalFilter
                             filter={globalFilter}
                             setFilter={setGlobalFilter}
                           />
                         </div>
+        </div>
+      </div>
+                        
                       </div>
                       <div className="-mx-6 overflow-x-auto">
                         <div className="inline-block min-w-full align-middle">
@@ -4102,6 +4176,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                                 </h4>
                               </center>
                             ) : (
+                              <div id="printMonoTxn">
                               <table className="min-w-full divide-y table-fixed divide-slate-100 dark:divide-slate-700">
                                 <thead className="bg-slate-200 dark:bg-slate-700">
                                   <tr>
@@ -4183,6 +4258,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                                   </React.Fragment>
                                 ))}
                               </table>
+                              </div>
                             )}
                           </div>
                         </div>
