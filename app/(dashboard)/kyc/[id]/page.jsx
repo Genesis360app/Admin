@@ -23,6 +23,7 @@ import axios from "axios"; // Import Axios at the top of your file
 import dynamic from "next/dynamic";
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 import useDarkMode from "@/hooks/useDarkMode";
+import userDarkMode from "@/hooks/useDarkMode";
 import { Tab, Disclosure, Transition } from "@headlessui/react";
 import Accordion from "@/components/ui/Accordion";
 import { InfinitySpin } from "react-loader-spinner";
@@ -76,7 +77,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
 
 
 
-
+  const [isDark] = userDarkMode();
   const dispatch = useDispatch();
   const router = useRouter();
   const { id } = params;
@@ -195,8 +196,18 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
   const [assignOustanding, setAssignOustanding] = useState(null);
   const [loanError, setLoanError] = useState(null);
   const [loanSuccess, setLoanSuccess] = useState(null);
-
-
+ 
+  const printPage = () => {
+    const printContent = document.getElementById("printContent");
+    if (!printContent) {
+      console.error("Element with id 'printContent' not found.");
+      return;
+    }
+    const originalContents = document.body.innerHTML;
+    document.body.innerHTML = printContent.innerHTML;
+    window.print();
+    document.body.innerHTML = originalContents;
+  };
   const handleToggleChange = () => {
     setIsChecked(!isChecked);
     setBusinessDefault(!isChecked);
@@ -3927,15 +3938,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                 <div className="text-slate-600 dark:text-slate-400 text-sm font-normal">
                     <Card>
                       <div className="items-center justify-between mb-6 md:flex">
-                        <h4 className="card-title">
-                          {firstname + " " + " Orders"}
-                        </h4>
-                        <div>
-                          <GlobalFilter
-                            filter={globalFilter}
-                            setFilter={setGlobalFilter}
-                          />
-                        </div>
+                    
                       </div>
                       <div className="-mx-6 overflow-x-auto">
                         <div className="inline-block min-w-full align-middle">
@@ -3947,150 +3950,129 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                                 </h4>
                               </center>
                             ) : (
-                              <table className="min-w-full divide-y table-fixed divide-slate-100 dark:divide-slate-700">
-                                <thead className="bg-slate-200 dark:bg-slate-700">
-                                  <tr>
-                                    <th scope="col" className="table-th">
-                                      ID
-                                    </th>
-                                    <th scope="col" className="table-th">
-                                    VerificationType
-                                    </th>
-                                    <th scope="col" className="table-th">
-                                    Account Number
-                                    </th>
-                                    
-                                    <th scope="col" className="table-th">
-                                    Balance
-                                    </th>
-                                    <th scope="col" className="table-th">
-                                    Auth Method
-                                    </th>
-                                    <th scope="col" className="table-th">
-                                    Currency
-                                    </th>
-                                    <th scope="col" className="table-th">
-                                    Type
-                                    </th>
-                                    <th scope="col" className="table-th">
-                                    Name
-                                    </th>
-                                    <th scope="col" className="table-th">
-                                      Date
-                                    </th>
-                                   
-                                  </tr>
-                                </thead>
-                                {/* {monoDetails.map((item) => (
-                                  <React.Fragment key={item?._id}>
-                                    
-                                  </React.Fragment>
-                                ))} */}
-                              </table>
+                              
+       <div id="printContent">
+      <div className="lg:flex justify-between flex-wrap items-center mb-6">
+        <h4>{monoDetails?.verificationType}</h4>
+        <div className="flex lg:justify-end items-center flex-wrap space-xy-5">
+          <button
+            type="button"
+            onClick={printPage}
+            className="invocie-btn inline-flex btn btn-sm whitespace-nowrap space-x-1 cursor-pointer bg-white dark:bg-slate-800 dark:text-slate-300 btn-md h-min text-sm font-normal text-slate-900 rtl:space-x-reverse"
+          >
+            <span className="text-lg">
+              <Icon icon="heroicons:printer" />
+            </span>
+            <span>Print</span>
+          </button>
+          <button className="invocie-btn inline-flex btn btn-sm whitespace-nowrap space-x-1 cursor-pointer bg-white dark:bg-slate-800 dark:text-slate-300 btn-md h-min text-sm font-normal text-slate-900 rtl:space-x-reverse">
+            <span className="text-lg">
+              <Icon icon="heroicons:arrow-down-tray" />
+            </span>
+            <span>Download</span>
+          </button>
+          <button className="invocie-btn inline-flex btn btn-sm whitespace-nowrap space-x-1 cursor-pointer bg-white dark:bg-slate-800 dark:text-slate-300 btn-md h-min text-sm font-normal text-slate-900 rtl:space-x-reverse">
+            <span className="text-lg transform -rotate-45">
+              <Icon icon="heroicons:paper-airplane" />
+            </span>
+            <span>Send invoice</span>
+          </button>
+        </div>
+      </div>
+      <Card bodyClass="p-0" >
+        <div className="flex justify-between flex-wrap space-y-4 px-6 pt-6 bg-slate-50 dark:bg-slate-800 pb-6 rounded-t-md"  >
+          <div>
+            <img
+              src={
+                isDark
+                  ? "/assets/images/logo/Genesis360green.png"
+                  : "/assets/images/logo/Genesislogo.png"
+              }
+              alt=""
+            />
+
+            <div className="text-slate-500 dark:text-slate-300 font-normal leading-5 mt-4 text-sm">
+             
+           <div className="text-slate-500 dark:text-slate-300 font-normal leading-5 text-sm">
+           Mono Exchange ID :{monoDetails?.verificationData?.mono_exchange_id}  </div>
+           <div className="text-slate-500 dark:text-slate-300 font-normal leading-5 text-sm">
+           Account ID. :{monoDetails?.verificationData?.mono_connected_acct?._id}  </div>
+           <div className="text-slate-500 dark:text-slate-300 font-normal leading-5 text-sm">
+           Currency :{monoDetails?.verificationData?.mono_connected_acct?.currency} <br />
+            </div>
+            <div className="text-slate-500 dark:text-slate-300 font-normal leading-5 text-sm">
+          Created On : {formattedDate(monoDetails?.verificationData?.mono_connected_acct?.created_at)}
+            </div>
+           <div className="text-slate-500 dark:text-slate-300 font-normal leading-5 text-sm">
+          Updated On : {formattedDate(monoDetails?.verificationData?.mono_connected_acct?.updated_at)}
+            </div>
+              
+            </div>
+          </div>
+          <div>
+            <span className="block text-slate-900 dark:text-slate-300 font-medium leading-5 text-xl">
+            Mono Connected Acct
+            </span>
+
+            <div className="text-slate-500 dark:text-slate-300 font-normal leading-5 mt-4 text-sm">
+ 
+           Account No. :{monoDetails?.verificationData?.mono_connected_acct?.accountNumber} <br />
+           Auth Method :{monoDetails?.verificationData?.mono_connected_acct?.authMethod} <br />
+           Account Name :{monoDetails?.verificationData?.mono_connected_acct?.name} <br />
+           Account Type :{monoDetails?.verificationData?.mono_connected_acct?.type} <br />
+           BVN :{monoDetails?.verificationData?.mono_connected_acct?.bvn} <br />
+           {monoDetails?.verificationData?.mono_connected_acct?.balance > 1000 ? (
+
+                                          <div>
+                                          Balance :
+                                          <span className="text-success-500">
+                                         {naira.format(monoDetails?.verificationData?.mono_connected_acct?.balance)}
+                                          </span> 
+                                          </div>
+                                        ) : (
+                                          <div>
+                                          Balance :
+                                          <span className="text-danger-500">
+                                         {naira.format(monoDetails?.verificationData?.mono_connected_acct?.balance)}
+                                          </span>
+                                            
+                                          </div>
+                                         
+                                        )}
+            </div>
+          </div>
+          <div className="space-y-[2px]">
+            <span className="block text-slate-900 dark:text-slate-300 font-medium leading-5 text-xl mb-4">
+            Institution
+            </span>
+            <h4 className="text-slate-600 font-medium dark:text-slate-300 text-xs uppercase">
+            Bank Type:
+            </h4>
+            <div className="text-slate-500 dark:text-slate-300 font-normal leading-5 text-sm">
+            {monoDetails?.verificationData?.mono_connected_acct?.institution?.type}
+            </div>
+            <h4 className="text-slate-600 font-medium dark:text-slate-300 text-xs uppercase">
+              Bank Name :
+            </h4>
+            <div className="text-slate-500 dark:text-slate-300 font-normal leading-5 text-sm">
+            {monoDetails?.verificationData?.mono_connected_acct?.institution?.name}
+            </div>
+            <h4 className="text-slate-600 font-medium dark:text-slate-300 text-xs uppercase">
+              Bank Code :
+            </h4>
+            <div className="text-slate-500 dark:text-slate-300 font-normal leading-5 text-sm">
+            {monoDetails?.verificationData?.mono_connected_acct?.institution?.bankCode}
+            </div>
+          </div>
+        </div>
+
+      </Card>
+    </div>
                             )}
                           </div>
                         </div>
                       </div>
-                      <div className="items-center justify-between mt-6 space-y-5 md:flex md:space-y-0">
-                        <div className="flex items-center space-x-3 rtl:space-x-reverse">
-                          <select
-                            className="py-2 form-control w-max"
-                            value={pageSize}
-                            onChange={(e) => {
-                              setPageSize(Number(e.target.value));
-                              setCurrentPage(1); // Reset current page to 1 when changing page size
-                            }}
-                          >
-                            {[10, 25, 50, 100, 500].map((pageSizeOption) => (
-                              <option
-                                key={pageSizeOption}
-                                value={pageSizeOption}
-                              >
-                                Show {pageSizeOption}
-                              </option>
-                            ))}
-                          </select>
-                          <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
-                            Page
-                            <span>
-                              {currentPage} of {totalPages}
-                            </span>
-                          </span>
-                        </div>
-                        <ul className="flex flex-wrap items-center space-x-3 rtl:space-x-reverse">
-                          <li className="text-xl leading-4 text-slate-900 dark:text-white rtl:rotate-180">
-                            <button
-                              className={`${
-                                currentPage === 1
-                                  ? "opacity-50 cursor-not-allowed"
-                                  : ""
-                              }`}
-                              onClick={() => setCurrentPage(1)}
-                              disabled={currentPage === 1}
-                            >
-                              <Icon icon="heroicons:chevron-double-left-solid" />
-                            </button>
-                          </li>
-                          <li className="text-sm leading-4 text-slate-900 dark:text-white rtl:rotate-180">
-                            <button
-                              className={`${
-                                currentPage === 1
-                                  ? "opacity-50 cursor-not-allowed"
-                                  : ""
-                              }`}
-                              onClick={handlePrevPage}
-                              disabled={currentPage === 1}
-                            >
-                              Prev
-                            </button>
-                          </li>
-
-                          {getPageNumbers().map((pageNumber) => (
-                            <li key={pageNumber}>
-                              <button
-                                href="#"
-                                aria-current="page"
-                                className={`${
-                                  pageNumber === currentPage
-                                    ? "bg-slate-900 dark:bg-slate-600 dark:text-slate-200 text-white font-medium "
-                                    : "bg-slate-100 dark:bg-slate-700 dark:text-slate-400 text-slate-900  font-normal  "
-                                }    text-sm rounded leading-[16px] flex h-6 w-6 items-center justify-center transition-all duration-150`}
-                                onClick={() => setCurrentPage(pageNumber)}
-                              >
-                                {pageNumber}
-                              </button>
-                            </li>
-                          ))}
-
-                          <li className="text-sm leading-4 text-slate-900 dark:text-white rtl:rotate-180">
-                            <button
-                              className={`${
-                                currentPage === totalPages
-                                  ? "opacity-50 cursor-not-allowed"
-                                  : ""
-                              }`}
-                              onClick={handleNextPage}
-                              disabled={currentPage === totalPages}
-                            >
-                              Next
-                            </button>
-                          </li>
-                          <li className="text-xl leading-4 text-slate-900 dark:text-white rtl:rotate-180">
-                            <button
-                              onClick={() => setCurrentPage(totalPages)}
-                              disabled={currentPage === totalPages}
-                              className={`${
-                                currentPage === totalPages
-                                  ? "opacity-50 cursor-not-allowed"
-                                  : ""
-                              }`}
-                            >
-                              <Icon icon="heroicons:chevron-double-right-solid" />
-                            </button>
-                          </li>
-                        </ul>
-                      </div>
-                      {/*end*/}
+                    
                     </Card>
                   </div>
                 </Tab.Panel>
