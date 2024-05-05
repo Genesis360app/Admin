@@ -3,6 +3,7 @@ import Card from "@/components/ui/Card";
 import Icon from "@/components/ui/Icon";
 import Tooltip from "@/components/ui/Tooltip";
 import Textinput from "@/components/ui/Textinput";
+import Textarea from "@/components/ui/Textarea";
 import GlobalFilter from "../table/GlobalFilter";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -14,7 +15,7 @@ import { productService } from "@/services/product.services";
 import HTMLReactParser from "html-react-parser";
 import { _notifySuccess, _notifyError } from "@/utils/alart";
 import { CircularProgress } from "@mui/material";
-import JoditEditor from "jodit-react";
+// import JoditEditor from "jodit-react";
 import Fileinput from "@/components/ui/Fileinput";
 
 const ProductList = ({ title = "All Product", placeholder }) => {
@@ -37,7 +38,7 @@ const ProductList = ({ title = "All Product", placeholder }) => {
   const [description, setDescription] = useState("");
   const [countInStock, setCountInStock] = useState("");
   const [selectedImages, setSelectedImages] = useState([]);
-  const editor = useRef(null);
+  // const editor = useRef(null);
   const [all_packages, setAll_packages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -247,13 +248,13 @@ const ProductList = ({ title = "All Product", placeholder }) => {
     setSelectedFiles2(filesArray);
   };
 
-  const config = useMemo(
-    () => ({
-      readonly: false,
-      placeholder: placeholder || "Start typing...",
-    }),
-    [placeholder]
-  );
+  // const config = useMemo(
+  //   () => ({
+  //     readonly: false,
+  //     placeholder: placeholder || "Start typing...",
+  //   }),
+  //   [placeholder]
+  // );
 
   const handleDeleteProduct = async () => {
     setIsLoading(true);
@@ -388,14 +389,26 @@ const ProductList = ({ title = "All Product", placeholder }) => {
             </div>
           </div>
 
-          <JoditEditor
-            ref={editor}
+          <Textarea
+          label="Product Description"
+          id="description"
+          type="text"
+          value={description}
+          placeholder="Product Description"
+          description="Enter Product Description "
+          onChange={(e) => {
+              setDescription(e.target.value);
+            }}
+        />
+
+          {/* <JoditEditor
+            // ref={editor}
             defaultValue={selectedEdit?.description}
-            config={config}
+            // config={config}
             // tabIndex={1} // tabIndex of textarea
             onBlur={(newContent) => setDescription(newContent)} // preferred to use only this option to update the content for performance reasons
             onChange={(newContent) => setDescription(newContent)}
-          />
+          /> */}
 
           <Textinput
             name="countInStock"

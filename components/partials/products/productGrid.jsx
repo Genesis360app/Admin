@@ -22,7 +22,7 @@ import { productService } from "@/services/product.services";
 import HTMLReactParser from "html-react-parser";
 import { _notifySuccess, _notifyError } from "@/utils/alart";
 import { CircularProgress } from "@mui/material";
-import JoditEditor from 'jodit-react';
+// import JoditEditor from 'jodit-react';
 
 const ProductGrid = ({ project, globalFilter, placeholder }) => {
   const { startDate, endDate } = project;
@@ -47,7 +47,7 @@ const ProductGrid = ({ project, globalFilter, placeholder }) => {
   const [countInStock, setCountInStock] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [selectedImages, setSelectedImages] = useState([]);
-  const editor = useRef(null);
+  // const editor = useRef(null);
   const dispatch = useDispatch();
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
@@ -200,10 +200,10 @@ const handleImageChange = (e) => {
   setFiles(file);
 };
 
-const config = useMemo(() => ({
-  readonly: false,
-  placeholder: placeholder || 'Start typing...'
-}), [placeholder]);
+// const config = useMemo(() => ({
+//   readonly: false,
+//   placeholder: placeholder || 'Start typing...'
+// }), [placeholder]);
 
 const handleDeleteProduct = async () => {
   setIsLoading(true);
@@ -343,14 +343,26 @@ const handleDeleteProduct = async () => {
             </div>
           </div>
 
-          <JoditEditor
-        ref={editor}
+          <Textarea
+          label="Product Description"
+          id="description"
+          type="text"
+          value={description}
+          placeholder="Product Description"
+          description="Enter Product Description "
+          onChange={(e) => {
+              setDescription(e.target.value);
+            }}
+        />
+
+          {/* <JoditEditor
+        // ref={editor}
 			defaultValue={selectedEdit?.description}
-			config={config}
+			// config={config}
 			// tabIndex={1} // tabIndex of textarea
       onBlur={(newContent) => setDescription(newContent)}// preferred to use only this option to update the content for performance reasons
       onChange={(newContent) => setDescription(newContent)} 
-          />
+          /> */}
             
             <Textinput
               name="countInStock"
