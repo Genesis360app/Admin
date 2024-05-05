@@ -136,7 +136,7 @@ const ProductPostPage = ({ placeholder }) => {
 
         if (response) {
           // console.log(response); // Use response.data
-          setTotalProduct(response.productCount);
+          setTotalProduct(response);
         } else {
           // Handle case where response or response.data is undefined
         }
@@ -330,7 +330,7 @@ const ProductPostPage = ({ placeholder }) => {
             iconClass=" text-lg"
             onClick={() => setfiller("list")}
           />
-          <Button
+          {/* <Button
             icon="heroicons-outline:view-grid"
             text="Grid view"
             disabled={isLoaded}
@@ -341,18 +341,13 @@ const ProductPostPage = ({ placeholder }) => {
             }   h-min text-sm font-normal`}
             iconClass=" text-lg"
             onClick={() => setfiller("grid")}
-          />
+          /> */}
 
           <GlobalFilter filter={globalFilter} setFilter={setGlobalFilter} />
 
           {/* ... Existing code ... */}
 
-          <Button
-            icon="uil:edit"
-            text="Edit Product"
-            className="bg-white dark:bg-slate-800 dark:text-slate-300 hover:bg-slate-900 hover:text-white btn-md  h-min text-sm font-normal"
-            iconClass=" text-lg"
-          />
+         
 
           <Button
             icon="heroicons-outline:plus"
