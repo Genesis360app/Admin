@@ -136,7 +136,7 @@ const ProductPostPage = ({ placeholder }) => {
 
         if (response) {
           // console.log(response); // Use response.data
-          setTotalProduct(response);
+          setIsProductCount(response.productCount);
         } else {
           // Handle case where response or response.data is undefined
         }
@@ -360,7 +360,7 @@ const ProductPostPage = ({ placeholder }) => {
           />
         </div>
       </div>
-      {isLoaded && filler === "grid" && (
+      {isLoaded && filler === "list" && (
         <GridLoading count={projects?.length} />
       )}
       {isLoaded && filler === "list" && (
