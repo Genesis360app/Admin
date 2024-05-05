@@ -22,7 +22,7 @@ import { CircularProgress } from "@mui/material";
 
 
 const ProductPostPage = ({ placeholder }) => {
-  const [filler, setfiller] = useState("list");
+  const [filler, setfiller] = useState("grid");
   const { width, breakpoints } = useWidth();
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState(null);
@@ -136,7 +136,7 @@ const ProductPostPage = ({ placeholder }) => {
 
         if (response) {
           // console.log(response); // Use response.data
-          setIsProductCount(response.productCount);
+          setTotalProduct(response.productCount);
         } else {
           // Handle case where response or response.data is undefined
         }
@@ -360,14 +360,14 @@ const ProductPostPage = ({ placeholder }) => {
           />
         </div>
       </div>
-      {isLoaded && filler === "list" && (
+      {isLoaded && filler === "grid" && (
         <GridLoading count={projects?.length} />
       )}
       {isLoaded && filler === "list" && (
         <TableLoading count={projects?.length} />
       )}
 
-      {filler === "list" && !isLoaded && (
+      {filler === "grid" && !isLoaded && (
         <div className="grid xl:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
           {projects.map((project, projectIndex) => (
             <ProductGrid
