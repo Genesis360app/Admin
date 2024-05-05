@@ -367,7 +367,7 @@ const ProductPostPage = ({ placeholder }) => {
         <TableLoading count={projects?.length} />
       )}
 
-      {filler === "grid" && !isLoaded && (
+      {filler === "list" && !isLoaded && (
         <div className="grid xl:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
           {projects.map((project, projectIndex) => (
             <ProductGrid
