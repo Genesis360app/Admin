@@ -22,7 +22,7 @@ import { CircularProgress } from "@mui/material";
 
 
 const ProductPostPage = ({ placeholder }) => {
-  const [filler, setfiller] = useState("grid");
+  const [filler, setfiller] = useState("list");
   const { width, breakpoints } = useWidth();
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState(null);
