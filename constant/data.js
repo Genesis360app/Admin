@@ -106,7 +106,7 @@ export const menuItems = [
     title: "Customer Orders",
     isHide: true,
     icon: "solar:cart-2-bold",
-    link: "orders",
+    link: "customer_orders",
     badge: "All",
   },
 
