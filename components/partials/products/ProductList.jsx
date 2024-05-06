@@ -393,7 +393,7 @@ const ProductList = ({ title = "All Product", placeholder }) => {
           label="Product Description"
           id="description"
           type="text"
-          value={description}
+          defaultValue={selectedEdit?.description}
           placeholder="Product Description"
           description="Enter Product Description "
           onChange={(e) => {
