@@ -83,11 +83,19 @@ export const menuItems = [
     link: "loans",
     badge: "All",
   },
+  {
+    title: "All Kyc",
+    isHide: true,
+    icon: "heroicons-outline:collection",
+    link: "kycs",
+    badge: "All",
+  },
   // {
-  //   title: "Packages",
+  //   title: "All Kyc",
   //   isHide: true,
   //   icon: "emojione-monotone:package",
   //   link: "packages",
+  //   badge: "All",
   // },
 
   {
@@ -100,6 +108,7 @@ export const menuItems = [
     isHide: true,
     icon: "dashicons:products",
     link: "products",
+    badge: "All",
   },
 
   {
@@ -557,327 +566,140 @@ export const menuItems = [
 ];
 
 export const topMenu = [
+ 
+
   {
     title: "Dashboard",
     icon: "heroicons-outline:home",
-    link: "/app/home",
+    isOpen: true,
+    isHide: true,
     child: [
       {
-        childtitle: "Analytics Dashboard",
-        childlink: "dashboard",
-        childicon: "heroicons:presentation-chart-line",
-      },
-      {
         childtitle: "Ecommerce Dashboard",
-        childlink: "ecommerce",
-        childicon: "heroicons:shopping-cart",
-      },
-      {
-        childtitle: "Project  Dashboard",
-        childlink: "project",
-        childicon: "heroicons:briefcase",
-      },
-      {
-        childtitle: "CRM Dashboard",
-        childlink: "crm",
-        childicon: "ri:customer-service-2-fill",
+        link: "ecommerce",
       },
       {
         childtitle: "Banking Dashboard",
-        childlink: "banking",
-        childicon: "heroicons:wrench-screwdriver",
+        link: "banking",
       },
     ],
   },
+
   {
-    title: "App",
-    icon: "heroicons-outline:chip",
-    link: "/app/home",
+    title: "Customers",
+    icon: "solar:cart-2-bold",
+    link: "#",
     child: [
       {
-        childtitle: "Calendar",
-        childlink: "calender",
-        childicon: "heroicons-outline:calendar",
+        childtitle: " Genesis Customers",
+        link: "all_customers",
+        icon: "solar:cart-2-bold",
       },
       {
-        childtitle: "Kanban",
-        childlink: "kanban",
-        childicon: "heroicons-outline:view-boards",
+        childtitle: "Available Loans",
+        link: "loans",
+        icon: "eos-icons:subscriptions-created-outlined",
       },
       {
-        childtitle: "Todo",
-        childlink: "todo",
-        childicon: "heroicons-outline:clipboard-check",
-      },
-      {
-        childtitle: "Projects",
-        childlink: "projects",
-        childicon: "heroicons-outline:document",
+        childtitle: "All Kyc",
+        link: "kycs",
+        icon: "heroicons-outline:collection",
       },
     ],
   },
+
+  {
+    title: "Businesses",
+    icon: "ion:business-outline",
+    link: "#",
+    child: [
+      {
+        childtitle: " All Businesses",
+        link: "all_business",
+        icon: "ic:outline-add-business",
+      },
+      {
+        childtitle: "Pay Business",
+        link: "pay_business",
+        icon: "arcticons:amazon-business",
+      },
+    ],
+  },
+
+
+
+  {
+    title: "Apps",
+    icon: "eos-icons:subscriptions-created-outlined",
+    link: "form-elements",
+    child: [
+      {
+        childtitle: "Products",
+        link: "products",
+        childicon: "dashicons:products",
+      },
+      {
+        childtitle: "Customer Orders",
+        link: "customer_orders",
+        childicon: "solar:cart-2-bold",
+      },
+      {
+        childtitle: "Transactions",
+        link: "transactions",
+        childicon: "tdesign:undertake-transaction",
+      },
+    ],
+  },
+
   {
     title: "Pages",
-    icon: "heroicons-outline:view-boards",
-    link: "/app/home",
-    megamenu: [
-      {
-        megamenutitle: "Authentication",
-        megamenuicon: "heroicons-outline:user",
-        singleMegamenu: [
-          {
-            m_childtitle: "Signin One",
-            m_childlink: "/",
-          },
-          {
-            m_childtitle: "Signin Two",
-            m_childlink: "/login2",
-          },
-          {
-            m_childtitle: "Signin Three",
-            m_childlink: "/login3",
-          },
-          {
-            m_childtitle: "Signup One",
-            m_childlink: "/register",
-          },
-          {
-            m_childtitle: "Signup Two",
-            m_childlink: "/register/register2",
-          },
-          {
-            m_childtitle: "Signup Three",
-            m_childlink: "/register/register3",
-          },
-          {
-            m_childtitle: "Forget Password One",
-            m_childlink: "/forgot-password",
-          },
-          {
-            m_childtitle: "Forget Password Two",
-            m_childlink: "/forgot-password2",
-          },
-          {
-            m_childtitle: "Forget Password Three",
-            m_childlink: "/forgot-password3",
-          },
-          {
-            m_childtitle: "Lock Screen One",
-            m_childlink: "/lock-screen",
-          },
-          {
-            m_childtitle: "Lock Screen Two",
-            m_childlink: "/lock-screen2",
-          },
-          {
-            m_childtitle: "Lock Screen Three",
-            m_childlink: "/lock-screen3",
-          },
-        ],
-      },
-
-      {
-        megamenutitle: "Components",
-        megamenuicon: "heroicons-outline:user",
-        singleMegamenu: [
-          {
-            m_childtitle: "typography",
-            m_childlink: "typography",
-          },
-          {
-            m_childtitle: "colors",
-            m_childlink: "colors",
-          },
-          {
-            m_childtitle: "alert",
-            m_childlink: "alert",
-          },
-          {
-            m_childtitle: "button",
-            m_childlink: "button",
-          },
-          {
-            m_childtitle: "card",
-            m_childlink: "card",
-          },
-          {
-            m_childtitle: "carousel",
-            m_childlink: "carousel",
-          },
-          {
-            m_childtitle: "dropdown",
-            m_childlink: "dropdown",
-          },
-          {
-            m_childtitle: "image",
-            m_childlink: "image",
-          },
-          {
-            m_childtitle: "modal",
-            m_childlink: "modal",
-          },
-          {
-            m_childtitle: "Progress bar",
-            m_childlink: "progress-bar",
-          },
-          {
-            m_childtitle: "Placeholder",
-            m_childlink: "placeholder",
-          },
-
-          {
-            m_childtitle: "Tab & Accordion",
-            m_childlink: "tab-accordion",
-          },
-        ],
-      },
-      {
-        megamenutitle: "Forms",
-        megamenuicon: "heroicons-outline:user",
-        singleMegamenu: [
-          {
-            m_childtitle: "Input",
-            m_childlink: "input",
-          },
-          {
-            m_childtitle: "Input group",
-            m_childlink: "input-group",
-          },
-          {
-            m_childtitle: "Input layout",
-            m_childlink: "input-layout",
-          },
-          {
-            m_childtitle: "Form validation",
-            m_childlink: "form-validation",
-          },
-          {
-            m_childtitle: "Wizard",
-            m_childlink: "form-wizard",
-          },
-          {
-            m_childtitle: "Input mask",
-            m_childlink: "input-mask",
-          },
-          {
-            m_childtitle: "File input",
-            m_childlink: "file-input",
-          },
-          {
-            m_childtitle: "Form repeater",
-            m_childlink: "form-repeater",
-          },
-          {
-            m_childtitle: "Textarea",
-            m_childlink: "textarea",
-          },
-          {
-            m_childtitle: "Checkbox",
-            m_childlink: "checkbox",
-          },
-          {
-            m_childtitle: "Radio button",
-            m_childlink: "radio-button",
-          },
-          {
-            m_childtitle: "Switch",
-            m_childlink: "switch",
-          },
-        ],
-      },
-      {
-        megamenutitle: "Utility",
-        megamenuicon: "heroicons-outline:user",
-        singleMegamenu: [
-          {
-            m_childtitle: "Invoice",
-            m_childlink: "invoice",
-          },
-          {
-            m_childtitle: "Pricing",
-            m_childlink: "pricing",
-          },
-
-          // {
-          //   m_childtitle: "Testimonial",
-          //   m_childlink: "testimonial",
-          // },
-          {
-            m_childtitle: "FAQ",
-            m_childlink: "faq",
-          },
-          {
-            m_childtitle: "Blank page",
-            m_childlink: "blank-page",
-          },
-          {
-            m_childtitle: "Blog",
-            m_childlink: "blog",
-          },
-          {
-            m_childtitle: "404 page",
-            m_childlink: "error-page",
-          },
-          {
-            m_childtitle: "Coming Soon",
-            m_childlink: "coming-soon",
-          },
-          {
-            m_childtitle: "Under Maintanance page",
-            m_childlink: "under-construction",
-          },
-        ],
-      },
-    ],
-  },
-
-  {
-    title: "Widgets",
     icon: "heroicons-outline:view-grid-add",
     link: "form-elements",
     child: [
       {
-        childtitle: "Basic",
-        childlink: "basic",
-        childicon: "heroicons-outline:document-text",
+        childtitle: "Create Account",
+        link: "account",
+        childicon: "mdi:account-edit-outline",
       },
       {
-        childtitle: "Statistic",
-        childlink: "statistic",
-        childicon: "heroicons-outline:document-text",
+        childtitle: "Profile",
+        link: "profile",
+        childicon: "heroicons-outline:view-boards",
       },
     ],
   },
 
   {
-    title: "Extra",
+    title: "Utility",
     icon: "heroicons-outline:template",
 
     child: [
       {
-        childtitle: "Basic Table",
-        childlink: "table-basic",
+        childtitle: "Shipping Address",
+        link: "shipping-address",
         childicon: "heroicons-outline:table",
       },
       {
-        childtitle: "Advanced table",
-        childlink: "table-advanced",
+        childtitle: "Settings",
+        link: "settings",
+        childicon: "heroicons-outline:view-boards",
+      },
+    ],
+  },
+  {
+    title: "AI Assistance",
+    icon: "heroicons-outline:template",
+
+    child: [
+      {
+        childtitle: "Blog",
+        link: "blog",
+        childicon: "eos-icons:subscriptions-created-outlined",
+      },
+      {
+        childtitle: "Contact Us",
+        link: "contact",
         childicon: "heroicons-outline:table",
-      },
-      {
-        childtitle: "Apex chart",
-        childlink: "appex-chart",
-        childicon: "heroicons-outline:chart-bar",
-      },
-      {
-        childtitle: "Chart js",
-        childlink: "chartjs",
-        childicon: "heroicons-outline:chart-bar",
-      },
-      {
-        childtitle: "Map",
-        childlink: "map",
-        childicon: "heroicons-outline:map",
       },
     ],
   },

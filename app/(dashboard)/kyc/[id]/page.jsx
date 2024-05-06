@@ -194,6 +194,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
   const [showLoader, setShowLoader] = useState(false);
   const [loanLoader, setLoanLoader] = useState(false);
   const [assignLimit, setAssignLimit] = useState("");
+  const [loanLimit, setLoanLimit] = useState("");
   const [assignOustanding, setAssignOustanding] = useState(null);
   const [loanError, setLoanError] = useState(null);
   const [loanSuccess, setLoanSuccess] = useState(null);
@@ -584,7 +585,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
           setMonoDetails(userKyc.verification[2]);
           setMonoTxn(userKyc.verification[3].verificationData.mono_transactions);
           // console.log('Test Data', response);
-          console.log('Test verification', userKyc.verification);
+          // console.log('Test verification', userKyc.verification);
         } else {
           // Handle case where response or response.data is undefined
         }
@@ -689,6 +690,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
 
           // console.log("userloan", response.data);
           setLoan(response.data);
+          setLoanLimit(response.data[0].limit);
           
         } else {
           // Handle case where response or response.data is undefined
@@ -2988,7 +2990,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                   Spending Limit
                 </h4>
                 <div className="text-sm font-medium text-slate-900 dark:text-white">
-                  {naira.format(assignLimit)}
+                  {naira.format(loanLimit)}
                 </div>
               </div>
             </div>
