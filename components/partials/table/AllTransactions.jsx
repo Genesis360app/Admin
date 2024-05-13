@@ -146,7 +146,7 @@ const AllTransaction = ({ title = "All Transaction" }) => {
         const response = await walletService.fetchTransactions(); // Call fetchUsers as a function
 
         if (response) {
-          // console.log(response); // Use response.data
+          console.log(response); // Use response.data
           setHistory(response.transactions);
         } else {
           // Handle case where response or response.data is undefined
@@ -346,6 +346,7 @@ const AllTransaction = ({ title = "All Transaction" }) => {
                               } 
                   ${item.status === "Pending" ? "text-warning-500 " : ""}
                   ${item.status === "Canceled" ? "text-danger-500" : ""}
+                  ${item.status === "Paid" ? "text-info-500" : ""}
                   
                    `}
                             >

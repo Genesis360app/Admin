@@ -3274,6 +3274,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                                               } 
                   ${item.status === "Pending" ? "text-warning-500 " : ""}
                   ${item.status === "Canceled" ? "text-danger-500" : ""}
+                  ${item.status === "Paid" ? "text-info-500" : ""}
                   
                    `}
                                             >

@@ -147,12 +147,14 @@ const AllOrders = ({ title = "All Orders", item }) => {
   const handleNextPage = () => {
     if (currentPage < Math.ceil(filteredData.length / itemsPerPage)) {
       setCurrentPage((prevPage) => prevPage + 1);
+      fetchData();
     }
   };
 
   const handlePrevPage = () => {
     if (currentPage > 1) {
       setCurrentPage((prevPage) => prevPage - 1);
+      fetchData();
     }
   };
 
@@ -200,10 +202,10 @@ const AllOrders = ({ title = "All Orders", item }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await orderService.fetchOrders(); // Call fetchUsers as a function
+        const response = await orderService.fetchOrders(currentPage, itemsPerPage); // Call fetchUsers as a function
 
         if (response) {
-          // console.log(response.data); // Use response.data
+          console.log(response.data); // Use response.data
           setOrderItems(response.data);
           // setStatus_(selectedOrder?.data.data.trackingId?.status);
         } else {
@@ -214,7 +216,7 @@ const AllOrders = ({ title = "All Orders", item }) => {
       }
     };
     fetchData();
-  }, []);
+  }, [currentPage, itemsPerPage]);
 
   const handleItemClick = (item) => {
     setSelectedOrder(item);

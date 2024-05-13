@@ -332,7 +332,7 @@ const TransactionsTable = () => {
                               } 
                   ${item.status === "Pending" ? "text-warning-500 " : ""}
                   ${item.status === "Canceled" ? "text-danger-500" : ""}
-                  
+                  ${item.status === "Paid" ? "text-info-500" : ""}
                    `}
                             >
                               {item.status}

@@ -16,7 +16,7 @@ const fetchOrders = async () => {
           throw new Error('Invalid user data');
         }
       const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/order`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/user/order`,
         {
           
           headers: {
