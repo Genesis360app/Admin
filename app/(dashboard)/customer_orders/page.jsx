@@ -80,7 +80,8 @@ const AllOrders = ({ title = "All Orders", item }) => {
   const [success, setSuccess] = useState(null);
   const steps = ["Pending", "Paid", "Proccessing", "In-Transit", "Delivering", "Closed"];
   const statusIndex = steps.indexOf(orderStatus);
-
+  const [totalPages, setTotalPages] = useState(1);
+  
 
   // // Determine if the order is complete
   // const isComplete = orderStatus === "complete";
@@ -144,37 +145,74 @@ const AllOrders = ({ title = "All Orders", item }) => {
     minimumFractionDigits: 0,
   });
 
-  const handleNextPage = () => {
-    if (currentPage < Math.ceil(filteredData.length / itemsPerPage)) {
-      setCurrentPage((prevPage) => prevPage + 1);
-      fetchData();
-    }
-  };
+// Handle next page click
+const handleNextPage = () => {
+  if (currentPage < totalPages) {
+    setCurrentPage((prevPage) => prevPage + 1);
+  }
+};
 
-  const handlePrevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage((prevPage) => prevPage - 1);
-      fetchData();
-    }
-  };
+// Handle previous page click
+const handlePrevPage = () => {
+  if (currentPage > 1) {
+    setCurrentPage((prevPage) => prevPage - 1);
+  }
+};
 
-  // Calculate the index range for the current page
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = Math.min(startIndex + itemsPerPage, filteredData.length);
+  
 
-  // Get the paginated history data for the current page
-  const paginatedHistory = filteredData.slice(startIndex, endIndex);
+// Calculate the index range for the current page
+const startIndex = (currentPage - 1) * itemsPerPage;
+const endIndex = Math.min(startIndex + itemsPerPage, filteredData.length);
+
+// Get the paginated history data for the current page
+const paginatedHistory = filteredData.slice(startIndex, endIndex);
 
   // Calculate the total number of pages
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  // const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+
+ 
+  
+  const handlePrint = () => {
+    window.print();
+  };
+
+  // const getPageNumbers = () => {
+  //   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  //   const middlePage = Math.ceil(maxPageButtons / 2);
+
+  //   let startPage = currentPage - middlePage + 1;
+  //   let endPage = currentPage + middlePage - 1;
+
+  //   if (totalPages <= maxPageButtons) {
+  //     startPage = 1;
+  //     endPage = totalPages;
+  //   } else if (currentPage <= middlePage) {
+  //     startPage = 1;
+  //     endPage = maxPageButtons;
+  //   } else if (currentPage >= totalPages - middlePage) {
+  //     startPage = totalPages - maxPageButtons + 1;
+  //     endPage = totalPages;
+  //   }
+
+  //   const pageNumbers = [];
+  //   for (let i = startPage; i <= endPage; i++) {
+  //     pageNumbers.push(i);
+  //   }
+
+  //   return pageNumbers;
+  // };
+
+  // Function to handle printing
+ 
+  
 
   const getPageNumbers = () => {
-    const totalPages = Math.ceil(filteredData.length / itemsPerPage);
     const middlePage = Math.ceil(maxPageButtons / 2);
-
+  
     let startPage = currentPage - middlePage + 1;
     let endPage = currentPage + middlePage - 1;
-
+  
     if (totalPages <= maxPageButtons) {
       startPage = 1;
       endPage = totalPages;
@@ -185,38 +223,33 @@ const AllOrders = ({ title = "All Orders", item }) => {
       startPage = totalPages - maxPageButtons + 1;
       endPage = totalPages;
     }
-
+  
     const pageNumbers = [];
     for (let i = startPage; i <= endPage; i++) {
       pageNumbers.push(i);
     }
-
+  
     return pageNumbers;
   };
-
-  // Function to handle printing
-  const handlePrint = () => {
-    window.print();
-  };
-
+ 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await orderService.fetchOrders(currentPage, itemsPerPage); // Call fetchUsers as a function
-
-        if (response) {
-          console.log(response.data); // Use response.data
+        const response = await orderService.fetchOrders(currentPage, itemsPerPage);
+        if (response && response.success) {
           setOrderItems(response.data);
-          // setStatus_(selectedOrder?.data.data.trackingId?.status);
+          console.log(response);
+          setTotalPages(Math.ceil(response.total / itemsPerPage));
         } else {
           // Handle case where response or response.data is undefined
         }
       } catch (err) {
-        // console.error("Error:", err);
+        // Handle error
       }
     };
     fetchData();
   }, [currentPage, itemsPerPage]);
+  
 
   const handleItemClick = (item) => {
     setSelectedOrder(item);
@@ -399,31 +432,31 @@ const AllOrders = ({ title = "All Orders", item }) => {
                 </thead>
                 <tbody className="bg-white divide-y divide-slate-100 dark:bg-slate-800 dark:divide-slate-700">
                   <tr>
-                    <td className="table-td py-2">
+                    <td className="py-2 table-td">
                       
                       <span>
                         {selectedOrder?.id.slice(0, 8)}...
                         {selectedOrder?.id.slice(-10)}
                       </span>
                     </td>
-                    <td className="table-td py-2">
+                    <td className="py-2 table-td">
                       {selectedOrder?.user?.fullName}
                     </td>
-                    <td className="table-td py-2">
+                    <td className="py-2 table-td">
                       {"+234" + "" + selectedOrder?.phone}
                     </td>
-                    <td className="table-td py-2 ">
+                    <td className="py-2 table-td ">
                     {selectedOrder?.trackingId?.location || "No Location"}
                     </td>
-                    <td className="table-td py-2">
+                    <td className="py-2 table-td">
                       
                       {naira.format(selectedOrder?.totalPrice || "0")}
                     </td>
-                    <td className="table-td py-2">
+                    <td className="py-2 table-td">
                     {selectedOrder?.transaction?.paymentMode || "Unknown Payment Mode"}
                     </td>
-                    <td className="table-td py-2"> {selectedOrder?.city} </td>
-                    <td className="table-td py-2">
+                    <td className="py-2 table-td"> {selectedOrder?.city} </td>
+                    <td className="py-2 table-td">
                       <span className="block w-full">
                         <span
                           className={` inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 ${
@@ -462,10 +495,10 @@ const AllOrders = ({ title = "All Orders", item }) => {
                         </span>
                       </span>
                     </td>
-                    <td className="table-td py-2">
+                    <td className="py-2 table-td">
                       {formattedDate(selectedOrder?.dateOrdered)}
                     </td>
-                    <td className="table-td py-2">
+                    <td className="py-2 table-td">
                       {formattedDate(
                         selectedOrder?.trackingId?.estimatedDelivery
                       )}
@@ -505,7 +538,7 @@ const AllOrders = ({ title = "All Orders", item }) => {
                 <tbody className="bg-white divide-y divide-slate-100 dark:bg-slate-800 dark:divide-slate-700">
                   {selectedOrder?.orderItems?.map((item) => (
                     <tr key={item.id}>
-                      <td className="table-td py-2">
+                      <td className="py-2 table-td">
                         {" "}
                         {item.product?.id.slice(0, 8)}...
                         {item.product?.id.slice(-10)}
@@ -524,9 +557,9 @@ const AllOrders = ({ title = "All Orders", item }) => {
                           alt={item.product?.name}
                         />
                       </td>
-                      <td className="table-td py-2">{item.product?.name}</td>
-                      <td className="table-td py-2">{item.product?.price}</td>
-                      <td className="table-td py-2">{item?.quantity}</td>
+                      <td className="py-2 table-td">{item.product?.name}</td>
+                      <td className="py-2 table-td">{item.product?.price}</td>
+                      <td className="py-2 table-td">{item?.quantity}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -618,16 +651,16 @@ const AllOrders = ({ title = "All Orders", item }) => {
               className="w-[150px] h-[150px] rounded-md "
             />
 
-            <div className="text-slate-600 dark:text-slate-200 text-lg pt-4 pb-1">
+            <div className="pt-4 pb-1 text-lg text-slate-600 dark:text-slate-200">
               <p className="font-bold">Are you sure you want to delete this Oder ?</p>
             </div>
-            <div className="text-slate-600 dark:text-slate-200 text-lg rounded-lg pb-1">
+            <div className="pb-1 text-lg rounded-lg text-slate-600 dark:text-slate-200">
             {selectedOrder?.id}
             </div>
-            <div className="text-slate-600 dark:text-slate-200 text-lg pb-1">
+            <div className="pb-1 text-lg text-slate-600 dark:text-slate-200">
             {naira.format(selectedOrder?.totalPrice)}
             </div>
-            <div className="text-slate-600 dark:text-slate-200 text-lg pb-1">
+            <div className="pb-1 text-lg text-slate-600 dark:text-slate-200">
             {"+234" + "" + selectedOrder?.phone}
             </div>
             {error ? (
@@ -639,23 +672,23 @@ const AllOrders = ({ title = "All Orders", item }) => {
             {success ? (
               <Alert
                 label={success}
-                className="alert-success light-mode w-full"
+                className="w-full alert-success light-mode"
               />
             ) : (
               ""
             )}
             <br />
 
-            <div className="flex ltr:text-right rtl:text-left space-x-2 justify-center">
+            <div className="flex justify-center space-x-2 ltr:text-right rtl:text-left">
               <Button
-                className="btn btn-dark  text-center"
+                className="text-center btn btn-dark"
                 onClick={() => setDelete_orderModal(false)}
               >
                 Cancel
               </Button>
 
               <Button
-                className="btn btn-danger  text-center"
+                className="text-center btn btn-danger"
                 onClick={handleDeleteOrder}
                 disabled={isLoading}
               >
@@ -726,37 +759,37 @@ const AllOrders = ({ title = "All Orders", item }) => {
                   <React.Fragment key={item?.id}>
                     <tbody className="bg-white divide-y divide-slate-100 dark:bg-slate-800 dark:divide-slate-700">
                       <tr>
-                        <td className="table-td py-2">
+                        <td className="py-2 table-td">
                           {" "}
                           <span>
                             {item.id.slice(0, 8)}...{item.id.slice(-10)}
                           </span>
                         </td>
-                        <td className="table-td py-2 ">
+                        <td className="py-2 table-td ">
                           {" "}
                           {item.user?.fullName}{" "}
                         </td>
-                        <td className="table-td py-2 ">
+                        <td className="py-2 table-td ">
                           {" "}
                           {"+234" + "" + item?.phone}{" "}
                         </td>
 
                        
 
-                        <td className="table-td py-2 ">
+                        <td className="py-2 table-td ">
                           {item.trackingId?.location || "No Location"}
                         </td>
-                        <td className="table-td py-2">
+                        <td className="py-2 table-td">
                           {" "}
                           {naira.format(item?.totalPrice || "0")}
                         </td>
-                        <td className="table-td py-2">
+                        <td className="py-2 table-td">
                           {" "}
                           {item.transaction?.paymentMode}{" "}
                         </td>
 
-                        <td className="table-td py-2"> {item?.city} </td>
-                        <td className="table-td py-2">
+                        <td className="py-2 table-td"> {item?.city} </td>
+                        <td className="py-2 table-td">
                           <span className="block w-full">
                             <span
                               className={` inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 ${
@@ -801,17 +834,17 @@ const AllOrders = ({ title = "All Orders", item }) => {
                           </span>
                         </td>
 
-                        <td className="table-td py-2">
+                        <td className="py-2 table-td">
                           {formattedDate(item?.dateOrdered)}
                         </td>
-                        <td className="table-td py-2">
+                        <td className="py-2 table-td">
                           {" "}
                           {formattedDate(
                             item.trackingId?.estimatedDelivery
                           )}{" "}
                         </td>
 
-                        <td className="table-td py-2">
+                        <td className="py-2 table-td">
                           {" "}
                           <div className="flex space-x-3 rtl:space-x-reverse">
                             <Tooltip
@@ -876,98 +909,91 @@ const AllOrders = ({ title = "All Orders", item }) => {
           </div>
         </div>
         <div className="items-center justify-between mt-6 space-y-5 md:flex md:space-y-0">
-          <div className="flex items-center space-x-3 rtl:space-x-reverse">
-            <select
-              className="py-2 form-control w-max"
-              value={pageSize}
-              onChange={(e) => {
-                setPageSize(Number(e.target.value));
-                setCurrentPage(1); // Reset current page to 1 when changing page size
-              }}
-            >
-              {[10, 25, 50, 100, 500].map((pageSizeOption) => (
-                <option key={pageSizeOption} value={pageSizeOption}>
-                  Show {pageSizeOption}
-                </option>
-              ))}
-            </select>
-            <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
-              Page
-              <span>
-                {currentPage} of {totalPages}
-              </span>
-            </span>
-          </div>
-          {/* <p>Total Amount : <b>{naira.format(priceTotal)}</b> </p> */}
-          <ul className="flex flex-wrap items-center space-x-3 rtl:space-x-reverse">
-            <li className="text-xl leading-4 text-slate-900 dark:text-white rtl:rotate-180">
-              <button
-                className={`${
-                  currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-                onClick={() => setCurrentPage(1)}
-                disabled={currentPage === 1}
-              >
-                <Icon icon="heroicons:chevron-double-left-solid" />
-              </button>
-            </li>
-            <li className="text-sm leading-4 text-slate-900 dark:text-white rtl:rotate-180">
-              <button
-                className={`${
-                  currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-                onClick={handlePrevPage}
-                disabled={currentPage === 1}
-              >
-                Prev
-              </button>
-            </li>
+  <div className="flex items-center space-x-3 rtl:space-x-reverse">
+    <select
+      className="py-2 form-control w-max"
+      value={pageSize}
+      onChange={(e) => {
+        setPageSize(Number(e.target.value));
+        setCurrentPage(1); // Reset current page to 1 when changing page size
+      }}
+    >
+      {[10, 25, 50, 100, 500].map((pageSizeOption) => (
+        <option key={pageSizeOption} value={pageSizeOption}>
+          Show {pageSizeOption}
+        </option>
+      ))}
+    </select>
+    <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
+      Page
+      <span>
+        {currentPage} of {totalPages}
+      </span>
+    </span>
+  </div>
+  <ul className="flex flex-wrap items-center space-x-3 rtl:space-x-reverse">
+    <li className="text-xl leading-4 text-slate-900 dark:text-white rtl:rotate-180">
+      <button
+        className={`${
+          currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
+        }`}
+        onClick={() => setCurrentPage(1)} disabled={currentPage === 1}
+      >
+        <Icon icon="heroicons:chevron-double-left-solid" />
+      </button>
+    </li>
+    <li className="text-sm leading-4 text-slate-900 dark:text-white rtl:rotate-180">
+      <button
+        className={`${
+          currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
+        }`}
+        onClick={handlePrevPage} disabled={currentPage === 1}
+      >
+        Prev
+      </button>
+    </li>
 
-            {getPageNumbers().map((pageNumber) => (
-              <li key={pageNumber}>
-                <button
-                  href="#"
-                  aria-current="page"
-                  className={`${
-                    pageNumber === currentPage
-                      ? "bg-slate-900 dark:bg-slate-600 dark:text-slate-200 text-white font-medium "
-                      : "bg-slate-100 dark:bg-slate-700 dark:text-slate-400 text-slate-900  font-normal  "
-                  }    text-sm rounded leading-[16px] flex h-6 w-6 items-center justify-center transition-all duration-150`}
-                  onClick={() => setCurrentPage(pageNumber)}
-                >
-                  {pageNumber}
-                </button>
-              </li>
-            ))}
+    {getPageNumbers().map((pageNumber) => (
+      <li key={pageNumber}>
+        <button
+          href="#"
+          aria-current="page"
+          className={`${
+            pageNumber === currentPage
+              ? "bg-slate-900 dark:bg-slate-600 dark:text-slate-200 text-white font-medium "
+              : "bg-slate-100 dark:bg-slate-700 dark:text-slate-400 text-slate-900  font-normal  "
+          }    text-sm rounded leading-[16px] flex h-6 w-6 items-center justify-center transition-all duration-150`}
+          onClick={() => setCurrentPage(pageNumber)}
+        >
+          {pageNumber}
+        </button>
+      </li>
+    ))}
 
-            <li className="text-sm leading-4 text-slate-900 dark:text-white rtl:rotate-180">
-              <button
-                className={`${
-                  currentPage === totalPages
-                    ? "opacity-50 cursor-not-allowed"
-                    : ""
-                }`}
-                onClick={handleNextPage}
-                disabled={currentPage === totalPages}
-              >
-                Next
-              </button>
-            </li>
-            <li className="text-xl leading-4 text-slate-900 dark:text-white rtl:rotate-180">
-              <button
-                onClick={() => setCurrentPage(totalPages)}
-                disabled={currentPage === totalPages}
-                className={`${
-                  currentPage === totalPages
-                    ? "opacity-50 cursor-not-allowed"
-                    : ""
-                }`}
-              >
-                <Icon icon="heroicons:chevron-double-right-solid" />
-              </button>
-            </li>
-          </ul>
-        </div>
+    <li className="text-sm leading-4 text-slate-900 dark:text-white rtl:rotate-180">
+      <button
+        className={`${
+          currentPage === totalPages ? "opacity-50 cursor-not-allowed" : ""
+        }`}
+        onClick={handleNextPage}
+        disabled={currentPage === totalPages}
+      >
+        Next
+      </button>
+    </li>
+    <li className="text-xl leading-4 text-slate-900 dark:text-white rtl:rotate-180">
+      <button
+       onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages}
+        className={`${
+          currentPage === totalPages ? "opacity-50 cursor-not-allowed" : ""
+        }`}
+      >
+        <Icon icon="heroicons:chevron-double-right-solid" />
+      </button>
+    </li>
+  </ul>
+</div>
+
         {/*end*/}
       </Card>
     </>

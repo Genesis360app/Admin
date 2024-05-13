@@ -3,44 +3,49 @@ import { _notifySuccess, _notifyError,_notifyWarn } from "@/utils/alart";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const fetchOrders = async () => {
-    try {
-      const userString = localStorage.getItem("user");
-        if (!userString) {
-          throw new Error('User token not found');
-        }
-    
-        const user = JSON.parse(userString);
-    
-        if (!user || !user.token || !user.userId) {
-          throw new Error('Invalid user data');
-        }
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/user/order`,
-        {
-          
-          headers: {
-            // cache: 'no-store',
-            Authorization: `Bearer ${user.token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-  
-      if (response.data) {
-  
-        // console.log(response.data);
-      }
-  
-      return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        throw error.response?.data ||handleApiError; // Include error.message for unexpected errors
-      } else {
-        throw 'An unexpected error occurred';
-      }
+const fetchOrders = async (page, limit) => {
+  try {
+    const userString = localStorage.getItem("user");
+    if (!userString) {
+      throw new Error('User token not found');
     }
-  };
+
+    const user = JSON.parse(userString);
+
+    if (!user || !user.token || !user.userId) {
+      throw new Error('Invalid user data');
+    }
+
+    const response = await axios.get(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/order`,
+      {
+        params: {
+          page: page,
+          limit: limit,
+        },
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    if (response.data) {
+      // console.log(response.data);
+    }
+
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      throw error.response?.data || handleApiError;
+    } else {
+      throw 'An unexpected error occurred';
+    }
+  }
+};
+
+
+
 const totalSales = async () => {
     try {
       const userString = localStorage.getItem("user");
