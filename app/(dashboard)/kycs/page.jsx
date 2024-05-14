@@ -169,7 +169,7 @@ const paginatedHistory = allKycs.slice(startIndex, endIndex);
       const response = await kycService.fetchKycs(currentPage, itemsPerPage);
       if (response && response.success) {
         setAllKycs(response.data);
-        console.log(response);
+        // console.log(response);
         setTotalPages(Math.ceil(response.totalCount / itemsPerPage));
       } else {
         // Handle case where response or response.data is undefined
