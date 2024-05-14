@@ -134,7 +134,11 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
   const [issueDate, setIssueDate] = useState("");
   const [nationality, setNationality] = useState("");
   const [images, setImages] = useState();
-  const [businessinfo, Setbusinessinfo] = useState("");
+  const [businessAddress, SetBusinessAddress] = useState("");
+  const [businessCategory, SetBusinessCategory] = useState("");
+  const [businessReg, SetBusinessReg] = useState("");
+  const [businessName, SetBusinessName] = useState("");
+  const [businessRcNumber, SetBusinessRcNumber] = useState("");
   const [referralcode, setReferralcode] = useState("");
   const [refby, setRefby] = useState("");
   const [shippingState, setShippingState] = useState("");
@@ -167,11 +171,6 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
   const [kycId, setKycId] = useState("");
   const [kycStatus, setKycStatus] = useState("");
   const [selectedLoan, setSelectedLoan] = useState(null);
-  const [isusername, setIsusername] = useState("");
-  const [isfirstname, setIsfirstname] = useState("");
-  const [islastname, setIslastname] = useState("");
-  const [isemail, setIsemail] = useState("");
-  const [isphone, setIsphone] = useState("");
   const [isBusinessDefault, setBusinessDefault] = useState(false);
   const [password, setPassword] = useState("");
   const [monoDetails, setMonoDetails] = useState("");
@@ -468,8 +467,8 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
   // const isSubEmpty = subByID.length === 0;
   const isHistoryEmpty = history.length === 0;
   const isLoanEmpty = loan.length === 0;
-  const isMonoEmpty = monoDetails.length === 0;
-  const isMonoTxnEmpty = monoTxn.length === 0;
+  const isMonoEmpty = monoDetails?.length === 0;
+  const isMonoTxnEmpty = monoTxn?.length === 0;
 
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "", // Provide a default value if the environment variable is not defined
@@ -501,9 +500,14 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
         );
 
         if (response.data) {
-          const userinfo = response.data.data.user;
-          const userwallet = response.data.data.wallet;
-          Setbusinessinfo(response.data.data.business);
+          const userinfo = response?.data?.data?.user;
+          const userwallet = response?.data?.data?.wallet;
+          SetBusinessAddress(response?.data?.data?.business?.address);
+          SetBusinessCategory(response?.data?.data?.business?.category);
+          SetBusinessReg(response?.data?.data?.business?.isRegistered);
+          SetBusinessName(response?.data?.data?.business?.name);
+          SetBusinessRcNumber(response?.data?.data?.business?.rcNumber);
+          // console.log(response?.data?.business?.data);
           // console.log(response);
           // console.log(id);
           setFirstname(userinfo.first_name);
@@ -1399,9 +1403,9 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
     />
   }
   footerContent={
-    <div className="flex ltr:text-right rtl:text-left space-x-1">
+    <div className="flex space-x-1 ltr:text-right rtl:text-left">
       <Button
-        className="btn btn-dark text-center"
+        className="text-center btn btn-dark"
         onClick={() => assignLoan(assignLimit)}
         disabled={loanLoader}
       >
@@ -1415,7 +1419,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
   }
 >
   <form className="space-y-4">
-    <div className="xl:col-span-2 col-span-1">
+    <div className="col-span-1 xl:col-span-2">
       <Card>
         <Textinput
           label={`Assign Loan Limit to ${firstname} ${lastname}`}
@@ -1433,7 +1437,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
           <Alert
             dismissible
             label={loanError}
-            className="alert-danger light-mode w-full"
+            className="w-full alert-danger light-mode"
           />
         ) : (
           ""
@@ -1443,7 +1447,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
           <Alert
             dismissible
             label={loanSuccess}
-            className="alert-success light-mode w-full"
+            className="w-full alert-success light-mode"
           />
         ) : (
           ""
@@ -1460,9 +1464,9 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
         title={showLoader ? "Updating..." :  "Update KYC"}
         className="max-w-[80%]"
         footerContent={
-          <div className="flex ltr:text-right rtl:text-left space-x-1">
+          <div className="flex space-x-1 ltr:text-right rtl:text-left">
             <Button
-              className="btn btn-dark   text-center"
+              className="text-center btn btn-dark"
               onClick={onSuccess}
               disabled={showLoader}
             >
@@ -1718,7 +1722,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
               <Alert
                dismissible
                 label={error}
-                className="alert-danger light-mode w-full "
+                className="w-full alert-danger light-mode "
               />
             ) : (
               ""
@@ -1728,7 +1732,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
               <Alert
                dismissible
                 label={success}
-                className="alert-success light-mode w-full "
+                className="w-full alert-success light-mode "
               />
             ) : (
               ""
@@ -1743,9 +1747,9 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
         title={isLoading ? "Updating..." : "Update Profile "}
         className="max-w-[48%]"
         footerContent={
-          <div className="flex ltr:text-right rtl:text-left space-x-1">
+          <div className="flex space-x-1 ltr:text-right rtl:text-left">
             <Button
-              className="btn btn-dark   text-center"
+              className="text-center btn btn-dark"
               disabled={isLoading}
               onClick={() => UpdateProfile(
                 username,
@@ -1839,7 +1843,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
             // readOnly
         />
 
-        <label className="relative mt-4 inline-flex items-center cursor-pointer">
+        <label className="relative inline-flex items-center mt-4 cursor-pointer">
             <input
                 type="checkbox"
                 className="sr-only peer"
@@ -1847,7 +1851,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                 onChange={handleToggleChange}
             />
             <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-gray-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-800"></div>
-            <span className="ms-3 ml-4 text-sm font-medium text-success-900 dark:text-success-900">
+            <span className="ml-4 text-sm font-medium ms-3 text-success-900 dark:text-success-900">
                 Mark as Business Account
             </span>
         </label>
@@ -1860,7 +1864,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
               <Alert
                dismissible
                 label={error}
-                className="alert-danger light-mode w-full "
+                className="w-full alert-danger light-mode "
               />
             ) : (
               ""
@@ -1870,7 +1874,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
               <Alert
                dismissible
                 label={success}
-                className="alert-success light-mode w-full "
+                className="w-full alert-success light-mode "
               />
             ) : (
               ""
@@ -2189,30 +2193,30 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                 </thead>
                 <tbody className="bg-white divide-y divide-slate-100 dark:bg-slate-800 dark:divide-slate-700">
                   <tr>
-                    <td className="table-td py-2">
+                    <td className="py-2 table-td">
                       <span>
                         {selectedOrder?.id.slice(0, 8)}...
                         {selectedOrder?.id.slice(-10)}
                       </span>
                     </td>
-                    <td className="table-td py-2">
+                    <td className="py-2 table-td">
                       {selectedOrder?.user?.username}
                     </td>
-                    <td className="table-td py-2">
+                    <td className="py-2 table-td">
                       {"+234" + "" + selectedOrder?.phone}
                     </td>
-                    <td className="table-td py-2 ">
+                    <td className="py-2 table-td ">
                       {selectedOrder?.trackingId?.location || "No Location"}
                     </td>
-                    <td className="table-td py-2">
+                    <td className="py-2 table-td">
                       {naira.format(selectedOrder?.totalPrice || "0")}
                     </td>
-                    <td className="table-td py-2">
+                    <td className="py-2 table-td">
                       {selectedOrder?.transaction?.paymentMode ||
                         "Unknown Payment Mode"}
                     </td>
-                    <td className="table-td py-2"> {selectedOrder?.city} </td>
-                    <td className="table-td py-2">
+                    <td className="py-2 table-td"> {selectedOrder?.city} </td>
+                    <td className="py-2 table-td">
                       <span className="block w-full">
                         <span
                           className={` inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 ${
@@ -2256,10 +2260,10 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                         </span>
                       </span>
                     </td>
-                    <td className="table-td py-2">
+                    <td className="py-2 table-td">
                       {formattedDate(selectedOrder?.dateOrdered)}
                     </td>
-                    <td className="table-td py-2">
+                    <td className="py-2 table-td">
                       {formattedDate(
                         selectedOrder?.trackingId?.estimatedDelivery
                       )}
@@ -2302,7 +2306,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                 <tbody className="bg-white divide-y divide-slate-100 dark:bg-slate-800 dark:divide-slate-700">
                   {selectedOrder?.orderItems?.map((item) => (
                     <tr key={item.id}>
-                      <td className="table-td py-2">
+                      <td className="py-2 table-td">
                         {" "}
                         {item.product?.id.slice(0, 8)}...
                         {item.product?.id.slice(-10)}
@@ -2321,14 +2325,14 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                           alt={item.product?.name}
                         />
                       </td>
-                      <td className="table-td py-2">{item.product?.name}</td>
-                      <td className="table-td py-2">
+                      <td className="py-2 table-td">{item.product?.name}</td>
+                      <td className="py-2 table-td">
                         {item.product?.description
                           ? HTMLReactParser(item.product.description)
                           : null}
                       </td>
-                      <td className="table-td py-2">{item.product?.price}</td>
-                      <td className="table-td py-2">{item?.quantity}</td>
+                      <td className="py-2 table-td">{item.product?.price}</td>
+                      <td className="py-2 table-td">{item?.quantity}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -2419,18 +2423,18 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
               className="w-[150px] h-[150px] rounded-md "
             />
 
-            <div className="text-slate-600 dark:text-slate-200 text-lg pt-4 pb-1">
+            <div className="pt-4 pb-1 text-lg text-slate-600 dark:text-slate-200">
               <p className="font-bold">
                 Are you sure you want to delete this Oder ?
               </p>
             </div>
-            <div className="text-slate-600 dark:text-slate-200 text-lg rounded-lg pb-1">
+            <div className="pb-1 text-lg rounded-lg text-slate-600 dark:text-slate-200">
               {selectedOrder?.id}
             </div>
-            <div className="text-slate-600 dark:text-slate-200 text-lg pb-1">
+            <div className="pb-1 text-lg text-slate-600 dark:text-slate-200">
               {naira.format(selectedOrder?.totalPrice)}
             </div>
-            <div className="text-slate-600 dark:text-slate-200 text-lg pb-1">
+            <div className="pb-1 text-lg text-slate-600 dark:text-slate-200">
               {"+234" + "" + selectedOrder?.phone}
             </div>
             {error ? (
@@ -2442,23 +2446,23 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
             {success ? (
               <Alert
                 label={success}
-                className="alert-success light-mode w-full"
+                className="w-full alert-success light-mode"
               />
             ) : (
               ""
             )}
             <br />
 
-            <div className="flex ltr:text-right rtl:text-left space-x-2 justify-center">
+            <div className="flex justify-center space-x-2 ltr:text-right rtl:text-left">
               <Button
-                className="btn btn-dark  text-center"
+                className="text-center btn btn-dark"
                 onClick={() => setDelete_orderModal(false)}
               >
                 Cancel
               </Button>
 
               <Button
-                className="btn btn-danger  text-center"
+                className="text-center btn btn-danger"
                 onClick={handleDeleteOrder}
                 disabled={isLoading}
               >
@@ -2521,17 +2525,17 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                 <tbody className="bg-white divide-y divide-slate-100 dark:bg-slate-800 dark:divide-slate-700">
                   {selectedLoan?.loanItems?.map((item) => (
                     <tr key={item?._id}>
-                      <td className="table-td py-2"> {item?._id}</td>
-                      <td className="table-td py-2">
+                      <td className="py-2 table-td"> {item?._id}</td>
+                      <td className="py-2 table-td">
                         {naira.format(item?.amount)}
                       </td>
 
                       <td className="w-8 h-8 rounded-[100%] ltr:mr-2 rtl:ml-2">
                         {item?.repayment}{" "}
                       </td>
-                      <td className="table-td py-2">{item?.interestRate}%</td>
+                      <td className="py-2 table-td">{item?.interestRate}%</td>
                       
-                      <td className="table-td py-2">
+                      <td className="py-2 table-td">
                         <span className="block w-full">
                           <span
                             className={` inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 ${
@@ -2555,15 +2559,15 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                         </span>
                       </td>
 
-                      <td className="table-td py-2">
+                      <td className="py-2 table-td">
                         {formattedDate(item?.dueDate)}
                       </td>
-                      <td className="table-td py-2">
+                      <td className="py-2 table-td">
                       <div>
                             <Dropdown
                               classMenuItems="right-0 w-[140px] top-[110%] "
                               label={
-                                <span className="text-xl text-center block w-full">
+                                <span className="block w-full text-xl text-center">
                                   <Icon icon="heroicons-outline:dots-vertical" />
                                 </span>
                               }
@@ -2576,7 +2580,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                                 }}
                                   disabled={isLoading}
                                 >
-                                  <div className="hover:bg-slate-900 hover:text-white dark:hover:bg-slate-600 dark:hover:bg-opacity-50 w-full border-b border-b-gray-500 border-opacity-10 px-4 py-2 text-sm  last:mb-0 cursor-pointer first:rounded-t last:rounded-b flex space-x-2 items-center rtl:space-x-reverse">
+                                  <div className="flex items-center w-full px-4 py-2 space-x-2 text-sm border-b cursor-pointer hover:bg-slate-900 hover:text-white dark:hover:bg-slate-600 dark:hover:bg-opacity-50 border-b-gray-500 border-opacity-10 last:mb-0 first:rounded-t last:rounded-b rtl:space-x-reverse">
                                     <span className="text-base">
                                       <Icon icon="mdi:approve" />
                                     </span>
@@ -2598,8 +2602,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                                   disabled={isLoading}
                                 >
                                   <div
-                                    className="bg-danger-500 text-danger-500 bg-opacity-30   hover:bg-opacity-100 hover:text-white w-full border-b border-b-gray-500 border-opacity-10 px-4 py-2 text-sm  last:mb-0 cursor-pointer 
-                   first:rounded-t last:rounded-b flex  space-x-2 items-center rtl:space-x-reverse "
+                                    className="flex items-center w-full px-4 py-2 space-x-2 text-sm border-b cursor-pointer bg-danger-500 text-danger-500 bg-opacity-30 hover:bg-opacity-100 hover:text-white border-b-gray-500 border-opacity-10 last:mb-0 first:rounded-t last:rounded-b rtl:space-x-reverse "
                                   >
                                     <span className="text-base">
                                       <Icon icon="fluent:shifts-deny-24-regular" />
@@ -2636,7 +2639,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
             backgroundSize: "cover",
           }}
         >
-          <div className="flex-none flex md:space-x-3 space-x-1 items-center rtl:space-x-reverse absolute right-3 top-3">
+          <div className="absolute flex items-center flex-none space-x-1 md:space-x-3 rtl:space-x-reverse right-3 top-3">
             <Link href={`tel:${phone}`}>
               <div className="msg-action-btn">
                 <Icon icon="heroicons-outline:phone" />
@@ -2664,15 +2667,15 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
           </div>
         </div>
 
-        <div className="profile-box flex-none md:text-start text-center">
-          <div className="md:flex items-end md:space-x-6 rtl:space-x-reverse">
+        <div className="flex-none text-center profile-box md:text-start">
+          <div className="items-end md:flex md:space-x-6 rtl:space-x-reverse">
             <div className="flex-none">
               <div className="md:h-[186px] md:w-[186px] h-[140px] w-[140px] md:ml-0 md:mr-0 ml-auto mr-auto md:mb-0 mb-4 rounded-full ring-4 ring-slate-100 relative">
                 <img
                   src={
                     avatar == "" ? "/assets/images/users/user-1.jpg" : avatar
                   }
-                  className="w-full h-full object-cover rounded-full"
+                  className="object-cover w-full h-full rounded-full"
                 />
                 <div
                   className="absolute right-2 h-8 w-8 bg-slate-50 text-slate-600 rounded-full shadow-sm flex flex-col items-center justify-center md:top-[140px] top-[100px]"
@@ -2725,28 +2728,28 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
 
         <div className="profile-info-500 md:flex md:text-start text-center flex-1 max-w-[516px] md:space-y-0 space-y-4">
           <div className="flex-1">
-            <div className="text-base text-slate-900 dark:text-slate-300 font-medium mb-1">
+            <div className="mb-1 text-base font-medium text-slate-900 dark:text-slate-300">
               <center>{account_number}</center>
             </div>
-            <div className="text-sm text-slate-600 font-light dark:text-slate-300">
+            <div className="text-sm font-light text-slate-600 dark:text-slate-300">
               Account Number
             </div>
-            <div className="text-sm text-slate-600 font-light dark:text-slate-300">
+            <div className="text-sm font-light text-slate-600 dark:text-slate-300">
               {accountName}
             </div>
           </div>
           &nbsp; &nbsp; &nbsp;
           <div className="flex-1">
-            <div className="text-base text-slate-900 dark:text-slate-300 font-medium mb-1 mr-3">
+            <div className="mb-1 mr-3 text-base font-medium text-slate-900 dark:text-slate-300">
               {bank_name}
             </div>
-            <div className="text-sm text-slate-600 font-light dark:text-slate-300">
+            <div className="text-sm font-light text-slate-600 dark:text-slate-300">
               Bank Name
             </div>
           </div>
           &nbsp;&nbsp; &nbsp;
           <div className="flex-1">
-            <div className="text-base text-slate-900 dark:text-slate-300 font-medium mb-1 pr-3">
+            <div className="pr-3 mb-1 text-base font-medium text-slate-900 dark:text-slate-300">
               {kycStatus === "Approved" ? (
                 <div className=" text-success-500 bg-success-500 px-3 inline-block  min-w-[60px] text-xs font-medium text-center mx-auto py-1 rounded-[999px] bg-opacity-25">
                   Approved
@@ -2758,12 +2761,12 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
               )}
             </div>
 
-            <div className="text-sm text-slate-600 font-light dark:text-slate-300">
+            <div className="text-sm font-light text-slate-600 dark:text-slate-300">
               Kyc Status
             </div>
           </div>
           {/* <div className="flex-1">
-            <div className="text-base text-slate-900 dark:text-slate-300 font-medium mb-1 pr-3">
+            <div className="pr-3 mb-1 text-base font-medium text-slate-900 dark:text-slate-300">
               {isVerified == true ? (
                 <div className=" text-success-500 bg-success-500 px-3 inline-block  min-w-[60px] text-xs font-medium text-center mx-auto py-1 rounded-[999px] bg-opacity-25">
                   Approve
@@ -2775,18 +2778,18 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
               )}
             </div>
 
-            <div className="text-sm text-slate-600 font-light dark:text-slate-300">
+            <div className="text-sm font-light text-slate-600 dark:text-slate-300">
               Kyc Status
             </div>
           </div> */}
           <div className="flex-1">
             <>
-              <div className="text-base text-slate-900 dark:text-slate-300 font-medium mb-1">
+              <div className="mb-1 text-base font-medium text-slate-900 dark:text-slate-300">
                 <div className="inline-block  text-white px-[10px] py-[6px] text-xs font-medium rounded-full min-w-[60px]">
                   {formattedDate(isCreated)}
                 </div>
               </div>
-              <div className="text-sm text-slate-600 font-light dark:text-slate-300">
+              <div className="text-sm font-light text-slate-600 dark:text-slate-300">
                 Date Created
               </div>
             </>
@@ -2813,9 +2816,9 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
       </center>
       <br />
       <div className="grid grid-cols-12 gap-6">
-        <div className="lg:col-span-4 col-span-12">
+        <div className="col-span-12 lg:col-span-4">
           <Card title="Info">
-            <ul className="list space-y-8">
+            <ul className="space-y-8 list">
               <li className="flex space-x-3 rtl:space-x-reverse">
                 <div className="flex-none text-2xl text-slate-600 dark:text-slate-300">
                   <Icon icon="heroicons:envelope" />
@@ -2892,28 +2895,28 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
           </Card>
         </div>
 
-        <div className="xl:col-span-4 lg:col-span-5 col-span-12 ">
+        <div className="col-span-12 xl:col-span-4 lg:col-span-5 ">
           <Card title="Files" className="h-[394px]">
             {step === 200 ? (
               <ul className="divide-y divide-slate-100 dark:divide-slate-700">
                 {images.map((item, i) => (
                   <li key={i} className="block py-[8px]">
                     <div className="flex space-x-2 rtl:space-x-reverse">
-                      <div className="flex-1 flex space-x-2 rtl:space-x-reverse">
+                      <div className="flex flex-1 space-x-2 rtl:space-x-reverse">
                         <div className="flex-none">
-                          <div className="h-8 w-8">
+                          <div className="w-8 h-8">
                             <img
                               src={"/assets/images/icon/scr-1.svg"}
                               alt=""
-                              className="block w-full h-full object-cover rounded-full border hover:border-white border-transparent"
+                              className="block object-cover w-full h-full border border-transparent rounded-full hover:border-white"
                             />
                           </div>
                         </div>
                         <div className="flex-1">
-                          <span className="block text-slate-600 text-sm dark:text-slate-300">
+                          <span className="block text-sm text-slate-600 dark:text-slate-300">
                             {"Files"}
                           </span>
-                          <span className="block font-normal text-xs text-slate-500 mt-1">
+                          <span className="block mt-1 text-xs font-normal text-slate-500">
                             {formattedDate(isCreated)}
                           </span>
                         </div>
@@ -2941,7 +2944,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
             )}
           </Card>
         </div>
-        <div className="lg:col-span-4 col-span-12">
+        <div className="col-span-12 lg:col-span-4">
           <Card title="Account Overview">
         
           <div className="flex justify-between">
@@ -2957,25 +2960,25 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                     </div>
              
             <RadarChart />
-            <div className="bg-slate-50 dark:bg-slate-900 rounded p-4 mt-8 flex justify-between flex-wrap">
+            <div className="flex flex-wrap justify-between p-4 mt-8 rounded bg-slate-50 dark:bg-slate-900">
             
               <div className="space-y-1">
-                <h4 className="text-slate-600 dark:text-slate-200 text-xs font-normal">
+                <h4 className="text-xs font-normal text-slate-600 dark:text-slate-200">
                   Monthly Income
                 </h4>
                 <div className="text-sm font-medium text-slate-900 dark:text-white">
                   {naira.format(income)}
                 </div>
-                {/* <div className="text-slate-500 dark:text-slate-300 text-xs font-normal">
+                {/* <div className="text-xs font-normal text-slate-500 dark:text-slate-300">
                   {formattedDate(kycdate)}
                 </div> */}
               </div>
 
               <div className="space-y-1">
-                <h4 className="text-slate-600 dark:text-slate-200 text-xs font-normal justify-center items-center">
+                <h4 className="items-center justify-center text-xs font-normal text-slate-600 dark:text-slate-200">
                   Outstanding
                 </h4>
-                <div className="text-sm font-medium text-slate-900 dark:text-white justify-center items-center ">
+                <div className="items-center justify-center text-sm font-medium text-slate-900 dark:text-white ">
                 {assignOustanding ==true ? ( 
                         <span className=" text-success-500 text-center bg-success-500 px-3 inline-block  min-w-[60px] text-xs font-medium   py-1 rounded-[999px] bg-opacity-25">Yes</span>
                       ):(
@@ -2986,7 +2989,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
               </div>
 
               <div className="space-y-1">
-                <h4 className="text-slate-600 dark:text-slate-200 text-xs font-normal">
+                <h4 className="text-xs font-normal text-slate-600 dark:text-slate-200">
                   Spending Limit
                 </h4>
                 <div className="text-sm font-medium text-slate-900 dark:text-white">
@@ -2996,12 +2999,12 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
             </div>
           </Card>
         </div>
-        <div className="lg:col-span-4 col-span-12 space-y-5">
-          <div className="lg:col-span-4 col-span-12 space-y-5">
+        <div className="col-span-12 space-y-5 lg:col-span-4">
+          <div className="col-span-12 space-y-5 lg:col-span-4">
             <Card title="Kyc information">
               {step === 200 ? (
                 <ul className="divide-y divide-slate-100 dark:divide-slate-700">
-                  <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
+                  <li className="py-2 text-sm first:text-xs first:text-slate-600 text-slate-600 dark:text-slate-300 first:uppercase">
                     <div className="flex justify-between">
                       <span>Update KYC</span>
                       <span
@@ -3014,56 +3017,56 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                       </span>
                     </div>
                   </li>
-                  <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
+                  <li className="py-2 text-sm first:text-xs first:text-slate-600 text-slate-600 dark:text-slate-300 first:uppercase">
                     <div className="flex justify-between">
                       <span>Name</span>
                       <span>Details</span>
                     </div>
                   </li>
 
-                  <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
+                  <li className="py-2 text-sm first:text-xs first:text-slate-600 text-slate-600 dark:text-slate-300 first:uppercase">
                     <div className="flex justify-between">
                       <span>Nationality</span>
                       <span>{nationality}</span>
                     </div>
                   </li>
-                  <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
+                  <li className="py-2 text-sm first:text-xs first:text-slate-600 text-slate-600 dark:text-slate-300 first:uppercase">
                     <div className="flex justify-between">
                       <span>BVN</span>
                       <span>{bvn}</span>
                     </div>
                   </li>
-                  <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
+                  <li className="py-2 text-sm first:text-xs first:text-slate-600 text-slate-600 dark:text-slate-300 first:uppercase">
                     <div className="flex justify-between">
                       <span>Age</span>
                       <span>{age}</span>
                     </div>
                   </li>
-                  <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
+                  <li className="py-2 text-sm first:text-xs first:text-slate-600 text-slate-600 dark:text-slate-300 first:uppercase">
                     <div className="flex justify-between">
                       <span>Date of Birth</span>
                       <span>{formattedDate(dob)}</span>
                     </div>
                   </li>
-                  <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
+                  <li className="py-2 text-sm first:text-xs first:text-slate-600 text-slate-600 dark:text-slate-300 first:uppercase">
                     <div className="flex justify-between">
                       <span>Marital Status</span>
                       <span>{marital}</span>
                     </div>
                   </li>
-                  <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
+                  <li className="py-2 text-sm first:text-xs first:text-slate-600 text-slate-600 dark:text-slate-300 first:uppercase">
                     <div className="flex justify-between">
                       <span>Maidens Name</span>
                       <span>{maiden}</span>
                     </div>
                   </li>
-                  <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
+                  <li className="py-2 text-sm first:text-xs first:text-slate-600 text-slate-600 dark:text-slate-300 first:uppercase">
                     <div className="flex justify-between">
                       <span>Family Number</span>
                       <span>{num}</span>
                     </div>
                   </li>
-                  <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
+                  <li className="py-2 text-sm first:text-xs first:text-slate-600 text-slate-600 dark:text-slate-300 first:uppercase">
                     <div className="flex justify-between">
                       <span>Corporate Account</span>
                       {corporateAccount ==true ? ( 
@@ -3075,67 +3078,67 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                       
                     </div>
                   </li>
-                  <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
+                  <li className="py-2 text-sm first:text-xs first:text-slate-600 text-slate-600 dark:text-slate-300 first:uppercase">
                     <div className="flex justify-between">
                       <span>Gender</span>
                       <span>{gender}</span>
                     </div>
                   </li>
-                  <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
+                  <li className="py-2 text-sm first:text-xs first:text-slate-600 text-slate-600 dark:text-slate-300 first:uppercase">
                     <div className="flex justify-between">
                       <span>Proof of Identity</span>
                       <span>{proof}</span>
                     </div>
                   </li>
-                  <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
+                  <li className="py-2 text-sm first:text-xs first:text-slate-600 text-slate-600 dark:text-slate-300 first:uppercase">
                     <div className="flex justify-between">
                       <span>Identity Number</span>
                       <span>{idNumber}</span>
                     </div>
                   </li>
-                  <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
+                  <li className="py-2 text-sm first:text-xs first:text-slate-600 text-slate-600 dark:text-slate-300 first:uppercase">
                     <div className="flex justify-between">
                       <span>Issue Date</span>
                       <span>{formattedDate(issueDate)}</span>
                     </div>
                   </li>
-                  <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
+                  <li className="py-2 text-sm first:text-xs first:text-slate-600 text-slate-600 dark:text-slate-300 first:uppercase">
                     <div className="flex justify-between">
                       <span>Expiry Date</span>
                       <span>{formattedDate(expiryDate)}</span>
                     </div>
                   </li>
-                  <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
+                  <li className="py-2 text-sm first:text-xs first:text-slate-600 text-slate-600 dark:text-slate-300 first:uppercase">
                     <div className="flex justify-between">
                       <span>Location Type</span>
                       <span>{locationType}</span>
                     </div>
                   </li>
-                  <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
+                  <li className="py-2 text-sm first:text-xs first:text-slate-600 text-slate-600 dark:text-slate-300 first:uppercase">
                     <div className="flex justify-between">
                       <span>Staff Strength</span>
                       <span>{staffStrength}</span>
                     </div>
                   </li>
-                  <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
+                  <li className="py-2 text-sm first:text-xs first:text-slate-600 text-slate-600 dark:text-slate-300 first:uppercase">
                     <div className="flex justify-between">
                       <span>Rc Number</span>
                       <span>{rcNumber}</span>
                     </div>
                   </li>
-                  <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
+                  <li className="py-2 text-sm first:text-xs first:text-slate-600 text-slate-600 dark:text-slate-300 first:uppercase">
                     <div className="flex justify-between">
                       <span>Referral Code</span>
                       <span>{referralcode}</span>
                     </div>
                   </li>
-                  <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
+                  <li className="py-2 text-sm first:text-xs first:text-slate-600 text-slate-600 dark:text-slate-300 first:uppercase">
                     <div className="flex justify-between">
                       <span>Referred By</span>
                       <span>{refby}</span>
                     </div>
                   </li>
-                  <li className="first:text-xs text-sm first:text-slate-600 text-slate-600 dark:text-slate-300 py-2 first:uppercase">
+                  <li className="py-2 text-sm first:text-xs first:text-slate-600 text-slate-600 dark:text-slate-300 first:uppercase">
                     <div className="flex justify-between">
                       <span>Google Map Location</span>
                       <span>{googleMapLocation}</span>
@@ -3148,15 +3151,15 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
             </Card>
           </div>
         </div>
-        <div className="lg:col-span-8 col-span-12">
+        <div className="col-span-12 lg:col-span-8">
           <Card title="User Overview">
             <BasicArea height={417} />
           </Card>
         </div>
-        <div className="lg:col-span-full col-span-12">
+        <div className="col-span-12 lg:col-span-full">
           <Card title={firstname + "  " + "Activities"}>
             <Tab.Group>
-              <Tab.List className="lg:space-x-8 md:space-x-4 space-x-0 rtl:space-x-reverse">
+              <Tab.List className="space-x-0 lg:space-x-8 md:space-x-4 rtl:space-x-reverse">
                 {buttons.map((item, i) => (
                   <Tab as={Fragment} key={i}>
                     {({ selected }) => (
@@ -3183,9 +3186,9 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
               </Tab.List>
               <Tab.Panels>
                 <Tab.Panel>
-                  <div className="text-slate-600 dark:text-slate-400 text-sm font-normal">
+                  <div className="text-sm font-normal text-slate-600 dark:text-slate-400">
                     <Card noborder>
-                      <div className="md:flex justify-between items-center mb-6">
+                      <div className="items-center justify-between mb-6 md:flex">
                         <h4 className="card-title">{firstname} transactions</h4>
                         <div>
                           <GlobalFilter
@@ -3421,7 +3424,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                 </Tab.Panel>
 
                 <Tab.Panel>
-                  <div className="text-slate-600 dark:text-slate-400 text-sm font-normal">
+                  <div className="text-sm font-normal text-slate-600 dark:text-slate-400">
                     <Card>
                       <div className="items-center justify-between mb-6 md:flex">
                         <h4 className="card-title">{title}</h4>
@@ -3467,20 +3470,20 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                   <React.Fragment key={item?.id}>
                     <tbody className="bg-white divide-y divide-slate-100 dark:bg-slate-800 dark:divide-slate-700">
                       <tr>
-                        <td className="table-td py-2">
+                        <td className="py-2 table-td">
                           <span>
                             {" "}
                             {item?.id.slice(0, 5)}...
                             {item.id.slice(-10)}
                           </span>
                         </td>
-                        <td className="table-td py-2">
+                        <td className="py-2 table-td">
                           {naira.format(item?.totalLoan || "0")}
                         </td>
-                        <td className="table-td py-2">
+                        <td className="py-2 table-td">
                         {naira.format(item?.limit)}
                       </td>
-                        <td className="table-td py-2">
+                        <td className="py-2 table-td">
                           <span className="block w-full">
                             {item?.isOverdue}
                           </span>
@@ -3513,7 +3516,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                             </span>
                           )}
                         </td>
-                        <td className="table-td py-2">
+                        <td className="py-2 table-td">
                         <div className="flex space-x-3 rtl:space-x-reverse">
                             <Tooltip
                               content="View"
@@ -3658,7 +3661,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                 </Tab.Panel>
 
                 <Tab.Panel>
-                  <div className="text-slate-600 dark:text-slate-400 text-sm font-normal">
+                  <div className="text-sm font-normal text-slate-600 dark:text-slate-400">
                     <Card>
                       <div className="items-center justify-between mb-6 md:flex">
                         <h4 className="card-title">
@@ -3726,42 +3729,42 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                                   <React.Fragment key={item?.id}>
                                     <tbody className="bg-white divide-y divide-slate-100 dark:bg-slate-800 dark:divide-slate-700">
                                       <tr>
-                                        <td className="table-td py-2">
+                                        <td className="py-2 table-td">
                                           {" "}
                                           <span>
                                             {item.id.slice(0, 8)}...
                                             {item.id.slice(-10)}
                                           </span>
                                         </td>
-                                        <td className="table-td py-2 ">
+                                        <td className="py-2 table-td ">
                                           {" "}
                                           {item.user?.fullName}{" "}
                                         </td>
-                                        <td className="table-td py-2 ">
+                                        <td className="py-2 table-td ">
                                           {" "}
                                           {"+234" + "" + item?.phone}{" "}
                                         </td>
 
-                                        <td className="table-td py-2 ">
+                                        <td className="py-2 table-td ">
                                           {item.trackingId?.location ||
                                             "No Location"}
                                         </td>
-                                        <td className="table-td py-2">
+                                        <td className="py-2 table-td">
                                           {" "}
                                           {naira.format(
                                             item?.totalPrice || "0"
                                           )}
                                         </td>
-                                        <td className="table-td py-2">
+                                        <td className="py-2 table-td">
                                           {" "}
                                           {item.transaction?.paymentMode}{" "}
                                         </td>
 
-                                        <td className="table-td py-2">
+                                        <td className="py-2 table-td">
                                           {" "}
                                           {item?.city}{" "}
                                         </td>
-                                        <td className="table-td py-2">
+                                        <td className="py-2 table-td">
                                           <span className="block w-full">
                                             <span
                                               className={` inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 ${
@@ -3808,17 +3811,17 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                                           </span>
                                         </td>
 
-                                        <td className="table-td py-2">
+                                        <td className="py-2 table-td">
                                           {formattedDate(item?.dateOrdered)}
                                         </td>
-                                        <td className="table-td py-2">
+                                        <td className="py-2 table-td">
                                           {" "}
                                           {formattedDate(
                                             item.trackingId?.estimatedDelivery
                                           )}{" "}
                                         </td>
 
-                                        <td className="table-td py-2">
+                                        <td className="py-2 table-td">
                                           {" "}
                                           <div className="flex space-x-3 rtl:space-x-reverse">
                                             <Tooltip
@@ -3989,7 +3992,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                 </Tab.Panel>
 
                 <Tab.Panel>
-                <div className="text-slate-600 dark:text-slate-400 text-sm font-normal">
+                <div className="text-sm font-normal text-slate-600 dark:text-slate-400">
                     <Card>
                       <div className="items-center justify-between mb-6 md:flex">
                     
@@ -4006,20 +4009,20 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                             ) : (
                               
        <div id="printContent">
-      <div className="lg:flex justify-between flex-wrap items-center mb-6">
+      <div className="flex-wrap items-center justify-between mb-6 lg:flex">
         <h4>{monoDetails?.verificationType}</h4>
-        <div className="flex lg:justify-end items-center flex-wrap space-xy-5">
+        <div className="flex flex-wrap items-center lg:justify-end space-xy-5">
           <button
             type="button"
             onClick={printPage}
-            className="invocie-btn inline-flex btn btn-sm whitespace-nowrap space-x-1 cursor-pointer bg-white dark:bg-slate-800 dark:text-slate-300 btn-md h-min text-sm font-normal text-slate-900 rtl:space-x-reverse"
+            className="inline-flex space-x-1 text-sm font-normal bg-white cursor-pointer invocie-btn btn btn-sm whitespace-nowrap dark:bg-slate-800 dark:text-slate-300 btn-md h-min text-slate-900 rtl:space-x-reverse"
           >
             <span className="text-lg">
               <Icon icon="heroicons:printer" />
             </span>
             <span>Print</span>
           </button>
-          <button onClick={downloadPage}  className="invocie-btn inline-flex btn btn-sm whitespace-nowrap space-x-1 cursor-pointer bg-white dark:bg-slate-800 dark:text-slate-300 btn-md h-min text-sm font-normal text-slate-900 rtl:space-x-reverse">
+          <button onClick={downloadPage}  className="inline-flex space-x-1 text-sm font-normal bg-white cursor-pointer invocie-btn btn btn-sm whitespace-nowrap dark:bg-slate-800 dark:text-slate-300 btn-md h-min text-slate-900 rtl:space-x-reverse">
             <span className="text-lg">
               <Icon icon="heroicons:arrow-down-tray" />
             </span>
@@ -4029,7 +4032,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
         </div>
       </div>
       <Card bodyClass="p-0" >
-        <div className="flex justify-between flex-wrap space-y-4 px-6 pt-6 bg-slate-50 dark:bg-slate-800 pb-6 rounded-t-md"  >
+        <div className="flex flex-wrap justify-between px-6 pt-6 pb-6 space-y-4 bg-slate-50 dark:bg-slate-800 rounded-t-md"  >
           <div>
             <img
               src={
@@ -4040,30 +4043,30 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
               alt=""
             />
 
-            <div className="text-slate-500 dark:text-slate-300 font-normal leading-5 mt-4 text-sm">
+            <div className="mt-4 text-sm font-normal leading-5 text-slate-500 dark:text-slate-300">
              
-           <div className="text-slate-500 dark:text-slate-300 font-normal leading-5 text-sm">
+           <div className="text-sm font-normal leading-5 text-slate-500 dark:text-slate-300">
            Mono Exchange ID :{monoDetails?.verificationData?.mono_exchange_id}  </div>
-           <div className="text-slate-500 dark:text-slate-300 font-normal leading-5 text-sm">
+           <div className="text-sm font-normal leading-5 text-slate-500 dark:text-slate-300">
            Account ID. :{monoDetails?.verificationData?.mono_connected_acct?._id}  </div>
-           <div className="text-slate-500 dark:text-slate-300 font-normal leading-5 text-sm">
+           <div className="text-sm font-normal leading-5 text-slate-500 dark:text-slate-300">
            Currency :{monoDetails?.verificationData?.mono_connected_acct?.currency} <br />
             </div>
-            <div className="text-slate-500 dark:text-slate-300 font-normal leading-5 text-sm">
+            <div className="text-sm font-normal leading-5 text-slate-500 dark:text-slate-300">
           Created On : {formattedDate(monoDetails?.verificationData?.mono_connected_acct?.created_at)}
             </div>
-           <div className="text-slate-500 dark:text-slate-300 font-normal leading-5 text-sm">
+           <div className="text-sm font-normal leading-5 text-slate-500 dark:text-slate-300">
           Updated On : {formattedDate(monoDetails?.verificationData?.mono_connected_acct?.updated_at)}
             </div>
               
             </div>
           </div>
           <div>
-            <span className="block text-slate-900 dark:text-slate-300 font-medium leading-5 text-xl">
+            <span className="block text-xl font-medium leading-5 text-slate-900 dark:text-slate-300">
             Mono Connected Acct
             </span>
 
-            <div className="text-slate-500 dark:text-slate-300 font-normal leading-5 mt-4 text-sm">
+            <div className="mt-4 text-sm font-normal leading-5 text-slate-500 dark:text-slate-300">
  
            Account No. :{monoDetails?.verificationData?.mono_connected_acct?.accountNumber} <br />
            Auth Method :{monoDetails?.verificationData?.mono_connected_acct?.authMethod} <br />
@@ -4091,25 +4094,25 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
             </div>
           </div>
           <div className="space-y-[2px]">
-            <span className="block text-slate-900 dark:text-slate-300 font-medium leading-5 text-xl mb-4">
+            <span className="block mb-4 text-xl font-medium leading-5 text-slate-900 dark:text-slate-300">
             Institution
             </span>
-            <h4 className="text-slate-600 font-medium dark:text-slate-300 text-xs uppercase">
+            <h4 className="text-xs font-medium uppercase text-slate-600 dark:text-slate-300">
             Bank Type:
             </h4>
-            <div className="text-slate-500 dark:text-slate-300 font-normal leading-5 text-sm">
+            <div className="text-sm font-normal leading-5 text-slate-500 dark:text-slate-300">
             {monoDetails?.verificationData?.mono_connected_acct?.institution?.type}
             </div>
-            <h4 className="text-slate-600 font-medium dark:text-slate-300 text-xs uppercase">
+            <h4 className="text-xs font-medium uppercase text-slate-600 dark:text-slate-300">
               Bank Name :
             </h4>
-            <div className="text-slate-500 dark:text-slate-300 font-normal leading-5 text-sm">
+            <div className="text-sm font-normal leading-5 text-slate-500 dark:text-slate-300">
             {monoDetails?.verificationData?.mono_connected_acct?.institution?.name}
             </div>
-            <h4 className="text-slate-600 font-medium dark:text-slate-300 text-xs uppercase">
+            <h4 className="text-xs font-medium uppercase text-slate-600 dark:text-slate-300">
               Bank Code :
             </h4>
-            <div className="text-slate-500 dark:text-slate-300 font-normal leading-5 text-sm">
+            <div className="text-sm font-normal leading-5 text-slate-500 dark:text-slate-300">
             {monoDetails?.verificationData?.mono_connected_acct?.institution?.bankCode}
             </div>
           </div>
@@ -4128,32 +4131,32 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
 
                 
                 <Tab.Panel>
-                <div className="text-slate-600 dark:text-slate-400 text-sm font-normal">
+                <div className="text-sm font-normal text-slate-600 dark:text-slate-400">
                     <Card>
                       <div className="items-center justify-between mb-6 md:flex">
                         <h4 className="card-title">
                           {firstname + " " + " Mono Bank Transactions"}
                         </h4>
-                        <div className="lg:flex justify-between flex-wrap items-center mb-6">
-                        <div className="flex lg:justify-end items-center flex-wrap space-xy-5">
+                        <div className="flex-wrap items-center justify-between mb-6 lg:flex">
+                        <div className="flex flex-wrap items-center lg:justify-end space-xy-5">
           <button
             type="button"
             onClick={printMonoTxnPage}
-            className="invocie-btn inline-flex btn btn-sm whitespace-nowrap space-x-1 cursor-pointer bg-white dark:bg-slate-800 dark:text-slate-300 btn-md h-min text-sm font-normal text-slate-900 rtl:space-x-reverse"
+            className="inline-flex space-x-1 text-sm font-normal bg-white cursor-pointer invocie-btn btn btn-sm whitespace-nowrap dark:bg-slate-800 dark:text-slate-300 btn-md h-min text-slate-900 rtl:space-x-reverse"
           >
             <span className="text-lg">
               <Icon icon="heroicons:printer" />
             </span>
             <span>Print</span>
           </button>
-          <button onClick={downloadMonoTxnPage}  className="invocie-btn inline-flex btn btn-sm whitespace-nowrap space-x-1 cursor-pointer bg-white dark:bg-slate-800 dark:text-slate-300 btn-md h-min text-sm font-normal text-slate-900 rtl:space-x-reverse">
+          <button onClick={downloadMonoTxnPage}  className="inline-flex space-x-1 text-sm font-normal bg-white cursor-pointer invocie-btn btn btn-sm whitespace-nowrap dark:bg-slate-800 dark:text-slate-300 btn-md h-min text-slate-900 rtl:space-x-reverse">
             <span className="text-lg">
               <Icon icon="heroicons:arrow-down-tray" />
             </span>
             <span>Download</span>
           </button>
          
-          <button onClick={sendPage} className="invocie-btn inline-flex btn btn-sm whitespace-nowrap space-x-1 cursor-pointer bg-white dark:bg-slate-800 dark:text-slate-300 btn-md h-min text-sm font-normal text-slate-900 rtl:space-x-reverse">
+          <button onClick={sendPage} className="inline-flex space-x-1 text-sm font-normal bg-white cursor-pointer invocie-btn btn btn-sm whitespace-nowrap dark:bg-slate-800 dark:text-slate-300 btn-md h-min text-slate-900 rtl:space-x-reverse">
             <span className="text-lg transform -rotate-45">
               <Icon icon="heroicons:paper-airplane" />
             </span>
@@ -4211,33 +4214,33 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                                   <React.Fragment key={item?.id}>
                                     <tbody className="bg-white divide-y divide-slate-100 dark:bg-slate-800 dark:divide-slate-700">
                                       <tr>
-                                        <td className="table-td py-2">
+                                        <td className="py-2 table-td">
                                           {" "}
                                           <span>
                                           {item?.id.slice(0, 5)}...
                                             {item.id.slice(-10)}
                                           </span>
                                         </td>
-                                        <td className="table-td py-2 ">
+                                        <td className="py-2 table-td ">
                                           {naira.format(
                                             item?.amount|| "0"
                                           )}
                                         </td> 
                                       
-                                        <td className="table-td py-2">
+                                        <td className="py-2 table-td">
                                         {naira.format(
                                             item?.balance|| "0"
                                           )}
                                         </td>
-                                        <td className="table-td py-2 ">
+                                        <td className="py-2 table-td ">
                                         
                                           {item?.narration}
                                         </td>
-                                        <td className="table-td py-2">
+                                        <td className="py-2 table-td">
                                         {item?.currency}
                                         </td>
 
-                                        <td className="table-td py-2">
+                                        <td className="py-2 table-td">
                                         {item?.type === "credit" ? (
                                           <span className="text-success-500">
                                             {item?.type}
@@ -4250,7 +4253,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
                                       </td>
 
                                        
-                                        <td className="table-td py-2">
+                                        <td className="py-2 table-td">
                                           {formattedDate(item?.date)}
                                         </td>
                                     
@@ -4378,94 +4381,92 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
         </div>
       </div>
       {!isBusiness == true ? ( // Conditionally rendering based on cart items
-        <center>
-          <h4 className="mt-10 text-2xl font-bold text-primary">
-            Not a Business Account
-          </h4>
-        </center>
-      ) : (
-        <div>
-          <br />
-          <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-6">
-            {businessinfo.map((item) => (
-              <React.Fragment key={item?.user}>
-                <Card>
-                  <div className="space-y-6">
-                    <div className="flex space-x-3 items-center rtl:space-x-reverse">
-                      <div className="flex-none h-8 w-8 rounded-full bg-slate-800 dark:bg-slate-700 text-slate-300 flex flex-col items-center justify-center text-lg">
-                        <Icon icon="ic:round-add-business" />
-                      </div>
-                      <div className="flex-1 text-base text-slate-900 dark:text-white font-medium">
-                        Business Name
-                      </div>
+      <center>
+        <h4 className="mt-10 text-2xl font-bold text-primary">
+          Not a Business Account
+        </h4>
+      </center>
+    ) : (
+      <div>
+        <br />
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 md:grid-cols-2">
+         
+              <Card>
+                <div className="space-y-6">
+                  <div className="flex items-center space-x-3 rtl:space-x-reverse">
+                    <div className="flex flex-col items-center justify-center flex-none w-8 h-8 text-lg rounded-full bg-slate-800 dark:bg-slate-700 text-slate-300">
+                      <Icon icon="ic:round-add-business" />
                     </div>
-                    <div className="flex-1 text-base text-slate-900 dark:text-white font-medium">
-                      {item.name}
+                    <div className="flex-1 text-base font-medium text-slate-900 dark:text-white">
+                      Business Name
                     </div>
                   </div>
-                </Card>
-                <Card>
-                  <div className="space-y-6">
-                    <div className="flex space-x-3 items-center rtl:space-x-reverse">
-                      <div className="flex-none h-8 w-8 rounded-full bg-primary-500 text-slate-300 flex flex-col items-center justify-center text-lg">
-                        <Icon icon="carbon:category-new-each" />
-                      </div>
-                      <div className="flex-1 text-base text-slate-900 dark:text-white font-medium">
-                        Business Category
-                      </div>
+                  <div className="flex-1 text-base font-medium text-slate-900 dark:text-white">
+                    {businessName}
+                  </div>
+                </div>
+              </Card>
+              <Card>
+                <div className="space-y-6">
+                  <div className="flex items-center space-x-3 rtl:space-x-reverse">
+                    <div className="flex flex-col items-center justify-center flex-none w-8 h-8 text-lg rounded-full bg-primary-500 text-slate-300">
+                      <Icon icon="carbon:category-new-each" />
                     </div>
-                    <div className="flex-1 text-base text-slate-900 dark:text-white font-medium">
-                      {item.category}
+                    <div className="flex-1 text-base font-medium text-slate-900 dark:text-white">
+                      Business Category
                     </div>
                   </div>
-                </Card>
-                <Card>
-                  <div className="space-y-6">
-                    <div className="flex space-x-3 rtl:space-x-reverse items-center">
-                      <div className="flex-none h-8 w-8 rounded-full bg-success-500 text-white flex flex-col items-center justify-center text-lg">
-                        <Icon icon="entypo:address" />
-                      </div>
-                      <div className="flex-1 text-base text-slate-900 dark:text-white font-medium">
-                        Business Address
-                      </div>
+                  <div className="flex-1 text-base font-medium text-slate-900 dark:text-white">
+                    {businessCategory}
+                  </div>
+                </div>
+              </Card>
+              <Card>
+                <div className="space-y-6">
+                  <div className="flex items-center space-x-3 rtl:space-x-reverse">
+                    <div className="flex flex-col items-center justify-center flex-none w-8 h-8 text-lg text-white rounded-full bg-success-500">
+                      <Icon icon="entypo:address" />
                     </div>
-                    <div className="flex-1 text-base text-slate-900 dark:text-white font-medium">
-                      {item.address}
+                    <div className="flex-1 text-base font-medium text-slate-900 dark:text-white">
+                      Business Address
                     </div>
+                  </div>
+                  <div className="flex-1 text-base font-medium text-slate-900 dark:text-white">
+                    {businessAddress}
+                  </div>
 
-                    {/* <span>{busi}</span>  */}
-                  </div>
-                </Card>
-                {item.isRegistered == true ? (
-                  <>
-                    <Card>
-                      <div className="space-y-6">
-                        <div className="flex space-x-3 rtl:space-x-reverse items-center">
-                          <div className="flex-none h-8 w-8 rounded-full bg-success-500 text-white flex flex-col items-center justify-center text-lg">
-                            <Icon icon="entypo:address" />
-                          </div>
-                          <div className="flex-1 text-base text-slate-900 dark:text-white font-medium">
-                            RC Number
-                          </div>
+                  {/* <span>{busi}</span>  */}
+                </div>
+              </Card>
+              {businessReg == true ? (
+                <>
+                  <Card>
+                    <div className="space-y-6">
+                      <div className="flex items-center space-x-3 rtl:space-x-reverse">
+                        <div className="flex flex-col items-center justify-center flex-none w-8 h-8 text-lg text-white rounded-full bg-success-500">
+                          <Icon icon="entypo:address" />
                         </div>
-                        <div className="flex-1 text-base text-slate-900 dark:text-white font-medium">
-                          {item.rcNumber}
+                        <div className="flex-1 text-base font-medium text-slate-900 dark:text-white">
+                          RC Number
                         </div>
-
-                        {/* <span>{busi}</span>  */}
                       </div>
-                    </Card>
-                  </>
-                ) : (
-                  " "
-                )}
-              </React.Fragment>
-            ))}
-          </div>
+                      <div className="flex-1 text-base font-medium text-slate-900 dark:text-white">
+                        {businessRcNumber}
+                      </div>
+
+                      {/* <span>{busi}</span>  */}
+                    </div>
+                  </Card>
+                </>
+              ) : (
+                " "
+              )}
+         
         </div>
-      )}
-    </>
-  );
+      </div>
+    )}
+  </>
+);
 };
 
 const buttons = [

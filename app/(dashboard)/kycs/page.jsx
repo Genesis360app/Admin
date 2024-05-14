@@ -18,46 +18,14 @@ import {
 import GlobalFilter from "@/components/partials/table/GlobalFilter";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import Modal from "@/components/ui/Modal";
-import Button from "@/components/ui/Button";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useNavigate } from "react-router-dom";
-import Alert from "@/components/ui/Alert";
 import { _notifySuccess, _notifyError } from "@/utils/alart";
-import { CircularProgress } from "@mui/material";
-import ProductBredCurbs from "@/components/partials/ProductBredCurbs";
 import dynamic from "next/dynamic";
-const Carousel = dynamic(() => import("@/components/ui/Carousel"), {
-  ssr: false,
-});
-
-import { SwiperSlide } from "swiper/react";
-
 
 // find current step schema
 
 const AllOrders = ({ title = "All Kycs", item }) => {
-  const getStatus = (status ) => {
-    switch (status) {
-     case "Pending":
-       return "Pending";
-     case "Paid":
-       return "Paid";
-     case  "Proccessing":
-       return "Proccessing";
-     case "In-Transit":
-       return "In-Transit";
-     case "Delivered":
-       return "Delivering";
-     case "Closed":
-       return "Closed";
-     default:
-       return "";
-    }
-  
-   }
-
+ 
   const router = useRouter();
   // handleClick to view project single page
   const handleClick = async (item) => {
@@ -65,21 +33,12 @@ const AllOrders = ({ title = "All Kycs", item }) => {
   };
 
   const [allKycs, setAllKycs] = useState([]);
-  const [selectedOrder, setSelectedOrder] = useState(null); // State to store the selected order data
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(5); // Added pageSize state
   const itemsPerPage = pageSize; // Use pageSize for itemsPerPage
   const maxPageButtons = 5; // Number of page buttons to display
   const [globalFilter, setGlobalFilter] = useState(""); // Global filter
   const [activeModal, setActiveModal] = useState(false);
-  const [status_, setStatus_] = useState();
-  const orderStatus = getStatus(status_);
-  const [delete_orderModal, setDelete_orderModal] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(null);
-  const steps = ["Pending", "Paid", "Proccessing", "In-Transit", "Delivering", "Closed"];
-  const statusIndex = steps.indexOf(orderStatus);
   const [totalPages, setTotalPages] = useState(1);
   
 
@@ -178,35 +137,7 @@ const paginatedHistory = allKycs.slice(startIndex, endIndex);
     window.print();
   };
 
-  // const getPageNumbers = () => {
-  //   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-  //   const middlePage = Math.ceil(maxPageButtons / 2);
 
-  //   let startPage = currentPage - middlePage + 1;
-  //   let endPage = currentPage + middlePage - 1;
-
-  //   if (totalPages <= maxPageButtons) {
-  //     startPage = 1;
-  //     endPage = totalPages;
-  //   } else if (currentPage <= middlePage) {
-  //     startPage = 1;
-  //     endPage = maxPageButtons;
-  //   } else if (currentPage >= totalPages - middlePage) {
-  //     startPage = totalPages - maxPageButtons + 1;
-  //     endPage = totalPages;
-  //   }
-
-  //   const pageNumbers = [];
-  //   for (let i = startPage; i <= endPage; i++) {
-  //     pageNumbers.push(i);
-  //   }
-
-  //   return pageNumbers;
-  // };
-
-  // Function to handle printing
- 
-  
 
   const getPageNumbers = () => {
     const middlePage = Math.ceil(maxPageButtons / 2);
@@ -266,153 +197,6 @@ const paginatedHistory = allKycs.slice(startIndex, endIndex);
   return (
     <>
       <ToastContainer />
-
-      {/* <Modal
-        className="w-[60%]"
-        activeModal={activeModal}
-        onClose={() => setActiveModal(false)}
-        title={selectedOrder?.id}
-        footer={
-          <Button
-            text="Close"
-            btnClass="btn-primary"
-            onClick={() => setActiveModal(false)}
-            router={router}
-          />
-        }
-      >
-        
-        <br />
-
-        <div className="-mx-6 overflow-x-auto">
-          <div className="inline-block min-w-full align-middle">
-            <div className="overflow-hidden ">
-              <table className="min-w-full divide-y table-fixed divide-slate-100 dark:divide-slate-700">
-                <thead className="bg-slate-200 dark:bg-slate-700">
-                <tr>
-                    <th scope="col" className="table-th">
-                      ID
-                    </th>
-                    <th scope="col" className="table-th">
-                      Customer Name
-                    </th>
-                    <th scope="col" className="table-th">
-                      Mobile Number
-                    </th>
-                    <th scope="col" className="table-th">
-                      Gender
-                    </th>
-                    <th scope="col" className="table-th">
-                      ID Type
-                    </th>
-                    <th scope="col" className="table-th">
-                      Place of Work
-                    </th>
-
-                    <th scope="col" className="table-th">
-                      City
-                    </th>
-                    <th scope="col" className="table-th">
-                      State
-                    </th>
-
-                    <th scope="col" className="table-th">
-                      Date
-                    </th>
-                    
-                    <th scope="col" className="table-th">
-                      Status
-                    </th>
-                    <th scope="col" className="table-th">
-                      Action
-                    </th>
-                    
-                   
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-slate-100 dark:bg-slate-800 dark:divide-slate-700">
-                  <tr>
-                    <td className="py-2 table-td">
-                      
-                      <span>
-                        {selectedOrder?.id.slice(0, 8)}...
-                        {selectedOrder?.id.slice(-10)}
-                      </span>
-                    </td>
-                    <td className="py-2 table-td">
-                      {selectedOrder?.user?.fullName}
-                    </td>
-                    <td className="py-2 table-td">
-                      {"+234" + "" + selectedOrder?.phone}
-                    </td>
-                    <td className="py-2 table-td ">
-                    {selectedOrder?.trackingId?.location || "No Location"}
-                    </td>
-                    <td className="py-2 table-td">
-                      
-                      {naira.format(selectedOrder?.totalPrice || "0")}
-                    </td>
-                    <td className="py-2 table-td">
-                    {selectedOrder?.transaction?.paymentMode || "Unknown Payment Mode"}
-                    </td>
-                    <td className="py-2 table-td"> {selectedOrder?.city} </td>
-                    <td className="py-2 table-td">
-                      <span className="block w-full">
-                        <span
-                          className={` inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 ${
-                            selectedOrder?.trackingId?.status === "Delivered"
-                              ? "text-success-500 bg-success-500"
-                              : ""
-                          } 
-            ${
-              selectedOrder?.trackingId?.status === "Paid"
-                ? "text-info-500 bg-info-500"
-                : ""
-            }
-            ${
-              selectedOrder?.trackingId?.status === "Proccessing"
-                ? "text-processing-400 bg-processing-400"
-                : ""
-            }
-            ${
-              selectedOrder?.trackingId?.status === "Closed"
-                ? "text-danger-500 bg-danger-500"
-                : ""
-            }
-                ${
-                  selectedOrder?.trackingId?.status === "Pending"
-                    ? "text-pending-500 bg-pending-500"
-                    : ""
-                } ${
-                            selectedOrder?.trackingId?.status === "In-Transit"
-                              ? "text-primary-500 bg-primary-500"
-                              : ""
-                          }
-            
-             `}
-                        >
-                          {selectedOrder?.trackingId?.status}
-                        </span>
-                      </span>
-                    </td>
-                    <td className="py-2 table-td">
-                      {formattedDate(selectedOrder?.dateOrdered)}
-                    </td>
-                    <td className="py-2 table-td">
-                      {formattedDate(
-                        selectedOrder?.trackingId?.estimatedDelivery
-                      )}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <br />
-      </Modal>
- */}
 
       <Card>
         <div className="items-center justify-between mb-6 md:flex">
@@ -479,11 +263,11 @@ const paginatedHistory = allKycs.slice(startIndex, endIndex);
                         </td>
                         <td className="py-2 table-td ">
                           {" "}
-                          {item.user?.fullName}{" "}
+                          {item.user?.fullName}
                         </td>
                         <td className="py-2 table-td ">
                           {" "}
-                          {"+234" + "" + item?.user?.phone}{" "}
+                          {item?.user?.phone}
                         </td>
 
                        
@@ -538,24 +322,6 @@ const paginatedHistory = allKycs.slice(startIndex, endIndex);
                         <td className="py-2 table-td">
                           {" "}
                           <div className="flex space-x-3 rtl:space-x-reverse">
-                            {/* <Tooltip
-                              content="View"
-                              placement="top"
-                              arrow
-                              animation="shift-away"
-                            >
-                              <button
-                                className="action-btn"
-                                type="button"
-                                onClick={() => {
-                                  setSelectedOrder(item);
-                                  setActiveModal(true);
-                                }}
-                              >
-                                <Icon icon="heroicons:eye" />
-                              </button>
-                            </Tooltip> */}
-
                             <Tooltip
                               content="View Kyc"
                               placement="top"
@@ -564,7 +330,7 @@ const paginatedHistory = allKycs.slice(startIndex, endIndex);
                             >
                               <button
                                 className="action-btn"
-                                //  onClick={() => router.push(`/order/${item.cart_info.id}`)}
+                                
                                 onClick={() => handleClick(item)}
                                 type="button"
                               >
