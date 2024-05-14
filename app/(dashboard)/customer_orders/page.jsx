@@ -149,6 +149,7 @@ const AllOrders = ({ title = "All Orders", item }) => {
 const handleNextPage = () => {
   if (currentPage < totalPages) {
     setCurrentPage((prevPage) => prevPage + 1);
+    
   }
 };
 
@@ -163,10 +164,10 @@ const handlePrevPage = () => {
 
 // Calculate the index range for the current page
 const startIndex = (currentPage - 1) * itemsPerPage;
-const endIndex = Math.min(startIndex + itemsPerPage, filteredData.length);
+const endIndex = Math.min(startIndex + itemsPerPage, orderItems.length);
 
-// Get the paginated history data for the current page
-const paginatedHistory = filteredData.slice(startIndex, endIndex);
+// Get the paginated data for the current page
+const paginatedHistory = orderItems.slice(startIndex, endIndex);
 
   // Calculate the total number of pages
   // const totalPages = Math.ceil(filteredData.length / itemsPerPage);
@@ -232,23 +233,25 @@ const paginatedHistory = filteredData.slice(startIndex, endIndex);
     return pageNumbers;
   };
  
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await orderService.fetchOrders(currentPage, itemsPerPage);
-        if (response && response.success) {
-          setOrderItems(response.data);
-          console.log(response);
-          setTotalPages(Math.ceil(response.total / itemsPerPage));
-        } else {
-          // Handle case where response or response.data is undefined
-        }
-      } catch (err) {
-        // Handle error
+  const fetchData = async () => {
+    try {
+      const response = await orderService.fetchOrders(currentPage, itemsPerPage);
+      if (response && response.success) {
+        setOrderItems(response.data);
+        console.log(response);
+        setTotalPages(Math.ceil(response.total / itemsPerPage));
+      } else {
+        // Handle case where response or response.data is undefined
       }
-    };
+    } catch (err) {
+      // Handle error
+    }
+  };
+
+  useEffect(() => {
     fetchData();
   }, [currentPage, itemsPerPage]);
+
   
 
   const handleItemClick = (item) => {
