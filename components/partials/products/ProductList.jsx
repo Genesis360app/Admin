@@ -23,6 +23,7 @@ const ProductList = ({ title = "All Product", placeholder }) => {
   const [statusCode, setStatusCode] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(5); // Added pageSize state
+  const [paginatedHistory, setpaginatedHistory] = useState([])
   const itemsPerPage = pageSize; // Use pageSize for itemsPerPage
   const maxPageButtons = 5; // Number of page buttons to display
   const [globalFilter, setGlobalFilter] = useState(""); // Global filter
@@ -30,13 +31,13 @@ const ProductList = ({ title = "All Product", placeholder }) => {
   const [merge_productModal, setMerge_productModal] = useState(false);
   const [delete_productModal, setDelete_productModal] = useState(false);
   const [selectedEdit, setSelectedEdit] = useState(null);
-  const [price, setPrice] = useState("");
-  const [discount, setDiscount] = useState("");
+  const [price, setPrice] = useState(selectedEdit?.price);
+  const [discount, setDiscount] = useState(selectedEdit?.discount);
   const [image, setImage] = useState("");
   const [files, setFiles] = useState([]);
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [countInStock, setCountInStock] = useState("");
+  const [name, setName] = useState(selectedEdit?.name);
+  const [description, setDescription] = useState(selectedEdit?.description);
+  const [countInStock, setCountInStock] = useState(selectedEdit?.countInStock);
   const [selectedImages, setSelectedImages] = useState([]);
   // const editor = useRef(null);
   const [all_packages, setAll_packages] = useState([]);
@@ -66,10 +67,19 @@ const ProductList = ({ title = "All Product", placeholder }) => {
       return <span>Invalid Date</span>;
     }
   }
+  console.log(selectedEdit)
+  useEffect(()=>{
+    setName(selectedEdit?.name);
+    setCountInStock(selectedEdit?.countInStock)
+    setDescription(selectedEdit?.description)
+    setDiscount(selectedEdit?.discount)
+    setPrice(selectedEdit?.price)
+    setSelectedImages(selectedEdit?.image)
+  },[selectedEdit])
 
   // Function to filter data based on globalFilter value
   // Function to filter data based on globalFilter value
-  const filteredData = useMemo(() => {
+  const filteredData = useMemo(() => { 
     return (productItems || []).filter((item) => {
       const productName = (item?.name || "").toLowerCase(); // Access product_name safely and convert to lowercase
       const productPrice = (item?.price || "").toString(); // Access product_name safely and convert to lowercase
@@ -115,8 +125,9 @@ const ProductList = ({ title = "All Product", placeholder }) => {
   const endIndex = Math.min(startIndex + itemsPerPage, filteredData.length);
 
   // Get the paginated history data for the current page
-  const paginatedHistory = filteredData.slice(startIndex, endIndex);
-
+  useEffect(()=>{
+    setpaginatedHistory(filteredData.slice(startIndex, endIndex))
+  },[filteredData])
   // Calculate the total number of pages
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
@@ -230,7 +241,7 @@ const ProductList = ({ title = "All Product", placeholder }) => {
 
     // Set up the FileReader onload event handler
     reader.onload = () => {
-      setSelectedImages(reader.result); // Set the selected image
+      setSelectedImages(file); // Set the selected image
     };
 
     // Read the file as a data URL
@@ -389,13 +400,12 @@ const ProductList = ({ title = "All Product", placeholder }) => {
             </div>
           </div>
 
-          <Textarea
+          <Textinput
           label="Product Description"
           id="description"
           type="text"
           defaultValue={selectedEdit?.description}
           placeholder="Product Description"
-          description="Enter Product Description "
           onChange={(e) => {
               setDescription(e.target.value);
             }}

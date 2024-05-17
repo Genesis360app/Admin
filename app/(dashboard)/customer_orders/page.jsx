@@ -67,6 +67,7 @@ const AllOrders = ({ title = "All Orders", item }) => {
   const [orderItems, setOrderItems] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null); // State to store the selected order data
   const [currentPage, setCurrentPage] = useState(1);
+  const [paginatedHistory, setpaginatedHistory] = useState([])
   const [pageSize, setPageSize] = useState(5); // Added pageSize state
   const itemsPerPage = pageSize; // Use pageSize for itemsPerPage
   const maxPageButtons = 5; // Number of page buttons to display
@@ -82,11 +83,6 @@ const AllOrders = ({ title = "All Orders", item }) => {
   const statusIndex = steps.indexOf(orderStatus);
   const [totalPages, setTotalPages] = useState(1);
   
-
-  // // Determine if the order is complete
-  // const isComplete = orderStatus === "complete";
-
-  // Function to format date value
   function formattedDate(rawDate) {
     const date = new Date(rawDate);
 
@@ -108,18 +104,6 @@ const AllOrders = ({ title = "All Orders", item }) => {
     }
   }
 
-  // const last25Items = orderItems;
-
-  // // Sort the last 25 items by the 'id' property in ascending order
-  // last25Items.sort((a, b) => {
-  //   const idA = a?.id || 0; // Use a default value if 'a.cart_info.id' is null
-  //   const idB = b?.id || 0; // Use a default value if 'b.cart_info.id' is null
-
-  //   return idB - idA; // Sort in ascending order by 'id'
-  // });
-
-  // Function to filter data based on globalFilter value
-  // Function to filter data based on globalFilter value
   const filteredData = useMemo(() => {
     return (orderItems || []).filter((item) => {
       const cart_id = (item?.id || "").toString(); // Access product_name safely and convert to lowercase
@@ -166,48 +150,9 @@ const handlePrevPage = () => {
 const startIndex = (currentPage - 1) * itemsPerPage;
 const endIndex = Math.min(startIndex + itemsPerPage, orderItems.length);
 
-// Get the paginated data for the current page
-const paginatedHistory = orderItems.slice(startIndex, endIndex);
-
-  // Calculate the total number of pages
-  // const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-
- 
-  
   const handlePrint = () => {
     window.print();
   };
-
-  // const getPageNumbers = () => {
-  //   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-  //   const middlePage = Math.ceil(maxPageButtons / 2);
-
-  //   let startPage = currentPage - middlePage + 1;
-  //   let endPage = currentPage + middlePage - 1;
-
-  //   if (totalPages <= maxPageButtons) {
-  //     startPage = 1;
-  //     endPage = totalPages;
-  //   } else if (currentPage <= middlePage) {
-  //     startPage = 1;
-  //     endPage = maxPageButtons;
-  //   } else if (currentPage >= totalPages - middlePage) {
-  //     startPage = totalPages - maxPageButtons + 1;
-  //     endPage = totalPages;
-  //   }
-
-  //   const pageNumbers = [];
-  //   for (let i = startPage; i <= endPage; i++) {
-  //     pageNumbers.push(i);
-  //   }
-
-  //   return pageNumbers;
-  // };
-
-  // Function to handle printing
- 
-  
-
   const getPageNumbers = () => {
     const middlePage = Math.ceil(maxPageButtons / 2);
   
@@ -239,6 +184,7 @@ const paginatedHistory = orderItems.slice(startIndex, endIndex);
       if (response && response.success) {
         setOrderItems(response.data);
         console.log(response);
+        setpaginatedHistory(response.data);
         setTotalPages(Math.ceil(response.total / itemsPerPage));
       } else {
         // Handle case where response or response.data is undefined
@@ -247,10 +193,10 @@ const paginatedHistory = orderItems.slice(startIndex, endIndex);
       // Handle error
     }
   };
-
-  useEffect(() => {
+console.log(paginatedHistory)
+useEffect(() => {
     fetchData();
-  }, [currentPage, itemsPerPage]);
+}, [currentPage, itemsPerPage]);
 
   
 
@@ -327,70 +273,6 @@ const paginatedHistory = orderItems.slice(startIndex, endIndex);
           />
         }
       >
-        {/* <div>
-          <Card>
-            <div>
-            <div className="flex z-[5] items-center relative justify-center md:mx-8">
-            {steps.map((item, i) => (
-              <div
-                className="relative z-[1] items-center item flex flex-start flex-1 last:flex-none group"
-                key={i}
-              >
-                <div
-                  className={`${
-                    statusIndex >= i
-                      ? "bg-slate-900 text-white ring-slate-900 ring-offset-2 dark:ring-offset-slate-500 dark:bg-slate-900 dark:ring-slate-900"
-                      : "bg-white ring-slate-900 ring-opacity-70  text-slate-900 dark:text-slate-300 dark:bg-slate-600 dark:ring-slate-600 text-opacity-70"
-                  }  transition duration-150 icon-box md:h-12 md:w-12 h-7 w-7 rounded-full flex flex-col items-center justify-center relative z-[66] ring-1 md:text-lg text-base font-medium`}
-                >
-                  {statusIndex <= i ? (
-                    
-                    i === "Pending" ? (
-                      <Icon icon="ic:twotone-pending-actions" />// Replace with your first icon
-    
-    ) : i === "Paid" ? (
-      <Icon icon="flat-color-icons:paid" /> // Replace with your third icon
-      ) : i === "Proccessing" ? (
-      <Icon icon="uis:process" /> // Replace with your second icon
-    ) : i === "In-Transit" ? (
-      <Icon icon="wpf:in-transit" /> // Replace with your third icon
-    ) : i === "Delivered" ? (
-      <Icon icon="solar:delivery-bold" /> // Replace with your third icon
-    ) : i === "Closed" ? (
-      <Icon icon="fluent-mdl2:completed-solid" /> // Replace with your third icon
-   
-    ) : (
-      <span>{i + 1}</span>
-    )
-                  ) : (
-                    <span className="text-3xl">
-                      <Icon icon="bx:check-double" />
-                    </span>
-                  )}
-                </div>
-
-                <div
-                  className={`${
-                    statusIndex >= i
-                      ? "bg-slate-900 dark:bg-slate-900"
-                      : "bg-[#E0EAFF] dark:bg-slate-700"
-                  } absolute top-1/2 h-[2px] w-full`}
-                ></div>
-                <div
-                  className={` ${
-                    statusIndex >= i
-                      ? " text-slate-900 dark:text-slate-300"
-                      : "text-slate-500 dark:text-slate-300 dark:text-opacity-40"
-                  } absolute top-full text-base md:leading-6 mt-3 transition duration-150 md:opacity-100 opacity-0 group-hover:opacity-100`}
-                >
-                  <span className="w-max">{item}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-            </div>
-          </Card>
-        </div> */}
         <br />
 
         <div className="-mx-6 overflow-x-auto">
