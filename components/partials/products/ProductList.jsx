@@ -46,6 +46,7 @@ const ProductList = ({ title = "All Product", placeholder }) => {
   const [success, setSuccess] = useState(null);
   const [showRefreshButton, setShowRefreshButton] = useState(false);
   const [selectedFiles2, setSelectedFiles2] = useState([]);
+  const [totalPages, setTotalPages] = useState(1);
   // Function to format date value
   function formattedDate(rawDate) {
     const date = new Date(rawDate);
@@ -67,7 +68,7 @@ const ProductList = ({ title = "All Product", placeholder }) => {
       return <span>Invalid Date</span>;
     }
   }
-  console.log(selectedEdit)
+  // console.log(selectedEdit)
   useEffect(()=>{
     setName(selectedEdit?.name);
     setCountInStock(selectedEdit?.countInStock)
@@ -128,16 +129,13 @@ const ProductList = ({ title = "All Product", placeholder }) => {
   useEffect(()=>{
     setpaginatedHistory(filteredData.slice(startIndex, endIndex))
   },[filteredData])
-  // Calculate the total number of pages
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
   const getPageNumbers = () => {
-    const totalPages = Math.ceil(filteredData.length / itemsPerPage);
     const middlePage = Math.ceil(maxPageButtons / 2);
-
+  
     let startPage = currentPage - middlePage + 1;
     let endPage = currentPage + middlePage - 1;
-
+  
     if (totalPages <= maxPageButtons) {
       startPage = 1;
       endPage = totalPages;
@@ -148,25 +146,27 @@ const ProductList = ({ title = "All Product", placeholder }) => {
       startPage = totalPages - maxPageButtons + 1;
       endPage = totalPages;
     }
-
+  
     const pageNumbers = [];
     for (let i = startPage; i <= endPage; i++) {
       pageNumbers.push(i);
     }
-
+  
     return pageNumbers;
   };
+ 
 
   const isOrderEmpty = productItems.length === 0;
 
   useEffect(() => {
     const allProductData = async () => {
       try {
-        const response = await productService.fetchAllProduct(); // Call fetchUsers as a function
+        const response = await productService.fetchAllProduct(currentPage, itemsPerPage); // Call fetchUsers as a function
 
         if (response) {
           // console.log(response.data); // Use response.data
           setProductItems(response.data);
+          setTotalPages(Math.ceil(response.pagination.totalDocuments / itemsPerPage));
         } else {
           // Handle case where response or response.data is undefined
         }
@@ -229,7 +229,7 @@ const ProductList = ({ title = "All Product", placeholder }) => {
         setError(responseData.message);
       }
     } catch (error) {
-      console.error("Error during edit product:", error.message);
+      // console.error("Error during edit product:", error.message);
     } finally {
       setIsLoading(false);
     }
@@ -331,7 +331,7 @@ const ProductList = ({ title = "All Product", placeholder }) => {
           {success ? (
             <Alert
               label={success}
-              className="alert-success light-mode w-full "
+              className="w-full alert-success light-mode "
             />
           ) : (
             ""
@@ -346,7 +346,7 @@ const ProductList = ({ title = "All Product", placeholder }) => {
             }}
             defaultValue={selectedEdit?.name}
           />
-          <div className="grid lg:grid-cols-2 gap-4 grid-cols-1">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <Textinput
               name="price"
               label="Price"
@@ -385,7 +385,7 @@ const ProductList = ({ title = "All Product", placeholder }) => {
                   <img
                     src={selectedImages}
                     alt="Selected"
-                    className="ml-auto block"
+                    className="block ml-auto"
                   />
                 )}
               </div>
@@ -430,9 +430,9 @@ const ProductList = ({ title = "All Product", placeholder }) => {
             }}
             defaultValue={selectedEdit?.countInStock}
           />
-          <div className="flex ltr:text-right rtl:text-left space-x-1">
+          <div className="flex space-x-1 ltr:text-right rtl:text-left">
             <Button
-              className="btn btn-dark   text-center"
+              className="text-center btn btn-dark"
               onClick={handleEditProduct}
               disabled={isLoading}
             >
@@ -459,10 +459,10 @@ const ProductList = ({ title = "All Product", placeholder }) => {
 
             {showRefreshButton && (
               <Button
-                className="btn btn-dark  text-center"
+                className="text-center btn btn-dark"
                 onClick={() => window.location.reload()}
               >
-                <div className="flex flex-auto gap-2 items-center">
+                <div className="flex items-center flex-auto gap-2">
                   <p>Refresh</p>
                   <Icon icon="material-symbols:refresh" />
                 </div>
@@ -497,10 +497,10 @@ const ProductList = ({ title = "All Product", placeholder }) => {
               className="w-[150px] h-[150px] rounded-md "
             />
 
-            <div className="text-slate-600 dark:text-slate-200 text-lg pt-4 pb-1">
+            <div className="pt-4 pb-1 text-lg text-slate-600 dark:text-slate-200">
               <p className="font-bold">Are you sure you want to Delete ?</p>
             </div>
-            <div className="text-slate-600 dark:text-slate-200 text-lg pb-1">
+            <div className="pb-1 text-lg text-slate-600 dark:text-slate-200">
               {selectedEdit?.name}
             </div>
             {error ? (
@@ -512,23 +512,23 @@ const ProductList = ({ title = "All Product", placeholder }) => {
             {success ? (
               <Alert
                 label={success}
-                className="alert-success light-mode w-full"
+                className="w-full alert-success light-mode"
               />
             ) : (
               ""
             )}
             <br />
 
-            <div className="flex ltr:text-right rtl:text-left space-x-2 justify-center">
+            <div className="flex justify-center space-x-2 ltr:text-right rtl:text-left">
               <Button
-                className="btn btn-dark  text-center"
+                className="text-center btn btn-dark"
                 onClick={() => setDelete_productModal(false)}
               >
                 Cancel
               </Button>
 
               <Button
-                className="btn btn-danger  text-center"
+                className="text-center btn btn-danger"
                 onClick={handleDeleteProduct}
                 disabled={isLoading}
               >
@@ -569,7 +569,7 @@ const ProductList = ({ title = "All Product", placeholder }) => {
  {selectedFiles2 ? (
               <>
                 <Button
-                  className="btn btn-dark  text-center"
+                  className="text-center btn btn-dark"
                   onClick={() => setMerge_productModal(false)}
                 >
                   Cancel

@@ -33,7 +33,8 @@ const AllLoans = ({ title = "All Loans", item }) => {
   const [globalFilter, setGlobalFilter] = useState(""); // Global filter
   const [isLoading, setIsLoading] = useState(false);
   const [activeModal, setActiveModal] = useState(false);
-
+  const [totalPages, setTotalPages] = useState(1);
+  const [paginatedLoan, setPaginatedLoan ]= useState([]);
   // Function to format date value
   function formattedDate(rawDate) {
     const date = new Date(rawDate);
@@ -107,19 +108,18 @@ const AllLoans = ({ title = "All Loans", item }) => {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, filteredData.length);
 
-  // Get the paginated history data for the current page
-  const paginatedLoan = filteredData.slice(startIndex, endIndex);
+  // // Get the paginated history data for the current page
+  // const paginatedLoan = filteredData.slice(startIndex, endIndex);
 
-  // Calculate the total number of pages
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  // // Calculate the total number of pages
+  // const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
   const getPageNumbers = () => {
-    const totalPages = Math.ceil(filteredData.length / itemsPerPage);
     const middlePage = Math.ceil(maxPageButtons / 2);
-
+  
     let startPage = currentPage - middlePage + 1;
     let endPage = currentPage + middlePage - 1;
-
+  
     if (totalPages <= maxPageButtons) {
       startPage = 1;
       endPage = totalPages;
@@ -130,23 +130,24 @@ const AllLoans = ({ title = "All Loans", item }) => {
       startPage = totalPages - maxPageButtons + 1;
       endPage = totalPages;
     }
-
+  
     const pageNumbers = [];
     for (let i = startPage; i <= endPage; i++) {
       pageNumbers.push(i);
     }
-
+  
     return pageNumbers;
   };
-
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await walletService.fetchLoans(); // Call fetchUsers as a function
+        const response = await walletService.fetchLoans(currentPage, itemsPerPage); // Call fetchUsers as a function
 
         if (response) {
-          console.log(response);
-          setAllLoan(response);
+          // console.log(response);
+          setAllLoan(response.loans);
+          setPaginatedLoan(response.loans);
+          setTotalPages(Math.ceil(response.totalItems / itemsPerPage));
         } else {
           // Handle case where response or response.data is undefined
         }
@@ -289,6 +290,9 @@ const AllLoans = ({ title = "All Loans", item }) => {
                       Amount
                     </th>
                     <th scope="col" className="table-th">
+                    Remaining Balance
+                    </th>
+                    <th scope="col" className="table-th">
                       Repayment Mode
                     </th>
                     <th scope="col" className="table-th">
@@ -309,16 +313,19 @@ const AllLoans = ({ title = "All Loans", item }) => {
                 <tbody className="bg-white divide-y divide-slate-100 dark:bg-slate-800 dark:divide-slate-700">
                   {selectedLoan?.loanItems?.map((item) => (
                     <tr key={item?._id}>
-                      <td className="table-td py-2"> {item?._id}</td>
-                      <td className="table-td py-2">
+                      <td className="py-2 table-td"> {item?._id}</td>
+                      <td className="py-2 table-td">
                         {naira.format(item?.amount)}
+                      </td>
+                      <td className="py-2 table-td">
+                        {naira.format(item?.remainingBalance)}
                       </td>
 
                       <td className="w-8 h-8 rounded-[100%] ltr:mr-2 rtl:ml-2">
                         {item?.repayment}{" "}
                       </td>
-                      <td className="table-td py-2">{item?.interestRate}%</td>
-                      <td className="table-td py-2">
+                      <td className="py-2 table-td">{item?.interestRate}%</td>
+                      <td className="py-2 table-td">
                         <span className="block w-full">
                           <span
                             className={` inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 ${
@@ -334,6 +341,11 @@ const AllLoans = ({ title = "All Loans", item }) => {
                     ? "text-pending-500 bg-pending-500"
                     : ""
                 } 
+                ${
+                  item?.status === "Repaid"
+                    ? "text-primary-500 bg-primary-500"
+                    : ""
+                } 
             
              `}
                           >
@@ -342,15 +354,15 @@ const AllLoans = ({ title = "All Loans", item }) => {
                         </span>
                       </td>
 
-                      <td className="table-td py-2">
+                      <td className="py-2 table-td">
                         {formattedDate(item?.dueDate)}
                       </td>
-                      <td className="table-td py-2">
+                      <td className="py-2 table-td">
                         <div>
                           <Dropdown
                             classMenuItems="right-0 w-[140px] top-[110%] "
                             label={
-                              <span className="text-xl text-center block w-full">
+                              <span className="block w-full text-xl text-center">
                                 <Icon icon="heroicons-outline:dots-vertical" />
                               </span>
                             }
@@ -363,7 +375,7 @@ const AllLoans = ({ title = "All Loans", item }) => {
                                 }}
                                 disabled={isLoading}
                               >
-                                <div className="hover:bg-slate-900 hover:text-white dark:hover:bg-slate-600 dark:hover:bg-opacity-50 w-full border-b border-b-gray-500 border-opacity-10 px-4 py-2 text-sm  last:mb-0 cursor-pointer first:rounded-t last:rounded-b flex space-x-2 items-center rtl:space-x-reverse">
+                                <div className="flex items-center w-full px-4 py-2 space-x-2 text-sm border-b cursor-pointer hover:bg-slate-900 hover:text-white dark:hover:bg-slate-600 dark:hover:bg-opacity-50 border-b-gray-500 border-opacity-10 last:mb-0 first:rounded-t last:rounded-b rtl:space-x-reverse">
                                   <span className="text-base">
                                     <Icon icon="mdi:approve" />
                                   </span>
@@ -382,8 +394,7 @@ const AllLoans = ({ title = "All Loans", item }) => {
                                 disabled={isLoading}
                               >
                                 <div
-                                  className="bg-danger-500 text-danger-500 bg-opacity-30   hover:bg-opacity-100 hover:text-white w-full border-b border-b-gray-500 border-opacity-10 px-4 py-2 text-sm  last:mb-0 cursor-pointer 
-                   first:rounded-t last:rounded-b flex  space-x-2 items-center rtl:space-x-reverse "
+                                  className="flex items-center w-full px-4 py-2 space-x-2 text-sm border-b cursor-pointer bg-danger-500 text-danger-500 bg-opacity-30 hover:bg-opacity-100 hover:text-white border-b-gray-500 border-opacity-10 last:mb-0 first:rounded-t last:rounded-b rtl:space-x-reverse "
                                 >
                                   <span className="text-base">
                                     <Icon icon="fluent:shifts-deny-24-regular" />
@@ -442,17 +453,17 @@ const AllLoans = ({ title = "All Loans", item }) => {
                   <React.Fragment key={item?.id}>
                     <tbody className="bg-white divide-y divide-slate-100 dark:bg-slate-800 dark:divide-slate-700">
                       <tr>
-                        <td className="table-td py-2">
+                        <td className="py-2 table-td">
                           <span>
                             {" "}
                             {item?.id.slice(0, 5)}...
                             {item.id.slice(-10)}
                           </span>
                         </td>
-                        <td className="table-td py-2">
+                        <td className="py-2 table-td">
                           {naira.format(item?.totalLoan || "0")}
                         </td>
-                        <td className="table-td py-2">
+                        <td className="py-2 table-td">
                           <span className="block w-full">
                             {item?.isOverdue}
                           </span>
@@ -485,7 +496,7 @@ const AllLoans = ({ title = "All Loans", item }) => {
                             </span>
                           )}
                         </td>
-                        <td className="table-td py-2">
+                        <td className="py-2 table-td">
                           <div className="flex space-x-3 rtl:space-x-reverse">
                             <Tooltip
                               content="View"

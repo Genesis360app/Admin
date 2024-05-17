@@ -18,7 +18,7 @@ import { CircularProgress } from "@mui/material"; // Path to your userService fi
 
 // import { useRouter } from 'next/router';
 
-const TransactionsTable = () => {
+const CustomerTable = () => {
 
     
 const router = useRouter();
@@ -57,6 +57,8 @@ const handleTnx = (item) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [paginatedHistory, setpaginatedHistory] = useState([])
+  const [totalPages, setTotalPages] = useState(1);
   // Function to format date value
 function formattedDate(rawDate) {
   const date = new Date(rawDate);
@@ -117,12 +119,14 @@ const naira = new Intl.NumberFormat("en-NG", {
   minimumFractionDigits: 0,
 });
 
+// Handle next page click
 const handleNextPage = () => {
   if (currentPage < Math.ceil(filteredData.length / itemsPerPage)) {
     setCurrentPage((prevPage) => prevPage + 1);
   }
 };
 
+// Handle previous page click
 const handlePrevPage = () => {
   if (currentPage > 1) {
     setCurrentPage((prevPage) => prevPage - 1);
@@ -131,16 +135,15 @@ const handlePrevPage = () => {
 
 // Calculate the index range for the current page
 const startIndex = (currentPage - 1) * itemsPerPage;
-const endIndex = Math.min(startIndex + itemsPerPage, filteredData.length);
+const endIndex = Math.min(startIndex + itemsPerPage, all_user.length);
 
-// Get the paginated history data for the current page
-const paginatedHistory = filteredData.slice(startIndex, endIndex);
+// // Get the paginated history data for the current page
+// const paginatedHistory = filteredData.slice(startIndex, endIndex);
 
-// Calculate the total number of pages
-const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+// // Calculate the total number of pages
+// const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
 const getPageNumbers = () => {
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const middlePage = Math.ceil(maxPageButtons / 2);
 
   let startPage = currentPage - middlePage + 1;
@@ -170,11 +173,13 @@ const getPageNumbers = () => {
 useEffect(() => {
   const fetchData = async () => {
     try {
-      const response = await userService.fetchUsers(); // Call fetchUsers as a function
+      const response = await userService.fetchUsers(currentPage, itemsPerPage); // Call fetchUsers as a function
 
       if (response) {
         // console.log(response); // Use response.data
         setAll_user(response.data);
+        setpaginatedHistory(response.data);
+        setTotalPages(Math.ceil(response.total / itemsPerPage));
       } else {
         // Handle case where response or response.data is undefined
       }
@@ -183,7 +188,7 @@ useEffect(() => {
     }
   };
   fetchData();
-}, []);
+}, [currentPage, itemsPerPage]);
 
 
 const handleDeleteProduct = async () => {
@@ -241,7 +246,7 @@ const handleDeleteProduct = async () => {
  
 
       <Card noborder>
-        <div className="md:flex justify-between items-center mb-6">
+        <div className="items-center justify-between mb-6 md:flex">
           <h4 className="card-title">All Users Account</h4>
           <div>
             <GlobalFilter filter={globalFilter} setFilter={setGlobalFilter} />
@@ -293,19 +298,19 @@ const handleDeleteProduct = async () => {
                   className="bg-white divide-y divide-slate-100 dark:bg-slate-800 dark:divide-slate-700" >
 
                       <tr >
-                      <td className="table-td py-2"> <span>{item.id.slice(0, 8)}...{item.id.slice(-10)}</span></td>
-                      <td className="table-td py-2"> <span>{item.username}</span></td>
-                      <td className="table-td py-2"> <span> <img
+                      <td className="py-2 table-td"> <span>{item.id.slice(0, 8)}...{item.id.slice(-10)}</span></td>
+                      <td className="py-2 table-td"> <span>{item.username}</span></td>
+                      <td className="py-2 table-td"> <span> <img
                src={item.image ? item.image : " https://cdnb.artstation.com/p/assets/images/images/034/457/389/large/shin-min-jeong-.jpg?1612345145"}
 
                 alt="avatar"
                 className="w-full h-full rounded-full"
               />
                     </span></td>
-                      <td className="table-td py-2"> <span>{item.first_name + " " + item.last_name }</span></td>
-                      <td className="table-td py-2"> <span>{item.email}</span></td>
-                      <td className="table-td py-2"> <span>{item.phone}</span></td>
-                      {/* <td className="table-td py-2"> <span>  
+                      <td className="py-2 table-td"> <span>{item.first_name + " " + item.last_name }</span></td>
+                      <td className="py-2 table-td"> <span>{item.email}</span></td>
+                      <td className="py-2 table-td"> <span>{item.phone}</span></td>
+                      {/* <td className="py-2 table-td"> <span>  
                       {item.wallet < 100 ?  (
                         <div className="inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 text-danger-500 bg-danger-500">
                         {item.loanOutstanding !== null ? naira.format(parseFloat(item.loanOutstanding)) : '₦0.00'}
@@ -317,7 +322,7 @@ const handleDeleteProduct = async () => {
                         </div>
                     )}</span></td> */}
 
-                      <td className="table-td py-2"> 
+                      <td className="py-2 table-td"> 
                 {item.isBusiness == true ?  (
             <div className="inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 text-success-500 bg-success-500">
             Business
@@ -329,7 +334,7 @@ const handleDeleteProduct = async () => {
             </div>
             )}
               </td>
-                      <td className="table-td py-2"> 
+                      <td className="py-2 table-td"> 
                  <span>
                  {item.isVerified == true ?  (
             <div className="inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 text-success-500 bg-success-500">
@@ -342,9 +347,9 @@ const handleDeleteProduct = async () => {
             </div>
             )}
                       </span></td>
-                      <td className="table-td py-2"> <span>{formattedDate(item.createdAt)}</span></td>
+                      <td className="py-2 table-td"> <span>{formattedDate(item.createdAt)}</span></td>
 
-                      <td className="table-td py-2">
+                      <td className="py-2 table-td">
 
                       <div className="flex space-x-3 rtl:space-x-reverse">
                             <Tooltip content="View" placement="top" arrow animation="shift-away">
@@ -505,13 +510,13 @@ const handleDeleteProduct = async () => {
               className="w-[150px] h-[150px] rounded-md "
             />
 
-            <div className="text-slate-600 dark:text-slate-200 text-lg pt-4 pb-1">
+            <div className="pt-4 pb-1 text-lg text-slate-600 dark:text-slate-200">
               <p className="font-bold">Are you sure you want to delete this User ?</p>
             </div>
-            <div className="text-slate-600 dark:text-slate-200 text-lg rounded-lg pb-1">
+            <div className="pb-1 text-lg rounded-lg text-slate-600 dark:text-slate-200">
               {selectedCustomer?.first_name + " " + selectedCustomer?.last_name }
             </div>
-            <div className="text-slate-600 dark:text-slate-200 text-lg pb-1">
+            <div className="pb-1 text-lg text-slate-600 dark:text-slate-200">
               {selectedCustomer?.phone}
             </div>
             {error ? (
@@ -523,23 +528,23 @@ const handleDeleteProduct = async () => {
             {success ? (
               <Alert
                 label={success}
-                className="alert-success light-mode w-full"
+                className="w-full alert-success light-mode"
               />
             ) : (
               ""
             )}
             <br />
 
-            <div className="flex ltr:text-right rtl:text-left space-x-2 justify-center">
+            <div className="flex justify-center space-x-2 ltr:text-right rtl:text-left">
               <Button
-                className="btn btn-dark  text-center"
+                className="text-center btn btn-dark"
                 onClick={() => setDelete_productModal(false)}
               >
                 Cancel
               </Button>
 
               <Button
-                className="btn btn-danger  text-center"
+                className="text-center btn btn-danger"
                 onClick={handleDeleteProduct}
                 disabled={isLoading}
               >
@@ -557,5 +562,5 @@ const handleDeleteProduct = async () => {
   );
 };
 
-export default TransactionsTable;
+export default CustomerTable;
 

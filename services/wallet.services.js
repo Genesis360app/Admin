@@ -3,7 +3,7 @@ import { _notifySuccess, _notifyError,_notifyWarn } from "@/utils/alart";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const fetchTransactions = async () => {
+const fetchTransactions = async (page, limit) => {
     try {
       const userString = localStorage.getItem("user");
         if (!userString) {
@@ -16,9 +16,12 @@ const fetchTransactions = async () => {
           throw new Error('Invalid user data');
         }
       const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/transaction/user`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/transaction`,
         {
-          
+          params: {
+            page: page,
+            limit: limit,
+          },
           headers: {
             // cache: 'no-store',
             Authorization: `Bearer ${user.token}`,
@@ -41,7 +44,7 @@ const fetchTransactions = async () => {
       }
     }
   };
-const fetchLoans = async () => {
+const fetchLoans = async (page, limit) => {
     try {
       const userString = localStorage.getItem("user");
         if (!userString) {
@@ -54,9 +57,12 @@ const fetchLoans = async () => {
           throw new Error('Invalid user data');
         }
       const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/loan/list`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/loan/all`,
         {
-          
+          params: {
+            page: page,
+            limit: limit,
+          },
           headers: {
             // cache: 'no-store',
             Authorization: `Bearer ${user.token}`,

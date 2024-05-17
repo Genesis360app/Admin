@@ -107,11 +107,11 @@ const AllOrders = ({ title = "All Kycs", item }) => {
 
 // Handle next page click
 const handleNextPage = () => {
-  if (currentPage < totalPages) {
+  if (currentPage < Math.ceil(filteredData.length / itemsPerPage)) {
     setCurrentPage((prevPage) => prevPage + 1);
-    
   }
 };
+
 
 // Handle previous page click
 const handlePrevPage = () => {
@@ -124,7 +124,7 @@ const handlePrevPage = () => {
 
 // Calculate the index range for the current page
 const startIndex = (currentPage - 1) * itemsPerPage;
-const endIndex = Math.min(startIndex + itemsPerPage, allKycs.length);
+const endIndex = Math.min(startIndex + itemsPerPage, filteredData.length);
 
 // Get the paginated data for the current page
 

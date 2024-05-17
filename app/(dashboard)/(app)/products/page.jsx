@@ -89,12 +89,6 @@ const ProductPostPage = ({ placeholder }) => {
           body: formData,
         }
       );
-      // console.log(name);
-      // console.log(description);
-      // console.log(price);
-      // console.log(discount);
-      // console.log(countInStock);
-      // console.log(files);
       const responseData = await response.json();
       if (response.status == 201) {
         setSuccess("Product Added successfully");
@@ -175,7 +169,7 @@ const ProductPostPage = ({ placeholder }) => {
           {success ? (
             <Alert
               label={success}
-              className="alert-success light-mode w-full "
+              className="w-full alert-success light-mode "
             />
           ) : (
             ""
@@ -190,7 +184,7 @@ const ProductPostPage = ({ placeholder }) => {
             }}
             value={name}
           />
-          <div className="grid lg:grid-cols-2 gap-4 grid-cols-1">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <Textinput
               name="price"
               label="Price"
@@ -229,7 +223,7 @@ const ProductPostPage = ({ placeholder }) => {
                   <img
                     src={selectedImages}
                     alt="Selected"
-                    className="ml-auto block"
+                    className="block ml-auto"
                   />
                 )}
               </div>
@@ -276,9 +270,9 @@ const ProductPostPage = ({ placeholder }) => {
             }}
             value={countInStock}
           />
-          <div className="flex ltr:text-right rtl:text-left space-x-2">
+          <div className="flex space-x-2 ltr:text-right rtl:text-left">
             <Button
-              className="btn btn-dark  text-center"
+              className="text-center btn btn-dark"
               onClick={handleAddProduct}
               disabled={isLoading}
             >
@@ -289,17 +283,17 @@ const ProductPostPage = ({ placeholder }) => {
               )}
             </Button>
             {error ? (
-              <Alert label={error} className="alert-danger light-mode w-4/6 " />
+              <Alert label={error} className="w-4/6 alert-danger light-mode " />
             ) : (
               ""
             )}
 
             {showRefreshButton && (
               <Button
-                className="btn btn-dark  text-center"
+                className="text-center btn btn-dark"
                 onClick={() => window.location.reload()}
               >
-                <div className="flex flex-auto gap-2 items-center">
+                <div className="flex items-center flex-auto gap-2">
                   <p>Refresh</p>
                   <Icon icon="material-symbols:refresh" />
                 </div>
@@ -309,8 +303,8 @@ const ProductPostPage = ({ placeholder }) => {
         </form>
       </Modal>
 
-      <div className="flex flex-wrap justify-between items-center mb-4">
-        <h4 className="font-medium lg:text-2xl text-xl capitalize text-slate-900 inline-block ltr:pr-4 rtl:pl-4">
+      <div className="flex flex-wrap items-center justify-between mb-4">
+        <h4 className="inline-block text-xl font-medium capitalize lg:text-2xl text-slate-900 ltr:pr-4 rtl:pl-4">
           All Product Items ({totalProduct})
         </h4>
         <div
@@ -352,7 +346,7 @@ const ProductPostPage = ({ placeholder }) => {
           <Button
             icon="heroicons-outline:plus"
             text="Add Product"
-            className="btn-dark dark:bg-slate-800  h-min text-sm font-normal"
+            className="text-sm font-normal btn-dark dark:bg-slate-800 h-min"
             iconClass=" text-lg"
             onClick={() => {
               setAdd_productModal(true);
@@ -368,7 +362,7 @@ const ProductPostPage = ({ placeholder }) => {
       )}
 
       {filler === "grid" && !isLoaded && (
-        <div className="grid xl:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
+        <div className="grid grid-cols-1 gap-5 xl:grid-cols-3 md:grid-cols-2">
           {projects.map((project, projectIndex) => (
             <ProductGrid
               globalFilter={filler === "grid" ? globalFilter : ""}
