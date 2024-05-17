@@ -33,6 +33,7 @@ const AllOrders = ({ title = "All Kycs", item }) => {
   };
 
   const [allKycs, setAllKycs] = useState([]);
+  const [paginatedHistory, setpaginatedHistory] = useState([])
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(5); // Added pageSize state
   const itemsPerPage = pageSize; // Use pageSize for itemsPerPage
@@ -126,8 +127,10 @@ const startIndex = (currentPage - 1) * itemsPerPage;
 const endIndex = Math.min(startIndex + itemsPerPage, allKycs.length);
 
 // Get the paginated data for the current page
-const paginatedHistory = allKycs.slice(startIndex, endIndex);
 
+useEffect(() => {
+  setpaginatedHistory(allKycs.slice(startIndex, endIndex));
+}, [allKycs,startIndex, endIndex]);
   // Calculate the total number of pages
   // const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
