@@ -108,27 +108,29 @@ const ProductList = ({ title = "All Product", placeholder }) => {
     maximumFractionDigits: 0,
     minimumFractionDigits: 0,
   });
+  
+// Handle next page click
+const handleNextPage = () => {
+  if (currentPage < Math.ceil(filteredData.length / itemsPerPage)) {
+    setCurrentPage((prevPage) => prevPage + 1);
+  }
+};
 
-  const handleNextPage = () => {
-    if (currentPage < Math.ceil(filteredData.length / itemsPerPage)) {
-      setCurrentPage((prevPage) => prevPage + 1);
-    }
-  };
-
-  const handlePrevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage((prevPage) => prevPage - 1);
-    }
-  };
+// Handle previous page click
+const handlePrevPage = () => {
+  if (currentPage > 1) {
+    setCurrentPage((prevPage) => prevPage - 1);
+  }
+};
 
   // Calculate the index range for the current page
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, filteredData.length);
 
   // Get the paginated history data for the current page
-  useEffect(()=>{
-    setpaginatedHistory(filteredData.slice(startIndex, endIndex))
-  },[filteredData])
+  // useEffect(()=>{
+  //   setpaginatedHistory(filteredData.slice(startIndex, endIndex))
+  // },[filteredData])
 
   const getPageNumbers = () => {
     const middlePage = Math.ceil(maxPageButtons / 2);
@@ -164,8 +166,9 @@ const ProductList = ({ title = "All Product", placeholder }) => {
         const response = await productService.fetchAllProduct(currentPage, itemsPerPage); // Call fetchUsers as a function
 
         if (response) {
-          // console.log(response.data); // Use response.data
+          // console.log(response); // Use response.data
           setProductItems(response.data);
+          setpaginatedHistory(response.data);
           setTotalPages(Math.ceil(response.pagination.totalDocuments / itemsPerPage));
         } else {
           // Handle case where response or response.data is undefined
@@ -175,7 +178,7 @@ const ProductList = ({ title = "All Product", placeholder }) => {
       }
     };
     allProductData();
-  }, []);
+  }, [currentPage, itemsPerPage]);
 
 
   const handleEditProduct = async () => {

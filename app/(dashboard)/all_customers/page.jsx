@@ -357,11 +357,11 @@ const handleDeleteProduct = async () => {
                                 <Icon icon="heroicons:eye" />
                               </button>
                             </Tooltip>
-                            <Tooltip content="transactions" placement="top" arrow animation="shift-away">
+                            {/* <Tooltip content="transactions" placement="top" arrow animation="shift-away">
                               <button className="action-btn" type="button" onClick={() => handleTnx(item)}>
                                 <Icon icon="tdesign:undertake-transaction" />
                               </button>
-                            </Tooltip>
+                            </Tooltip> */}
                             <Tooltip
                               content="Delete"
                               placement="top"

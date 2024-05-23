@@ -440,12 +440,11 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
   const totalPages = Math.ceil(filteredhistory.length / itemsPerPage);
 
   const getPageNumbers = () => {
-    const totalPages = Math.ceil(filteredData.length / itemsPerPage);
     const middlePage = Math.ceil(maxPageButtons / 2);
-
+  
     let startPage = currentPage - middlePage + 1;
     let endPage = currentPage + middlePage - 1;
-
+  
     if (totalPages <= maxPageButtons) {
       startPage = 1;
       endPage = totalPages;
@@ -456,12 +455,12 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
       startPage = totalPages - maxPageButtons + 1;
       endPage = totalPages;
     }
-
+  
     const pageNumbers = [];
     for (let i = startPage; i <= endPage; i++) {
       pageNumbers.push(i);
     }
-
+  
     return pageNumbers;
   };
   const isOrderEmpty = orderItems.length === 0;
@@ -658,7 +657,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
         );
         if (response.data) {
           // Handle response data
-          // console.log(response.data.transactions);
+          // console.log(response);
           setHistory(response.data.transactions);
         } else {
           // Handle case where response or response.data is undefined
