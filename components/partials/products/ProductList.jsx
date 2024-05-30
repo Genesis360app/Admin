@@ -38,6 +38,7 @@ const ProductList = ({ title = "All Product", placeholder }) => {
   const [name, setName] = useState(selectedEdit?.name);
   const [description, setDescription] = useState(selectedEdit?.description);
   const [countInStock, setCountInStock] = useState(selectedEdit?.countInStock);
+  const [editData, setEditData] = useState({})
   const [selectedImages, setSelectedImages] = useState([]);
   // const editor = useRef(null);
   const [all_packages, setAll_packages] = useState([]);
@@ -76,7 +77,7 @@ const ProductList = ({ title = "All Product", placeholder }) => {
     setPrice(selectedEdit?.price)
     setSelectedImages(selectedEdit?.image)
   },[selectedEdit])
-
+console.log(selectedImages )
   // Function to filter data based on globalFilter value
   // Function to filter data based on globalFilter value
   const filteredData = useMemo(() => { 
@@ -177,77 +178,110 @@ const ProductList = ({ title = "All Product", placeholder }) => {
     allProductData();
   }, []);
 
+  useEffect(()=>{
+    setEditData({...editData, ...{ name: name, description, price, discount, countInStock, imageUrl: selectedImages}}) 
+  },[name, description, price, discount, countInStock,selectedImages])
+    const handleEditProduct = async () => {
+      setIsLoading(true);
+      try {
+        const userString = localStorage.getItem("user");
 
-  const handleEditProduct = async () => {
-    setIsLoading(true);
-    try {
-      const userString = localStorage.getItem("user");
-
-      if (!userString) {
-        throw new Error("User token not found");
-      }
-
-      const user = JSON.parse(userString);
-
-      if (!user || !user.token || !user.userId) {
-        throw new Error("Invalid user data");
-      }
-
-      const editById = selectedEdit?.id;
-      const formData = new FormData();
-      formData.append("name", name);
-      formData.append("description", description);
-      formData.append("price", price);
-      formData.append("discount", discount);
-      formData.append("countInStock", countInStock);
-
-      // Append the image file if it exists
-      if (files) {
-        formData.append("image", files);
-      }
-
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/product/update_product/${editById}`,
-        {
-          headers: {
-            Authorization: `Bearer ${user.token}`,
-          },
-          method: "PUT",
-          body: formData,
+        if (!userString) {
+          throw new Error("User token not found");
         }
-      );
-      const responseData = await response.json();
 
-      if (response.status === 200) {
-        setSuccess("Product updated successfully");
-        _notifySuccess("Product updated successfully");
-        setShowRefreshButton(true);
-        // setTimeout(() => {
-        //     window.location.reload();
-        // }, 4000);
-      } else {
-        setError(responseData.message);
+        const user = JSON.parse(userString);
+
+        if (!user || !user.token || !user.userId) {
+          throw new Error("Invalid user data");
+        }
+
+        const editById = selectedEdit?.id;
+        console.log("this is editdata", editData)
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/product/update_product/${editById}`,
+          {
+            headers: {
+              Authorization: `Bearer ${user.token}`,
+              "Content-Type": "application/json",
+            },
+            method: "PUT",
+            body: JSON.stringify(editData),
+          }
+        );
+        const responseData = await response.json();
+
+        if (response.status === 200) {
+          setSuccess("Product updated successfully");
+          _notifySuccess("Product updated successfully");
+          setShowRefreshButton(true);
+          // setTimeout(() => {
+          //     window.location.reload();
+          // }, 4000);
+        } else {
+          setError(responseData.message);
+        }
+      } catch (error) {
+        console.error("Error during edit product:", error.message);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error("Error during edit product:", error.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    const reader = new FileReader();
-
-    // Set up the FileReader onload event handler
-    reader.onload = () => {
-      setSelectedImages(file); // Set the selected image
     };
 
-    // Read the file as a data URL
-    if (file) {
-      reader.readAsDataURL(file);
+  const handleImageChange = async (e) => {
+    const userString = localStorage.getItem("user");
+
+    if (!userString) {
+      throw new Error("User token not found");
     }
+
+    const user = JSON.parse(userString);
+
+    if (!user || !user.token || !user.userId) {
+      throw new Error("Invalid user data");
+    }
+
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    const formData = new FormData();
+
+    formData.append("image", file);
+
+    const response = await fetch(
+      `${process.env  .NEXT_PUBLIC_BASE_URL}/product/upload-image`,
+      {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+          // "Content-Type": "multipart/form-data",
+        },
+        method: "POST",
+        body: formData,
+      }
+      
+    ) ;
+    var body = await response.json();
+    if (response.status === 200) {
+      console.log(body)
+      setSuccess("Image Updated Successfully");
+      _notifySuccess("Image Updated Successfully");
+      setShowRefreshButton(true);
+      setSelectedImages(body.data)
+      // setTimeout(() => {
+      //     window.location.reload();
+      // }, 4000);
+    } else {
+      setError(responseData.message);
+    }
+    // Set up the FileReader onload event handler
+    // reader.onload = () => {
+    //   // setSelectedImages(file);
+    //    // Set the selected image
+    // };
+
+    // Read the file as a data URL
+    // if (file) {
+    //   reader.readAsDataURL(file);
+    // }
 
     // Update the files state with the selected file
     setFiles(file);
@@ -353,7 +387,7 @@ const ProductList = ({ title = "All Product", placeholder }) => {
               placeholder="# 2,000"
               required
               onChange={(e) => {
-                setPrice(e.target.value);
+                setPrice(parseInt(e.target.value));
               }}
               defaultValue={selectedEdit?.price}
             />
