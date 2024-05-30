@@ -3,7 +3,7 @@ import { _notifySuccess, _notifyError,_notifyWarn } from "@/utils/alart";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const fetchAllProduct = async () => {
+const fetchAllProduct = async (page, limit) => {
     try {
       const userString = localStorage.getItem("user");
         if (!userString) {
@@ -18,7 +18,10 @@ const fetchAllProduct = async () => {
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_BASE_URL}/product`,
         {
-          
+          params: {
+            page: page,
+            limit: limit,
+          },
           headers: {
             // cache: 'no-store',
             Authorization: `Bearer ${user.token}`,

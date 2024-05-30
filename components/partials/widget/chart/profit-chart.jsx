@@ -5,7 +5,7 @@ import useDarkMode from "@/hooks/useDarkMode";
 import { userService } from "@/services/users.service";
 
 const ProfitChart = ({
-  className = "bg-slate-50 dark:bg-slate-900 rounded pt-3 px-4",
+  className = "px-4 pt-3 rounded bg-slate-50 dark:bg-slate-900",
   color = "#4669FA",
 }) => {
   const [isDark] = useDarkMode();
@@ -91,8 +91,9 @@ const ProfitChart = ({
       try {
         const response = await userService.totalCustomer();
   
-        if (response && response.No_Of_Registered_Users) {
-          setAllUsers(response.No_Of_Registered_Users);
+        if (response && response.userCount) {
+          // console.log("user",response);
+          setAllUsers(response.userCount);
         } else {
           // Handle case where response or response.No_Of_Registered_Users is undefined
         }
@@ -124,7 +125,7 @@ const ProfitChart = ({
       <div className="text-lg text-slate-900 dark:text-white font-medium mb-[6px]">
         {allUsers}
       </div>
-      <div className="font-normal text-xs text-slate-600 dark:text-slate-300">
+      <div className="text-xs font-normal text-slate-600 dark:text-slate-300">
         <span className="text-primary-500">+{percentageChange.toFixed(2)}% </span>
         From last Period
       </div>

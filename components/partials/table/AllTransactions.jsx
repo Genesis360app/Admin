@@ -49,7 +49,8 @@ const AllTransaction = ({ title = "All Transaction" }) => {
   const itemsPerPage = pageSize; // Use pageSize for itemsPerPage
   const maxPageButtons = 5; // Number of page buttons to display
   const [globalFilter, setGlobalFilter] = useState(""); // Global filter
-
+  const [paginatedHistory, setPaginatedHistory] = useState([])
+  const [totalPages, setTotalPages] = useState(1);
   // Function to format date value
   function formattedDate(rawDate) {
     const date = new Date(rawDate);
@@ -109,18 +110,16 @@ const AllTransaction = ({ title = "All Transaction" }) => {
   const endIndex = Math.min(startIndex + itemsPerPage, filteredData.length);
 
   // Get the paginated history data for the current page
-  const paginatedHistory = filteredData.slice(startIndex, endIndex);
 
   // Calculate the total number of pages
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  // const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
   const getPageNumbers = () => {
-    const totalPages = Math.ceil(filteredData.length / itemsPerPage);
     const middlePage = Math.ceil(maxPageButtons / 2);
-
+  
     let startPage = currentPage - middlePage + 1;
     let endPage = currentPage + middlePage - 1;
-
+  
     if (totalPages <= maxPageButtons) {
       startPage = 1;
       endPage = totalPages;
@@ -131,23 +130,24 @@ const AllTransaction = ({ title = "All Transaction" }) => {
       startPage = totalPages - maxPageButtons + 1;
       endPage = totalPages;
     }
-
+  
     const pageNumbers = [];
     for (let i = startPage; i <= endPage; i++) {
       pageNumbers.push(i);
     }
-
+  
     return pageNumbers;
   };
-
   useEffect(() => {
     const transactionData = async () => {
       try {
-        const response = await walletService.fetchTransactions(); // Call fetchUsers as a function
+        const response = await walletService.fetchTransactions(currentPage, itemsPerPage); // Call fetchUsers as a function
 
         if (response) {
-          console.log(response); // Use response.data
+          // console.log(response); // Use response.data
           setHistory(response.transactions);
+          setPaginatedHistory(response.transactions);
+          setTotalPages(Math.ceil(response.totalTransactions / itemsPerPage));
         } else {
           // Handle case where response or response.data is undefined
         }
@@ -156,7 +156,7 @@ const AllTransaction = ({ title = "All Transaction" }) => {
       }
     };
     transactionData();
-  }, []);
+  }, [currentPage, itemsPerPage]);
 
   return (
     <>

@@ -131,9 +131,8 @@ const AllOrders = ({ title = "All Orders", item }) => {
 
 // Handle next page click
 const handleNextPage = () => {
-  if (currentPage < totalPages) {
+  if (currentPage < Math.ceil(filteredData.length / itemsPerPage)) {
     setCurrentPage((prevPage) => prevPage + 1);
-    
   }
 };
 
@@ -148,7 +147,7 @@ const handlePrevPage = () => {
 
 // Calculate the index range for the current page
 const startIndex = (currentPage - 1) * itemsPerPage;
-const endIndex = Math.min(startIndex + itemsPerPage, orderItems.length);
+const endIndex = Math.min(startIndex + itemsPerPage, filteredData.length);
 
   const handlePrint = () => {
     window.print();
@@ -183,7 +182,7 @@ const endIndex = Math.min(startIndex + itemsPerPage, orderItems.length);
       const response = await orderService.fetchOrders(currentPage, itemsPerPage);
       if (response && response.success) {
         setOrderItems(response.data);
-        console.log(response);
+        // console.log(response);
         setpaginatedHistory(response.data);
         setTotalPages(Math.ceil(response.total / itemsPerPage));
       } else {
@@ -193,7 +192,7 @@ const endIndex = Math.min(startIndex + itemsPerPage, orderItems.length);
       // Handle error
     }
   };
-console.log(paginatedHistory)
+// console.log(paginatedHistory)
 useEffect(() => {
     fetchData();
 }, [currentPage, itemsPerPage]);

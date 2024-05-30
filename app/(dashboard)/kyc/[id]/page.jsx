@@ -154,6 +154,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
   const [long, setLong] = useState("");
   const [activeModal, setActiveModal] = useState(false);
   const [activeLoanModal, setActiveLoanModal] = useState(false);
+  const [monoKycModal, setMonoKycModal] = useState(false);
   const [history, setHistory] = useState([]);
   const [loan, setLoan] = useState([]);
   const [history_activeModal, setHistory_activeModal] = useState(false);
@@ -176,7 +177,9 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
   const [password, setPassword] = useState("");
   const [monoDetails, setMonoDetails] = useState("");
   const [monoTxn, setMonoTxn] = useState("");
-
+  const [monoCusID, setMonoCusID] = useState("");
+  const [monoCusCreation, setMonoCusCreation] = useState("");
+  
 
 
   const [address, setAddress] = useState("");
@@ -440,12 +443,11 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
   const totalPages = Math.ceil(filteredhistory.length / itemsPerPage);
 
   const getPageNumbers = () => {
-    const totalPages = Math.ceil(filteredData.length / itemsPerPage);
     const middlePage = Math.ceil(maxPageButtons / 2);
-
+  
     let startPage = currentPage - middlePage + 1;
     let endPage = currentPage + middlePage - 1;
-
+  
     if (totalPages <= maxPageButtons) {
       startPage = 1;
       endPage = totalPages;
@@ -456,12 +458,12 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
       startPage = totalPages - maxPageButtons + 1;
       endPage = totalPages;
     }
-
+  
     const pageNumbers = [];
     for (let i = startPage; i <= endPage; i++) {
       pageNumbers.push(i);
     }
-
+  
     return pageNumbers;
   };
   const isOrderEmpty = orderItems.length === 0;
@@ -560,7 +562,8 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
           // Handle response data
           const userKyc = response.data.data;
           const userinfo2 = response.data.data.user;
-          setKycId(userKyc.id);status
+          setKycId(userKyc.id);
+          console.log(userKyc);
           setKycStatus(userKyc.status);
           setGender(userKyc.gender);
           setIncome(userKyc.monthlyIncome);
@@ -588,14 +591,16 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
           setGoogleMapLocation(userKyc.googleMapLocation);
           setCorporateAccount(userKyc.corporateAccount);
           setMonoDetails(userKyc.verification[2]);
+          setMonoCusID(userKyc.verification[0].verificationData.mono_cus_id);
+          setMonoCusCreation(userKyc.verification[0].verificationType);
           setMonoTxn(userKyc.verification[3].verificationData.mono_transactions);
-          // console.log('Test Data', response);
-          // console.log('Test verification', userKyc.verification);
+         
+          // console.log('Test verification', userKyc);
         } else {
           // Handle case where response or response.data is undefined
         }
       } catch (err) {
-        // console.error("Error:", err);
+        console.error("Error:", err);
         // Handle error
       }
     };
@@ -658,7 +663,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
         );
         if (response.data) {
           // Handle response data
-          // console.log(response.data.transactions);
+          // console.log(response);
           setHistory(response.data.transactions);
         } else {
           // Handle case where response or response.data is undefined
@@ -981,6 +986,49 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
   };
 
   // kyc approval
+  const handleMonokyc = async () => {
+    setIsLoading(true);
+    try {
+      const userString = localStorage.getItem("user");
+  
+      if (!userString) {
+        throw new Error("User token not found");
+      }
+  
+      const user = JSON.parse(userString);
+  
+      if (!user || !user.token || !user.userId) {
+        throw new Error("Invalid user data");
+      }
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/kyc/verify-kyc/mono/${kycId}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+            "Content-Type": "application/json", // Specify JSON content type
+            cache: "no-store",
+          },
+         
+        }
+      );
+  
+      if (response.ok) {
+        const responseData = await response.json();
+        console.log("resp",responseData);
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      } else {
+        throw new Error(`Failed to verify Mono KYC: ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error("Error during mono KYC verification :", error);
+      _notifyError(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleApprovekyc = async () => {
     setIsLoading(true);
@@ -1031,6 +1079,7 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
     }
   };
   
+ 
   const handleDisapprovekyc = async () => {
     setIsLoading(true);
     try {
@@ -1329,8 +1378,6 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
       setShowLoader(false);
     }
   };
-
-  
 
   const handleImageChange = (e, index) => {
     const file = e.target.files[0];
@@ -2479,6 +2526,22 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
       </Modal>
 
       <Modal
+        activeModal={monoKycModal}
+        onClose={() => setMonoKycModal(false)}
+        centered
+        title={selectedOrder?.id}
+        footer={
+          <Button
+            text="Close"
+            btnClass="btn-danger"
+            onClick={() => setMonoKycModal(false)}
+          />
+        }
+      >
+        
+      </Modal>
+
+      <Modal
         className="w-[48%]"
         activeModal={activeLoanModal}
         onClose={() => setActiveLoanModal(false)}
@@ -2814,6 +2877,18 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
           onClick={() => handleDisapprovekyc()}
           disabled={isLoading}
         />
+          &nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp;
+          <Button
+  icon="subway:error"
+  text="Verify Mono Kyc"
+  className="btn-outline-primary"
+  onClick={() => {
+    handleMonokyc();
+    setMonoKycModal(true);
+  }}
+  disabled={isLoading}
+/>
+
       </center>
       <br />
       <div className="grid grid-cols-12 gap-6">
@@ -4047,6 +4122,8 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
             <div className="mt-4 text-sm font-normal leading-5 text-slate-500 dark:text-slate-300">
              
            <div className="text-sm font-normal leading-5 text-slate-500 dark:text-slate-300">
+           Mono Customer ID :{monoCusID}  </div>
+           <div className="text-sm font-normal leading-5 text-slate-500 dark:text-slate-300">
            Mono Exchange ID :{monoDetails?.verificationData?.mono_exchange_id}  </div>
            <div className="text-sm font-normal leading-5 text-slate-500 dark:text-slate-300">
            Account ID. :{monoDetails?.verificationData?.mono_connected_acct?._id}  </div>
@@ -4063,6 +4140,9 @@ const AllSubcriptions = ({ title = "Loans", item, params }) => {
             </div>
           </div>
           <div>
+            <span className="block text-xl font-medium leading-5 text-slate-900 dark:text-slate-300">
+            {monoCusCreation}
+            </span>
             <span className="block text-xl font-medium leading-5 text-slate-900 dark:text-slate-300">
             Mono Connected Acct
             </span>

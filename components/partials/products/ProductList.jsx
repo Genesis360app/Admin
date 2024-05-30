@@ -47,6 +47,7 @@ const ProductList = ({ title = "All Product", placeholder }) => {
   const [success, setSuccess] = useState(null);
   const [showRefreshButton, setShowRefreshButton] = useState(false);
   const [selectedFiles2, setSelectedFiles2] = useState([]);
+  const [totalPages, setTotalPages] = useState(1);
   // Function to format date value
   function formattedDate(rawDate) {
     const date = new Date(rawDate);
@@ -68,7 +69,7 @@ const ProductList = ({ title = "All Product", placeholder }) => {
       return <span>Invalid Date</span>;
     }
   }
-  console.log(selectedEdit)
+  // console.log(selectedEdit)
   useEffect(()=>{
     setName(selectedEdit?.name);
     setCountInStock(selectedEdit?.countInStock)
@@ -108,37 +109,36 @@ console.log(selectedImages )
     maximumFractionDigits: 0,
     minimumFractionDigits: 0,
   });
+  
+// Handle next page click
+const handleNextPage = () => {
+  if (currentPage < Math.ceil(filteredData.length / itemsPerPage)) {
+    setCurrentPage((prevPage) => prevPage + 1);
+  }
+};
 
-  const handleNextPage = () => {
-    if (currentPage < Math.ceil(filteredData.length / itemsPerPage)) {
-      setCurrentPage((prevPage) => prevPage + 1);
-    }
-  };
-
-  const handlePrevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage((prevPage) => prevPage - 1);
-    }
-  };
+// Handle previous page click
+const handlePrevPage = () => {
+  if (currentPage > 1) {
+    setCurrentPage((prevPage) => prevPage - 1);
+  }
+};
 
   // Calculate the index range for the current page
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, filteredData.length);
 
   // Get the paginated history data for the current page
-  useEffect(()=>{
-    setpaginatedHistory(filteredData.slice(startIndex, endIndex))
-  },[filteredData])
-  // Calculate the total number of pages
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  // useEffect(()=>{
+  //   setpaginatedHistory(filteredData.slice(startIndex, endIndex))
+  // },[filteredData])
 
   const getPageNumbers = () => {
-    const totalPages = Math.ceil(filteredData.length / itemsPerPage);
     const middlePage = Math.ceil(maxPageButtons / 2);
-
+  
     let startPage = currentPage - middlePage + 1;
     let endPage = currentPage + middlePage - 1;
-
+  
     if (totalPages <= maxPageButtons) {
       startPage = 1;
       endPage = totalPages;
@@ -149,25 +149,28 @@ console.log(selectedImages )
       startPage = totalPages - maxPageButtons + 1;
       endPage = totalPages;
     }
-
+  
     const pageNumbers = [];
     for (let i = startPage; i <= endPage; i++) {
       pageNumbers.push(i);
     }
-
+  
     return pageNumbers;
   };
+ 
 
   const isOrderEmpty = productItems.length === 0;
 
   useEffect(() => {
     const allProductData = async () => {
       try {
-        const response = await productService.fetchAllProduct(); // Call fetchUsers as a function
+        const response = await productService.fetchAllProduct(currentPage, itemsPerPage); // Call fetchUsers as a function
 
         if (response) {
-          // console.log(response.data); // Use response.data
+          // console.log(response); // Use response.data
           setProductItems(response.data);
+          setpaginatedHistory(response.data);
+          setTotalPages(Math.ceil(response.pagination.totalDocuments / itemsPerPage));
         } else {
           // Handle case where response or response.data is undefined
         }
@@ -176,7 +179,7 @@ console.log(selectedImages )
       }
     };
     allProductData();
-  }, []);
+  }, [currentPage, itemsPerPage]);
 
   useEffect(()=>{
     setEditData({...editData, ...{ name: name, description, price, discount, countInStock, imageUrl: selectedImages}}) 
@@ -222,7 +225,7 @@ console.log(selectedImages )
           setError(responseData.message);
         }
       } catch (error) {
-        console.error("Error during edit product:", error.message);
+        // console.error("Error during edit product:", error.message);
       } finally {
         setIsLoading(false);
       }
@@ -365,7 +368,7 @@ console.log(selectedImages )
           {success ? (
             <Alert
               label={success}
-              className="alert-success light-mode w-full "
+              className="w-full alert-success light-mode "
             />
           ) : (
             ""
@@ -380,7 +383,7 @@ console.log(selectedImages )
             }}
             defaultValue={selectedEdit?.name}
           />
-          <div className="grid lg:grid-cols-2 gap-4 grid-cols-1">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <Textinput
               name="price"
               label="Price"
@@ -419,7 +422,7 @@ console.log(selectedImages )
                   <img
                     src={selectedImages}
                     alt="Selected"
-                    className="ml-auto block"
+                    className="block ml-auto"
                   />
                 )}
               </div>
@@ -464,9 +467,9 @@ console.log(selectedImages )
             }}
             defaultValue={selectedEdit?.countInStock}
           />
-          <div className="flex ltr:text-right rtl:text-left space-x-1">
+          <div className="flex space-x-1 ltr:text-right rtl:text-left">
             <Button
-              className="btn btn-dark   text-center"
+              className="text-center btn btn-dark"
               onClick={handleEditProduct}
               disabled={isLoading}
             >
@@ -493,10 +496,10 @@ console.log(selectedImages )
 
             {showRefreshButton && (
               <Button
-                className="btn btn-dark  text-center"
+                className="text-center btn btn-dark"
                 onClick={() => window.location.reload()}
               >
-                <div className="flex flex-auto gap-2 items-center">
+                <div className="flex items-center flex-auto gap-2">
                   <p>Refresh</p>
                   <Icon icon="material-symbols:refresh" />
                 </div>
@@ -531,10 +534,10 @@ console.log(selectedImages )
               className="w-[150px] h-[150px] rounded-md "
             />
 
-            <div className="text-slate-600 dark:text-slate-200 text-lg pt-4 pb-1">
+            <div className="pt-4 pb-1 text-lg text-slate-600 dark:text-slate-200">
               <p className="font-bold">Are you sure you want to Delete ?</p>
             </div>
-            <div className="text-slate-600 dark:text-slate-200 text-lg pb-1">
+            <div className="pb-1 text-lg text-slate-600 dark:text-slate-200">
               {selectedEdit?.name}
             </div>
             {error ? (
@@ -546,23 +549,23 @@ console.log(selectedImages )
             {success ? (
               <Alert
                 label={success}
-                className="alert-success light-mode w-full"
+                className="w-full alert-success light-mode"
               />
             ) : (
               ""
             )}
             <br />
 
-            <div className="flex ltr:text-right rtl:text-left space-x-2 justify-center">
+            <div className="flex justify-center space-x-2 ltr:text-right rtl:text-left">
               <Button
-                className="btn btn-dark  text-center"
+                className="text-center btn btn-dark"
                 onClick={() => setDelete_productModal(false)}
               >
                 Cancel
               </Button>
 
               <Button
-                className="btn btn-danger  text-center"
+                className="text-center btn btn-danger"
                 onClick={handleDeleteProduct}
                 disabled={isLoading}
               >
@@ -603,7 +606,7 @@ console.log(selectedImages )
  {selectedFiles2 ? (
               <>
                 <Button
-                  className="btn btn-dark  text-center"
+                  className="text-center btn btn-dark"
                   onClick={() => setMerge_productModal(false)}
                 >
                   Cancel
