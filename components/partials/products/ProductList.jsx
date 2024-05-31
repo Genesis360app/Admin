@@ -820,7 +820,7 @@ const handlePrevPage = () => {
                         <td className="table-td">
                           <div className="flex space-x-3 rtl:space-x-reverse">
                             <Tooltip
-                              content="Merge"
+                              content="Add Multiple images"
                               placement="top"
                               arrow
                               animation="shift-away"
