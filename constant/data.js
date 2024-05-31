@@ -12,7 +12,7 @@ export const menuItems = [
     child: [
       {
         childtitle: "Ecommerce Dashboard",
-        childlink: "ecommerce",
+        childlink: "/ecommerce",
       },
 
       // {
@@ -21,7 +21,7 @@ export const menuItems = [
       // },
       {
         childtitle: "Banking Dashboard",
-        childlink: "banking",
+        childlink: "/banking",
       },
       // {
       //   childtitle: "Project  Dashbaord",
@@ -45,12 +45,12 @@ export const menuItems = [
     child: [
       {
         childtitle: " All Businesses",
-        childlink: "all_business",
+        childlink: "/all_business",
         icon: "ic:outline-add-business",
       },
       {
         childtitle: "Pay Business",
-        childlink: "pay_business",
+        childlink: "/pay_business",
         icon: "arcticons:amazon-business",
       },
     ],
@@ -72,7 +72,7 @@ export const menuItems = [
     title: "Genesis Customers",
     isHide: true,
     icon: "solar:cart-2-bold",
-    link: "all_customers",
+    link: "/all_customers",
     badge: "All",
   },
 
@@ -80,14 +80,14 @@ export const menuItems = [
     title: "Available Loans",
     isHide: true,
     icon: "eos-icons:subscriptions-created-outlined",
-    link: "loans",
+    link: "/loans",
     badge: "All",
   },
   {
     title: "All Kyc",
     isHide: true,
     icon: "heroicons-outline:collection",
-    link: "kycs",
+    link: "/kycs",
     badge: "All",
   },
   // {
@@ -107,7 +107,7 @@ export const menuItems = [
     title: "Products",
     isHide: true,
     icon: "dashicons:products",
-    link: "products",
+    link: "/products",
     badge: "All",
   },
 
@@ -115,7 +115,7 @@ export const menuItems = [
     title: "Customer Orders",
     isHide: true,
     icon: "solar:cart-2-bold",
-    link: "customer_orders",
+    link: "/customer_orders",
     badge: "All",
   },
 
@@ -123,7 +123,7 @@ export const menuItems = [
     title: "Transactions",
     isHide: true,
     icon: "tdesign:undertake-transaction",
-    link: "transactions",
+    link: "/transactions",
     badge: "All",
   },
   // {
@@ -196,7 +196,7 @@ export const menuItems = [
     child: [
       {
         childtitle: "Create Account",
-        childlink: "account",
+        childlink: "/account",
         badge: "User Account",
       },
       // {
@@ -273,15 +273,15 @@ export const menuItems = [
     child: [
       {
         childtitle: "Profile",
-        childlink: "profile",
+        childlink: "/profile",
       },
       {
         childtitle: "Shipping Address",
-        childlink: "shipping-address",
+        childlink: "/shipping-address",
       },
       {
         childtitle: "Settings",
-        childlink: "settings",
+        childlink: "/settings",
       },
 
       // {
@@ -335,13 +335,13 @@ export const menuItems = [
     title: "Blog",
     isHide: true,
     icon: "eos-icons:subscriptions-created-outlined",
-    link: "blog",
+    link: "/blog",
   },
   {
     title: "Contact Us",
     isHide: true,
     icon: "heroicons-outline:table",
-    link: "contact",
+    link: "/contact",
   },
 
   // {
@@ -576,11 +576,11 @@ export const topMenu = [
     child: [
       {
         childtitle: "Ecommerce Dashboard",
-        link: "ecommerce",
+        link: "/ecommerce",
       },
       {
         childtitle: "Banking Dashboard",
-        link: "banking",
+        link: "/banking",
       },
     ],
   },
@@ -592,17 +592,17 @@ export const topMenu = [
     child: [
       {
         childtitle: " Genesis Customers",
-        link: "all_customers",
+        link: "/all_customers",
         icon: "solar:cart-2-bold",
       },
       {
         childtitle: "Available Loans",
-        link: "loans",
+        link: "/loans",
         icon: "eos-icons:subscriptions-created-outlined",
       },
       {
         childtitle: "All Kyc",
-        link: "kycs",
+        link: "/kycs",
         icon: "heroicons-outline:collection",
       },
     ],
@@ -615,12 +615,12 @@ export const topMenu = [
     child: [
       {
         childtitle: " All Businesses",
-        link: "all_business",
+        link: "/all_business",
         icon: "ic:outline-add-business",
       },
       {
         childtitle: "Pay Business",
-        link: "pay_business",
+        link: "/pay_business",
         icon: "arcticons:amazon-business",
       },
     ],
@@ -635,17 +635,17 @@ export const topMenu = [
     child: [
       {
         childtitle: "Products",
-        link: "products",
+        link: "/products",
         childicon: "dashicons:products",
       },
       {
         childtitle: "Customer Orders",
-        link: "customer_orders",
+        link: "/customer_orders",
         childicon: "solar:cart-2-bold",
       },
       {
         childtitle: "Transactions",
-        link: "transactions",
+        link: "/transactions",
         childicon: "tdesign:undertake-transaction",
       },
     ],
@@ -658,12 +658,12 @@ export const topMenu = [
     child: [
       {
         childtitle: "Create Account",
-        link: "account",
+        link: "/account",
         childicon: "mdi:account-edit-outline",
       },
       {
         childtitle: "Profile",
-        link: "profile",
+        link: "/profile",
         childicon: "heroicons-outline:view-boards",
       },
     ],
@@ -676,12 +676,12 @@ export const topMenu = [
     child: [
       {
         childtitle: "Shipping Address",
-        link: "shipping-address",
+        link: "/shipping-address",
         childicon: "heroicons-outline:table",
       },
       {
         childtitle: "Settings",
-        link: "settings",
+        link: "/settings",
         childicon: "heroicons-outline:view-boards",
       },
     ],
@@ -693,12 +693,12 @@ export const topMenu = [
     child: [
       {
         childtitle: "Blog",
-        link: "blog",
+        link: "/blog",
         childicon: "eos-icons:subscriptions-created-outlined",
       },
       {
         childtitle: "Contact Us",
-        link: "contact",
+        link: "/contact",
         childicon: "heroicons-outline:table",
       },
     ],
