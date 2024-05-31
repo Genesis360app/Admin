@@ -202,7 +202,7 @@ const handlePrevPage = () => {
         }
 
         const editById = selectedEdit?.id;
-        console.log("this is editdata", editData)
+        // console.log("this is editdata", editData)
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_BASE_URL}/product/update_product/${editById}`,
           {
@@ -316,7 +316,7 @@ const handlePrevPage = () => {
       }
   
       const editById = selectedEdit?.id;
-      console.log("this is addImage", addImage);
+      // console.log("this is addImage", addImage);
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BASE_URL}/product/gallery-images/${editById}`,
         {
@@ -330,7 +330,7 @@ const handlePrevPage = () => {
       const responseData = await response.json();
   
       if (response.status === 200) {
-        setSuccess("Product updated successfully");
+        setSuccess("Product Images added successfully");
         // console.log(response.data);
         setShowRefreshButton(true);
       } else {
@@ -635,6 +635,7 @@ const handlePrevPage = () => {
           </center>
         </form>
       </Modal>
+
       <Modal
   activeModal={merge_productModal}
   onClose={() => setMerge_productModal(false)}
@@ -651,7 +652,7 @@ const handlePrevPage = () => {
   <form className="space-y-4">
     <Card title={selectedEdit?.name}>
       <Fileinput
-        name="basic"
+        name={selectedEdit?.name}
         selectedFiles={selectedFiles2}
         onChange={handleFileChangeMultiple2}
         multiple
@@ -669,7 +670,7 @@ const handlePrevPage = () => {
               {isLoading ? (
                 <CircularProgress color="inherit" size={24} />
               ) : (
-                "Add Product"
+                "Add Images"
               )}
             </Button>
             {error && (
@@ -691,12 +692,24 @@ const handlePrevPage = () => {
             )}
           </div>
         ) : (
+          <div>
+          <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
+  {selectedEdit?.images.map((item) => (
+    <div key={item?.id}>
+      <img className="h-auto max-w-full rounded-lg" src={item} alt="" />
+    </div>
+  ))}
+</div>
+
+
+
           <Button
             className="text-center btn btn-dark"
             onClick={() => setMerge_productModal(false)}
           >
             Cancel
           </Button>
+          </div>
         )}
       </center>
     </Card>
