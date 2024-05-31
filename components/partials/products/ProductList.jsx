@@ -39,6 +39,7 @@ const ProductList = ({ title = "All Product", placeholder }) => {
   const [description, setDescription] = useState(selectedEdit?.description);
   const [countInStock, setCountInStock] = useState(selectedEdit?.countInStock);
   const [editData, setEditData] = useState({})
+  const [addImage, setAddImage] = useState({})
   const [selectedImages, setSelectedImages] = useState([]);
   // const editor = useRef(null);
   const [all_packages, setAll_packages] = useState([]);
@@ -78,7 +79,7 @@ const ProductList = ({ title = "All Product", placeholder }) => {
     setPrice(selectedEdit?.price)
     setSelectedImages(selectedEdit?.image)
   },[selectedEdit])
-console.log(selectedImages )
+// console.log(selectedImages )
   // Function to filter data based on globalFilter value
   // Function to filter data based on globalFilter value
   const filteredData = useMemo(() => { 
@@ -169,6 +170,7 @@ const handlePrevPage = () => {
         if (response) {
           // console.log(response); // Use response.data
           setProductItems(response.data);
+          console.log(response.data);
           setpaginatedHistory(response.data);
           setTotalPages(Math.ceil(response.pagination.totalDocuments / itemsPerPage));
         } else {
@@ -290,10 +292,64 @@ const handlePrevPage = () => {
     setFiles(file);
   };
 
+  const handleAddProductImages = async () => {
+    setIsLoading(true);
+    try {
+      const userString = localStorage.getItem("user");
+  
+      if (!userString) {
+        throw new Error("User token not found");
+      }
+  
+      const user = JSON.parse(userString);
+  
+      if (!user || !user.token || !user.userId) {
+        throw new Error("Invalid user data");
+      }
+  
+      const formData = new FormData();
+      // Append each image file to the formData
+      if (selectedFiles2) {
+        selectedFiles2.forEach((file, index) => {
+          formData.append("images", file);
+        });
+      }
+  
+      const editById = selectedEdit?.id;
+      console.log("this is addImage", addImage);
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/product/gallery-images/${editById}`,
+        {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+          method: "PUT",
+          body: formData,
+        }
+      );
+      const responseData = await response.json();
+  
+      if (response.status === 200) {
+        setSuccess("Product updated successfully");
+        // console.log(response.data);
+        setShowRefreshButton(true);
+      } else {
+        setError(responseData.message);
+      }
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
   const handleFileChangeMultiple2 = (e) => {
     const files = e.target.files;
-    const filesArray = Array.from(files).map((file) => file);
+    const filesArray = Array.from(files);
     setSelectedFiles2(filesArray);
+  
+    const imageUrls = filesArray.map(file => URL.createObjectURL(file));
+    setSelectedImages(imageUrls);
   };
 
   // const config = useMemo(
@@ -580,47 +636,72 @@ const handlePrevPage = () => {
         </form>
       </Modal>
       <Modal
-        activeModal={merge_productModal}
-        onClose={() => setMerge_productModal(false)}
-        centered
-        title={"Add Multiple Images"}
-        footer={
-          <Button
-            text="Close"
-            btnClass="btn-danger"
-            onClick={() => setMerge_productModal(false)}
-          />
-        }
-      >
-        <form className="space-y-4 ">
-          <Card title={selectedEdit?.name}>
-            <Fileinput
-              name="basic"
-              selectedFiles={selectedFiles2}
-              onChange={handleFileChangeMultiple2}
-              multiple
-              preview
-            />
-<br/>
-<center>
- {selectedFiles2 ? (
-              <>
-                <Button
-                  className="text-center btn btn-dark"
-                  onClick={() => setMerge_productModal(false)}
-                >
-                  Cancel
-                </Button>
-              </>
-            ) : (
-              ""
+  activeModal={merge_productModal}
+  onClose={() => setMerge_productModal(false)}
+  centered
+  title={"Add Multiple Images" + " " + selectedEdit?.id}
+  footer={
+    <Button
+      text="Close"
+      btnClass="btn-danger"
+      onClick={() => setMerge_productModal(false)}
+    />
+  }
+>
+  <form className="space-y-4">
+    <Card title={selectedEdit?.name}>
+      <Fileinput
+        name="basic"
+        selectedFiles={selectedFiles2}
+        onChange={handleFileChangeMultiple2}
+        multiple
+        preview
+      />
+      <br />
+      <center>
+        {selectedFiles2.length > 0 ? (
+          <div className="flex space-x-1 ltr:text-right rtl:text-left">
+            <Button
+              className="text-center btn btn-dark"
+              onClick={handleAddProductImages}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <CircularProgress color="inherit" size={24} />
+              ) : (
+                "Add Product"
+              )}
+            </Button>
+            {error && (
+              <Alert label={error} className="alert-danger light-mode w-fit" />
             )}
-
-</center>
-           
-          </Card>
-        </form>
-      </Modal>
+            {success && (
+              <Alert label={success} className="alert-success light-mode w-fit" />
+            )}
+            {showRefreshButton && (
+              <Button
+                className="text-center btn btn-dark"
+                onClick={() => window.location.reload()}
+              >
+                <div className="flex items-center flex-auto gap-2">
+                  <p>Refresh</p>
+                  <Icon icon="material-symbols:refresh" />
+                </div>
+              </Button>
+            )}
+          </div>
+        ) : (
+          <Button
+            className="text-center btn btn-dark"
+            onClick={() => setMerge_productModal(false)}
+          >
+            Cancel
+          </Button>
+        )}
+      </center>
+    </Card>
+  </form>
+</Modal>
 
       <Card>
         <div className="items-center justify-between mb-6 md:flex">
