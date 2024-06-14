@@ -60,8 +60,8 @@ const fetchLoans = async (page, limit) => {
         `${process.env.NEXT_PUBLIC_BASE_URL}/loan/all`,
         {
           params: {
-            page: page,
-            limit: limit,
+            totalPages: page,
+            totalItems: limit,
           },
           headers: {
             // cache: 'no-store',

@@ -302,7 +302,7 @@ useEffect(() => {
                               } 
             
                               ${
-                                item?.status === "Closed"
+                                item?.status === "Rejected"
                                   ? "text-danger-500 bg-danger-500"
                                   : ""
                               }

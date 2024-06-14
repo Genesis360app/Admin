@@ -97,22 +97,27 @@ const AllLoans = ({ title = "All Loans", item }) => {
       setCurrentPage((prevPage) => prevPage + 1);
     }
   };
-
+  
+  
+  // Handle previous page click
   const handlePrevPage = () => {
     if (currentPage > 1) {
       setCurrentPage((prevPage) => prevPage - 1);
     }
   };
 
-  // Calculate the index range for the current page
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = Math.min(startIndex + itemsPerPage, filteredData.length);
+// Calculate the index range for the current page
+const startIndex = (currentPage - 1) * itemsPerPage;
+const endIndex = Math.min(startIndex + itemsPerPage, filteredData.length);
 
   // // Get the paginated history data for the current page
   // const paginatedLoan = filteredData.slice(startIndex, endIndex);
 
   // // Calculate the total number of pages
   // const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  useEffect(() => {
+    setPaginatedLoan(allLoan.slice(startIndex, endIndex));
+  }, [allLoan,startIndex, endIndex]);
 
   const getPageNumbers = () => {
     const middlePage = Math.ceil(maxPageButtons / 2);
@@ -138,7 +143,8 @@ const AllLoans = ({ title = "All Loans", item }) => {
   
     return pageNumbers;
   };
-  useEffect(() => {
+ 
+  
     const fetchData = async () => {
       try {
         const response = await walletService.fetchLoans(currentPage, itemsPerPage); // Call fetchUsers as a function
@@ -146,7 +152,6 @@ const AllLoans = ({ title = "All Loans", item }) => {
         if (response) {
           // console.log(response);
           setAllLoan(response.loans);
-          setPaginatedLoan(response.loans);
           setTotalPages(Math.ceil(response.totalItems / itemsPerPage));
         } else {
           // Handle case where response or response.data is undefined
@@ -155,8 +160,13 @@ const AllLoans = ({ title = "All Loans", item }) => {
         console.error("Error:", err);
       }
     };
-    fetchData();
-  }, []);
+ 
+    useEffect(() => {
+      fetchData();
+    }, [currentPage, itemsPerPage]);
+
+
+
 
   // Loan approval
 
@@ -528,97 +538,90 @@ const AllLoans = ({ title = "All Loans", item }) => {
         </div>
 
         <div className="items-center justify-between mt-6 space-y-5 md:flex md:space-y-0">
-          <div className="flex items-center space-x-3 rtl:space-x-reverse">
-            <select
-              className="py-2 form-control w-max"
-              value={pageSize}
-              onChange={(e) => {
-                setPageSize(Number(e.target.value));
-                setCurrentPage(1); // Reset current page to 1 when changing page size
-              }}
-            >
-              {[10, 25, 50, 100, 500].map((pageSizeOption) => (
-                <option key={pageSizeOption} value={pageSizeOption}>
-                  Show {pageSizeOption}
-                </option>
-              ))}
-            </select>
-            <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
-              Page
-              <span>
-                {currentPage} of {totalPages}
-              </span>
-            </span>
-          </div>
-          <ul className="flex flex-wrap items-center space-x-3 rtl:space-x-reverse">
-            <li className="text-xl leading-4 text-slate-900 dark:text-white rtl:rotate-180">
-              <button
-                className={`${
-                  currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-                onClick={() => setCurrentPage(1)}
-                disabled={currentPage === 1}
-              >
-                <Icon icon="heroicons:chevron-double-left-solid" />
-              </button>
-            </li>
-            <li className="text-sm leading-4 text-slate-900 dark:text-white rtl:rotate-180">
-              <button
-                className={`${
-                  currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-                onClick={handlePrevPage}
-                disabled={currentPage === 1}
-              >
-                Prev
-              </button>
-            </li>
+  <div className="flex items-center space-x-3 rtl:space-x-reverse">
+    <select
+      className="py-2 form-control w-max"
+      value={pageSize}
+      onChange={(e) => {
+        setPageSize(Number(e.target.value));
+        setCurrentPage(1); // Reset current page to 1 when changing page size
+      }}
+    >
+      {[10, 25, 50, 100, 500].map((pageSizeOption) => (
+        <option key={pageSizeOption} value={pageSizeOption}>
+          Show {pageSizeOption}
+        </option>
+      ))}
+    </select>
+    <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
+      Page
+      <span>
+        {currentPage} of {totalPages}
+      </span>
+    </span>
+  </div>
+  <ul className="flex flex-wrap items-center space-x-3 rtl:space-x-reverse">
+    <li className="text-xl leading-4 text-slate-900 dark:text-white rtl:rotate-180">
+      <button
+        className={`${
+          currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
+        }`}
+        onClick={() => setCurrentPage(1)} disabled={currentPage === 1}
+      >
+        <Icon icon="heroicons:chevron-double-left-solid" />
+      </button>
+    </li>
+    <li className="text-sm leading-4 text-slate-900 dark:text-white rtl:rotate-180">
+      <button
+        className={`${
+          currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
+        }`}
+        onClick={handlePrevPage} disabled={currentPage === 1}
+      >
+        Prev
+      </button>
+    </li>
 
-            {getPageNumbers().map((pageNumber) => (
-              <li key={pageNumber}>
-                <button
-                  href="#"
-                  aria-current="page"
-                  className={`${
-                    pageNumber === currentPage
-                      ? "bg-slate-900 dark:bg-slate-600 dark:text-slate-200 text-white font-medium "
-                      : "bg-slate-100 dark:bg-slate-700 dark:text-slate-400 text-slate-900  font-normal  "
-                  }    text-sm rounded leading-[16px] flex h-6 w-6 items-center justify-center transition-all duration-150`}
-                  onClick={() => setCurrentPage(pageNumber)}
-                >
-                  {pageNumber}
-                </button>
-              </li>
-            ))}
+    {getPageNumbers().map((pageNumber) => (
+      <li key={pageNumber}>
+        <button
+          href="#"
+          aria-current="page"
+          className={`${
+            pageNumber === currentPage
+              ? "bg-slate-900 dark:bg-slate-600 dark:text-slate-200 text-white font-medium "
+              : "bg-slate-100 dark:bg-slate-700 dark:text-slate-400 text-slate-900  font-normal  "
+          }    text-sm rounded leading-[16px] flex h-6 w-6 items-center justify-center transition-all duration-150`}
+          onClick={() => setCurrentPage(pageNumber)}
+        >
+          {pageNumber}
+        </button>
+      </li>
+    ))}
 
-            <li className="text-sm leading-4 text-slate-900 dark:text-white rtl:rotate-180">
-              <button
-                className={`${
-                  currentPage === totalPages
-                    ? "opacity-50 cursor-not-allowed"
-                    : ""
-                }`}
-                onClick={handleNextPage}
-                disabled={currentPage === totalPages}
-              >
-                Next
-              </button>
-            </li>
-            <li className="text-xl leading-4 text-slate-900 dark:text-white rtl:rotate-180">
-              <button
-                onClick={() => setCurrentPage(totalPages)}
-                disabled={currentPage === totalPages}
-                className={`${
-                  currentPage === totalPages
-                    ? "opacity-50 cursor-not-allowed"
-                    : ""
-                }`}
-              >
-                <Icon icon="heroicons:chevron-double-right-solid" />
-              </button>
-            </li>
-          </ul>
-        </div>
+    <li className="text-sm leading-4 text-slate-900 dark:text-white rtl:rotate-180">
+      <button
+        className={`${
+          currentPage === totalPages ? "opacity-50 cursor-not-allowed" : ""
+        }`}
+        onClick={handleNextPage}
+        disabled={currentPage === totalPages}
+      >
+        Next
+      </button>
+    </li>
+    <li className="text-xl leading-4 text-slate-900 dark:text-white rtl:rotate-180">
+      <button
+       onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages}
+        className={`${
+          currentPage === totalPages ? "opacity-50 cursor-not-allowed" : ""
+        }`}
+      >
+        <Icon icon="heroicons:chevron-double-right-solid" />
+      </button>
+    </li>
+  </ul>
+</div>
 
         {/*end*/}
       </Card>
